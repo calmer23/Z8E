@@ -3725,7 +3725,8 @@ asm040:	ld	a,(delim)	;check delimiter
     if Z180
 	ld	c,83		;Number of HD64180 opcode names
     else
-	ld	c,73		;number	of Z80 opcodes in table as index
+;	ld	c,73		;number	of Z80 opcodes in table as index
+	ld	c,74		;number	of Z80 opcodes in table as index
     endif
 asm050:	dec	c
 	jp	m,asm??o	;opcode	not found
@@ -8038,7 +8039,7 @@ zopcpt:
 
 
 	defb	030h,035h,02eh,033h	;rlc	rrc	rl	rr
-	defb	03bh,03ch,022h,03dh	;sla	sra	...	srl
+	defb	03bh,03ch,048h,03dh	;sla	sra	sll	srl
 	defb	022h,040h,041h,042h	;...	bit	res	set
 
 
@@ -8252,6 +8253,7 @@ zopcnm:
 	defb	'SRA SRL SUB XOR '
 	defb	'BIT RES SET ORG '
 	defb	'DEFBDEFWDDB EQU '
+	defb	'SLL '
     if	Z180
 	defb	'IN0 OUT0TST TSIO'
 	defb	'SLP MLT OTIMOTDM'
