@@ -565,7 +565,7 @@ setHeight:
 
 	ld	a,(rstVec)	;Get breakpoint vector address
 	ld	l,a
-	ld	h,0
+	ld	h,00
 	ld	(nint03+1),hl	;Patch the code
 	inc	hl		;HL now holds rstVec+1
 	ld	(nint71+1),hl	;Patch some more code
@@ -649,7 +649,7 @@ nint10:	ex	de,hl		;HL - input buffer pointer
 	inc	hl
 	ld	(hl),a		;Restore trailing paren following hash sign
 	inc	hl
-	ld	(hl),0		;Add end of line null
+	ld	(hl),00		;Add end of line null
 	call	iarg
 	ex	de,hl		;DE - evaluated argument
 	ld	hl,fcb5c
@@ -675,11 +675,11 @@ nint20:	ex	de,hl		;Arg to hl for mult times maxlen bytes per
 	add	hl,hl
 nint22:	ex	de,hl
 	ld	(usymbl),de	;Save number of bytes to reserve
-	ld	hl,6ch		;since user symbol table arg was present then
+	ld	hl,006ch	;since user symbol table arg was present then
 				;target file must be in default fcb number 2
 
 nint25:	ld	de,zbuf		;Local buffer
-	ld	bc,16
+	ld	bc,0016
 	ldir			;Move FCB contents to local memory
 	ld	hl,0080h	;Command line buffer address
 	ld	a,(hl)
@@ -725,7 +725,7 @@ nint55:	ld	hl,z8eorg	;clear local symbol table to nulls
 nint60:	ld	(hl),a		;nulls to entire local symbol table
 	inc	hl
 	djnz	nint60
-	ld	hl,(06)		;start of BDOS
+	ld	hl,(0006)	;start of BDOS
 	ld	l,a		;init stack address to 256 boundary
 	ld	bc,nmem		;monitor size
 	and	a
@@ -737,7 +737,7 @@ nint60:	ld	(hl),a		;nulls to entire local symbol table
 	ld	a,d		;check for no user symbol table
 	or	e
 	jr	z,nint75	;no table - no clearing required
-nint70:	ld	(hl),0		;fill user symbol table with nulls
+nint70:	ld	(hl),00		;fill user symbol table with nulls
 	inc	hl
 	dec	de
 	ld	a,d
@@ -760,7 +760,7 @@ nint71:	ld	(0039h),hl	;Init RST 38h trap location
 nint80:	call	zlen00		;calculate instruction length
 	ld	h,d
 	ld	l,e		;de - current instruction,   hl - ditto
-	ld	b,0
+	ld	b,00
 	add	hl,bc
 	ex	de,hl		;de - next address to relocate
 	ld	a,c		;test length
@@ -847,13 +847,13 @@ zsym:	call	lfcb		;Initialize fcb
 	jp	m,zfnf		;m - file not found
 	ld	a,(delim)	;Check delimiter
 	cp	','
-	ld	hl,00
+	ld	hl,0000
 	jr	nz,zsym10	;nz - no comma means no symbol bias
 	call	prsr		;Let prsr extract symbol bias
 	jp	nz,zoff		;Parse error - use bias of 0000
 	ld	(delim),a	;Save delimiter which followed bias
 	ld	de,prsbf
-	ld	hl,00
+	ld	hl,0000
 	call	xval		;Evaluate bias
 	jr	z,zsym10	;z - numeric bias specified
 
@@ -890,7 +890,7 @@ zsym05:	ld	de,prsbf
 	ld	l,(hl)
 	ld	h,a		;HL - symbol value
 zsym10:	ld	(bias),hl	;Bias to add to each symbol address
-	ld	hl,00
+	ld	hl,0000
 	ld	a,(fcbtyp)
 	ld	bc,(ntpa)	;Current end of TPA
 	cp	'S'		;Is this a .SYM file?
@@ -1333,7 +1333,7 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 				;next file (if there is one).
 	ld	a,(maxlen)
 	ld	l,a
-	ld	h,0
+	ld	h,00
 	inc	l
 	add	hl,bc		;point to last loaded symbol
 	ld	b,h
@@ -1362,7 +1362,7 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	inc	de
 	djnz	.eof10		;if first three chars zero - fall thru and
 				;print the fourth regardless
-.eof20: ld	c,09
+.eof20: ld	c,9
 	call	bdos		;print the number as string ending with $
 	call	crlf
 	ld	hl,(tsym)	;now add in bcd total for this file to bcd
@@ -1378,7 +1378,7 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	daa
 	ld	l,a
 	ld	(tsym),hl
-	ld	hl,00		;clear out total for next file
+	ld	hl,0000		;clear out total for next file
 	ld	(nsym),hl
 	ld	hl,(z8eb)
 	ld	de,symflg-z8eorg
@@ -1406,14 +1406,14 @@ load:	ld	hl,(ntpa)	;current end of memory
 	ld	e,a		;de - length of a symbol table block
 	inc	e
 	sbc	hl,de		;compensate for pre-increment of pointer
-load00:	ld	de,(06)		;de - real entry point to bdos
-	ld	(06),hl		;point to our origin in high memory
+load00:	ld	de,(0006)	;de - real entry point to bdos
+	ld	(0006),hl	;point to our origin in high memory
 	ld	(hl),jp		;init jump to bdos at start of z8e
 	inc	hl
 	ld	(hl),e
 	inc	hl
 	ld	(hl),d
-	ld	e,0		;de - old start of bdos address in also our
+	ld	e,00		;de - old start of bdos address in also our
 				;ending address
 	ld	hl,(z8eb)	;load out starting address in high memory
 	ld	bc,z8e-z8eorg	;fetch the number of bytes between z8e's base
@@ -1448,7 +1448,7 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	ex	de,hl		;de - fcb address in relocated monitor in hi
 				;memory
 	ld	hl,zbuf		;
-	ld	bc,16
+	ld	bc,0016
 	ldir			;init fcb with saved file name
 	ld	de,mz8eld	;print memory space occupied by z8e
 	call	print
@@ -1458,13 +1458,13 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	call	ttyo
 	call	space
 	call	space
-	ld	hl,(06)		;this points to the new jump to bdos
+	ld	hl,(0006)		;this points to the new jump to bdos
 	inc	hl
 	ld	e,(hl)		;de - old start of bdos address
 	inc	hl
 	ld	d,(hl)
 	ex	de,hl
-	ld	l,0		;256 byte boundary to bypass cp/m serial no.
+	ld	l,00		;256 byte boundary to bypass cp/m serial no.
 	call	outadr
 
 	ld	a,(symflg)	;test for presence of symbol table
@@ -1472,7 +1472,7 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	jr	nz,load40	;nz - no table
 	ld	de,msymld	;display start address of symbol table message
 	call	print
-	ld	hl,(06)		;vector to bdos is start of symbol table
+	ld	hl,(0006)		;vector to bdos is start of symbol table
 	call	outadr
 	ld	a,'-'
 	call	ttyo
@@ -1502,7 +1502,7 @@ load20:	ld	a,(de)
 	inc	de
 	djnz	load20		;check first three digits then fall thru and
 				;print fourth regardless
-load30:	ld	c,09
+load30:	ld	c,9
 	call	bdos
 
 load40:	ld	hl,(06)
@@ -1731,7 +1731,7 @@ zmem:	ld	de,mmem??	;display out of memory message
 
 zoff:	ld	de,minvof	;display invalid offset using 0000 message
 	call	print
-	ld	hl,00
+	ld	hl,0000
 	jp	zsym10
 
 
@@ -2222,7 +2222,7 @@ ht02	equ	$-1		;[Patch to screen height - 1]
 	call	xycp
 	ld	hl,jstepf
 	ld	a,(hl)
-	ld	(hl),1
+	ld	(hl),01
 	and	a
 	jp	z,jdbg90	;J was last means screen intact - just move
 				;arrow, else fall thru and repaint screen.
@@ -2235,7 +2235,7 @@ jdbg02:	ld	a,(hl)		;check first char of input
 	cp	'#'		;+ eg 3.3.6
 	jr	nz,jdbg2a	;+ Skip if not repaint request
 	ld	hl,jstepf	;+
-	ld	(hl),1		;+ Signal repaint request
+	ld	(hl),01		;+ Signal repaint request
 	jr	jdbg01		;+
 jdbg2a:				;+
 	ex	de,hl		;de - save input buffer address
@@ -2916,7 +2916,7 @@ dump00:	call	iarg		;Read in next arg (starting address)
 	ex	de,hl		;DE - starting address to dump
 	call	iarg		;Next arg (block size)
 	jr	z,dump15	;Z - no errors
-	ld	hl,000		;Default to block size of 256
+	ld	hl,0000		;Default to block size of 256
 	jr	dump20
 dump15:	xor	a
 	or	h		;Test for block size or ending address
@@ -3377,7 +3377,7 @@ cbrk30:	ld	h,0FFh		;rewind to point to bp address
 	ld	de,psctbl
 	add	hl,de		;index into pass count table
 	ex	de,hl
-	ld	hl,02
+	ld	hl,0002
 	add	hl,de		;de - ptr to pass count,  hl - next in table
 	sla	c		;number of pass counts to move
 	ldir
@@ -3472,7 +3472,7 @@ kdmp:	call	iedtbc		;let user input address of memory to display
 	jp	nz,e???
 	ex	de,hl		;de - save memory address
 	call	iarg		;now get count
-	ld	a,0
+	ld	a,00
 	ld	(wnwsiz+1),a	;assume we are displaying NOTHING, flag = 0
 	jr	nz,kdmp20	;error during input - display no bytes
 	or	h
@@ -3671,7 +3671,7 @@ g520:	ld	(de),a		;into execute buffer
 				;address on to the user stack pointed to by
 				;spreg.
 
-	ld	bc,08		;point to jump instruction which is equivalent
+	ld	bc,0008		;point to jump instruction which is equivalent
 				;to call (call nz = jp nz)
 	add	hl,bc
 	ld	a,(hl)		;fetch jump object byte
@@ -3715,7 +3715,7 @@ g550:	ld	c,z802cl	;check if this is relative jump
 				;replace djnz with  dec   b
 				;		    jp    nz,
 
-	ld	(hl),05		;dec b instruction
+	ld	(hl),05h	;dec b instruction
 	inc	hl
 	ld	a,0C2h		;jp nz absolute
 g555:	ld	(hl),a
@@ -3791,7 +3791,7 @@ step:	ld	a,0FFh
 	ld	a,(de)		;first character from parse buffer
 	sub	'/'
 	ld	(wflag),a	;may be slash - no subroutine tracing
-	ld	hl,00
+	ld	hl,0000
 	jr	nz,step20
 	ld	(de),a
 	ld	a,(inbfnc)
@@ -3862,7 +3862,7 @@ asm015:	ld	(hl),c
 	ld	a,(hl)		;check last character
 	cp	':'
 	jr	nz,asm040	;no colon found - must be op code
-	ld	(hl),0		;erase colon
+	ld	(hl),00		;erase colon
 	ld	a,(de)		;fetch first char of label from parse buffer
 	cp	'A'
 	jp	c,asm??l	;error - first character must be alpha
@@ -3872,7 +3872,7 @@ asm015:	ld	(hl),c
 	jr	nc,asm030
 	cp	'Z'+1
 	jp	nc,asm??l
-asm030:	ld	hl,00
+asm030:	ld	hl,0000
 	ld	(isympt),hl	;clear pointer
 	call	isym		;attempt to insert symbol into symbol table
 	jp	nz,asm??t	;error - symbol table full
@@ -3894,7 +3894,7 @@ asm040:	ld	a,(delim)	;check delimiter
 	;; decrementing C by one lets us start at beginning of last entry
 asm050:	dec	c
 	jp	m,asm??o	;opcode not found
-	ld	b,0
+	ld	b,00
 	ld	hl,zopcnm	;table of opcode names
 	add	hl,bc
 	add	hl,bc		;index times four
@@ -3937,7 +3937,7 @@ asm070:	call	ixlt		;force upper case for compare
 asm085:	xor	a
 	ld	c,a
 asm090:	ld	hl,zopcpt	;opcode name pointer table
-	ld	b,0
+	ld	b,00
 	add	hl,bc		;index into table
 	ld	a,(ikey)	;fetch opcode key value
 	cp	(hl)		;check for match
@@ -4249,7 +4249,7 @@ rslv70:	add	a,a		;shift bit number left three
 
 
 
-oprn:	ld	bc,22		;count of reserved operand
+oprn:	ld	bc,0022		;count of reserved operand
 oprn00:	ld	de,prsbf	;buffer contains operand
 	ld	a,(hl)		;last character of operand in parse buffer
 	sub	')'
@@ -4322,7 +4322,7 @@ oprn40:	ld	(hl),c		;init first byte of object code
 	and	a		;test for default displacement
 	call	nz,xval		;not zero - evaluate
 	jr	nz,oprn85	;nz - displacement in error
-	ld	c,00
+	ld	c,0
 	ld	a,l
 	ld	(objbuf+2),a	;displacement always third byte
 	inc	h		;check upper byte of index value
@@ -4533,7 +4533,7 @@ xval95:	ex	de,hl
 
 
 fsym:
-	ld	hl,(06)		;de - buffer   hl - symbol table
+	ld	hl,(0006)	;de - buffer   hl - symbol table
 fsym00:	ld	a,(maxlen)
 	and	l
 	ld	c,a
@@ -4635,7 +4635,7 @@ prsr:	xor	a
 	ld	hl,prsbf	;start of parser scratch buffer
 	ld	b,prsbfz	;buffer size
 	ld	c,b
-prsr10:	ld	(hl),0		;clear parse buffer to nulls
+prsr10:	ld	(hl),00		;clear parse buffer to nulls
 	inc	hl
 	djnz	prsr10
 	ld	hl,prsbf	;start of parse buffer
@@ -4643,7 +4643,7 @@ prsr10:	ld	(hl),0		;clear parse buffer to nulls
 	ld	c,inbfl		;max size of input buffer
 prsr20:	ld	a,(de)		;from input buffer
 	ex	de,hl
-	ld	(hl),0		;erase as we pick from input buffer
+	ld	(hl),00		;erase as we pick from input buffer
 	ex	de,hl
 	dec	c		;decrement buffer size tally
 	ret	m		;error -  end of input buffer reached
@@ -4665,7 +4665,7 @@ prsr50:	dec	c		;decrement buffer size tally
 	ret	m		;error - end of parse buffer reached
 	ld	a,(de)		;next char from input buffer
 	ex	de,hl
-	ld	(hl),0		;clear as we remove
+	ld	(hl),00		;clear as we remove
 	ex	de,hl
 	inc	de
 	inc	b		;bumping character count tests quote flag
@@ -4754,7 +4754,7 @@ opnv00:	ld	(hl),a		;store key value
 
 zlen00:	ld	a,(de)		;fetch first byte of op code
 	cp	0CBh		;test for shift/bit manipulation instruction
-	ld	bc,02
+	ld	bc,0002
 	ret	z		;10-4 this is a cb and length is always 2
 	cp	0EDh		;test for fast eddie
 	jr	nz,zlen15	;
@@ -4940,14 +4940,14 @@ zlen85:	ld	a,(sbps)	;count of special step breakpoints
 ;*
 ;******************************************************************************
 
-pswDsp:	ld	de,3
+pswDsp:	ld	de,0003
 	ld	b,0			;+ eg 3.3.5a
 psw00:	ld	hl,pswbit		;table of bit mask for flags
 	add	hl,de			;
 	add	hl,de			;index times two
 	ld	a,e
 	neg				;now calculate index into pswmap
-	add	a,3
+	add	a,03
 	add	a,a
 	ld	c,a
 	ld	a,(freg)		;fetch current flag of user
@@ -5159,7 +5159,7 @@ ifcb:				;(Condensed, improved version - jrs 27 Dec 88)
 	push	hl		;Save input buffer pointer
 	ld	hl,fcb5c	;Zero out the default FCB
 	ld	b,32
-ifcb00:	ld	(hl),0
+ifcb00:	ld	(hl),00
 	inc	hl
 	djnz	ifcb00
 	ld	l,fcb5c+1	;Blank out the two file names
@@ -5184,14 +5184,14 @@ ifcb02:
 	jr	nz,ifcb12	;Skip if error
 	ld	de,fcb5c	;Copy FCB to default FCB at 5ch
 	ld	hl,fcb
-	ld	bc,12		;(only move 12 bytes)
+	ld	bc,0012		;(only move 12 bytes)
 	ldir
 ifcb12:
 	call	lfcb		;Do second file name (if any)
 	ret	nz		;Exit now if error
 	ld	hl,fcb		;Copy file name part of FCB to
 	ld	de,fcb5c+16	; second segment of default FCB
-	ld	bc,12
+	ld	bc,0012
 	ldir
 	ret
 
@@ -5214,9 +5214,9 @@ ibl00:	ld	(hl),' '
 ; routine.	jrs 27 Dec 88
 ;
 ;iwild:				;Expand asterisks in file names
-;	ld	bc,8		;Enter with HL pointing at FCB+1
+;	ld	bc,0008		;Enter with HL pointing at FCB+1
 ;	call	iexp		; i.e. first byte of file name.
-;	ld	bc,3
+;	ld	bc,0003
 ;;	call	iexp
 ;;	ret
 ;iexp:
@@ -5398,7 +5398,7 @@ lfcb00:	ld	b,0
 	ld	b,c		;b - number of chars preceding colon
 	ld	c,d		;return terminator in c
 	ld	de,fcb
-	ld	a,0
+	ld	a,00
 	jr	nz,lfcb10	;nz - no colon
 	dec	b
 	ret	nz		;syntax error - more than one char
@@ -5469,7 +5469,7 @@ lopn:
 lopn00:	ld	de,fcb
 	ld	b,nfcb-fcbext
 	ld	hl,fcbext	;clear remainder of fcb
-lopn10:	ld	(hl),0
+lopn10:	ld	(hl),00
 	inc	hl
 	djnz	lopn10
 	ld	c,15
@@ -5479,7 +5479,7 @@ lopn10:	ld	(hl),0
 
 imem:	ex	de,hl		;de - next load address
 	ld	a,d
-	ld	hl,07		;ptr to prt to start of z8e
+	ld	hl,0007		;ptr to prt to start of z8e
 	cp	(hl)
 	ex	de,hl
 	ret	c		;c - not out of memory
@@ -5531,7 +5531,7 @@ writ30:	ld	(endw),hl	;save address of where to end writing
 	ld	c,6
 	call	spaces
 writ40:	call	bwrite
-	ld	hl,127
+	ld	hl,0127
 	add	hl,de
 	ld	b,6
 writ50:	call	bksp
@@ -5682,7 +5682,7 @@ verf10:	inc	hl		;bump block 1 pointer
 ;******************************************************************************
 
 xreg:	call	cret
-	ld	bc,0		;init reg index
+	ld	bc,0000		;init reg index
 xreg00:	call	xreg05		;display reg name and contents
 	inc	c
 ;;; ---------------------------------
@@ -5792,7 +5792,7 @@ zasm:
 ;;	ret	m		;- eg 3.3.2
 	jp	p,zasm0		;+ Skip if arguments supplied, otherwise ...
 	ld	b,0		;+ Signal no file write
-;;;	ld	hl,16		;+ Assume 16 lines of code
+;;;	ld	hl,0016		;+ Assume 16 lines of code
 				;
 				;  No
 				;
@@ -5804,7 +5804,7 @@ zasm:
 				;  constant value and the way it was written
 				;  is contrary to the coding instructions.
 
-	ld	h,0		;  Better done like this ...
+	ld	h,00		;  Better done like this ...
 	ld	l,16+0-0	;  ... and this instruction will be patched
 ht08	equ	$-1		;  during initialisation
 
@@ -5822,12 +5822,12 @@ zasm0:				;+
 
 				; We've seen a starting address but no
 				; line count.  For some reason we now
-;;;	ld	hl,1		; change zero count to one instead of
+;;;	ld	hl,0001		; change zero count to one instead of
 				; height-8.
 
 				; That was another 16-bit constant load ...
-	ld	h,0		; ... now recoded as two 8-bit loads
-	ld	l,1+0-0		; v4.1 jrs 21 Feb 2015
+	ld	h,00		; ... now recoded as two 8-bit loads
+	ld	l,01+0-0		; v4.1 jrs 21 Feb 2015
 ht09	equ	$-1		; In case we want to patch it to height-8
 
 zasm00:	xor	a
@@ -6484,7 +6484,7 @@ opn400:
 	jr	nz,opn410
 	inc	de		;byte of interest is number four
 	inc	de
-opn410:	ld	a,01		;check low bit of operand key value
+opn410:	ld	a,01h		;check low bit of operand key value
 	and	b
 	ld	a,(de)		;fetch op code
 	jr	nz,opn500	;nz - index 01Bh
@@ -6709,7 +6709,7 @@ aed180:	push	hl		;Save registers.
 
 	ld	d,a		;Save instruction key.
 
-	ld	bc,40h
+	ld	bc,0040h
 aed05:	dec	c		;Decrement EDBIAS index.
 	jp	m,aed10		;If negative, opcode not 00h to 3Fh.
 	ld	hl,edbias	;Point HL to ED biases for opcodes < 3Fh.
@@ -6774,7 +6774,7 @@ zndx:	ld	hl,(zasmpc)	;fetch current instruction pointer
 	cp	10h		;ed check
 	jr	z,zndx00
 	cp	0EEh		;cb check
-	ld	a,0		;clear
+	ld	a,00		;clear
 	ret	nz
 zndx00:	inc	de		;cb or ed - bump instruction pointer
 	cpl
@@ -6824,7 +6824,7 @@ zhex20:	and	0Fh
 
 zmqf:	ld	hl,zmflag	;check interactive disassembly flag
 	ld	a,(hl)
-	ld	(hl),0		;clear regardless
+	ld	(hl),00		;clear regardless
 	ld	hl,(zasmpc)	;fetch current disassembly address
 	add	a,a		;check sign - on means interactive
 	ret
@@ -6852,7 +6852,7 @@ zasc20:	ex	de,hl
 
 fadr:	push	bc
 	push	hl
-	ld	hl,(06)		;fetch top of TPA - start of symbol table
+	ld	hl,(0006)		;fetch top of TPA - start of symbol table
 	ld	bc,(maxlen)
 	add	hl,bc		;point to start of symbol name
 	inc	hl
@@ -7244,7 +7244,7 @@ binx00:	and	0Fh
 ilin:	push	bc
 	push	de
 	ld	b,inbfsz
-	ld	c,0
+	ld	c,00
 	call	in
 	pop	de
 	pop	bc
@@ -7355,7 +7355,7 @@ parg10:	call	mreg		;check for register specified
 	ld	a,c
 	add	a,a
 	jr	c,parg60	;sign bit reset - 16 bit register pair
-parg50:	ld	hl,00
+parg50:	ld	hl,0000
 	ld	b,l
 	ld	de,prsbf	;reinit starting address of parse buffer
 	call	xval
@@ -7519,7 +7519,7 @@ iedt25:	call	space		;space out until char position mod 8 = zero
 	ld	a,7
 	and	d
 	jr	nz,iedt25
-	ld	(hl),0		;set end of line null
+	ld	(hl),00		;set end of line null
 	jr	iedt70
 iedt35:	ld	e,1		;assume one backspace required
 	cp	bs
@@ -7544,7 +7544,7 @@ iedt50:	call	bksp		;transmit bs - space - bs string
 	dec	d		;sub one from input buffer count
 	dec	hl		;rewind buffer pointer on notch
 	ld	a,(hl)		;check for control characters
-	ld	(hl),0
+	ld	(hl),00
 	cp	quote		;check for backspacing over a quote
 	jr	nz,iedt55
 	ld	a,(quoflg)	;toggle quote flag so we keep track of balance
@@ -7567,7 +7567,7 @@ iedt58:	dec	e		;dec backspace count
 	ret
 iedt60:	ld	(hl),a		;store char in inbf
 	inc	hl		;bump inbf pointer
-	ld	(hl),0		;end of line
+	ld	(hl),00		;end of line
 	inc	d		;bump number of chars in buffer
 iedt70:	ld	a,d		;current size
 	sub	b		;versus max size requested by caller
@@ -7750,7 +7750,7 @@ bpmsg:
 	defb	'*BP* @ '
 	defb	00
 prompt:
-	defb	'*',' ',bs,0
+	defb	'*',' ',bs,00
 
 mrrow:	defb	'=','>'		;backspaces taken out
 	defb	00
