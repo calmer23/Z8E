@@ -27,6 +27,12 @@
 ;------------------------------------------------------------------------------
 ;
 ;                       Revision history
+; 21 Mar 2025 clm v4.2clm33
+;			Modified code for "K" (kdmp) to allow actually dumping
+;			a maximum of 256 bytes (if your screen size allows it).	
+;			And all the other places that reference "wnwsiz".
+;			Byte counts are now BASE ZERO (count starting at zero).
+;
 ; 21 Jul 2024 clm v4.2clm2
 ;			Added display of registers as bits when "K" active.
 ;			Spin character in upper right when 'J' looping.
@@ -191,7 +197,7 @@
 ;
 ; 27 Nov 88 jrs v3.1	Bug fix - deleted three spurious instructions from
 ;			the initialisation code which was added to support
-;			breakpoint vectors at addresses other than 38h.
+;			breakpoint vectors at addresses other than 0038h.
 ;
 ; 16 Nov 88 jrs v3.0	Bumped version number to regain sequence with USA.
 ;			Until now there were two independent streams of
@@ -211,8 +217,8 @@
 ;			as it duplicated v1.4 but consumed more code space.]
 ;
 ; 15 May 87 jrs v1.4	Implemented "I" command to initialise the command
-;			tail at 80h and the default FCB name blocks at 5Ch
-;			and 6Ch.
+;			tail at 0080h and the default FCB name blocks at 005Ch
+;			and 006Ch.
 ;
 ;			Renamed I(nput) command to L(oad) to make way for new
 ;			I(nitialise) command.  Documentation changed 13/6/87.
@@ -243,7 +249,7 @@
 ;			to cover systems that have a destructive bs
 ;
 ;- 3 Dec 85 jgm v?.?	Added EQUates for breakpoint address so it could be
-;			something other than 38h.
+;			something other than 0038h.
 ;
 ; 25 Sep 85 ras v1.1	Fix case bug
 ;			Fix usym bug
@@ -402,13 +408,13 @@ tilde	equ	7Eh		;	tilde
 del	equ	7Fh		;	del
 
 bdos	equ	5
-fcb5c	equ	5Ch		;CP/M default FCB
+fcb5c	equ	005Ch		;CP/M default FCB
 
 nop	equ	000		;Z80 instructions
 jp	equ	0C3h
 rst38	equ	0FFh
 
-iobuf	equ	80h		;Disk read buffer for symbol loading
+iobuf	equ	0080h		;Disk read buffer for symbol loading
 
 cpmVer	equ	12
 getSCB	equ	49
@@ -422,7 +428,7 @@ getSCB	equ	49
 ;*	- Determine max symbol length before loading symbol table
 ;*        permissible values are 6 and 14 which are converted to bit
 ;*	  masks by bumping by one
-;*	- Set CP/M DMA address to 80h
+;*	- Set CP/M DMA address to 0080h
 ;*	- Check first command line argument for (xx) where xx is the
 ;*	  number of slots in the symbol table to reserve.
 ;*	- Move first file name found in command line to local memory
@@ -453,7 +459,7 @@ getSCB	equ	49
 	abs
       endif
 
-	org	100h
+	org	0100h
 
 	jp	nint
 
@@ -547,10 +553,6 @@ setHeight:
 	sub	3
 	ld	(ht04),a	; Height - 6	'J' end of disassembled instructions
 	ld	(ht07a),a	; Height - 6	'J' number of instructions to disassemble
-;;	cp	64
-;;	jr	c,setH07	; we only allow max of 63 lines for kdmp display
-;;	ld	a,63		; 63*4=252=0FCh=11111100, slightly less than 255 bytes
-;;setH07:	
 	ld	(ht07b),a	; Height - 6	'J' number of lines for kdmp display
 	sub	2
 	ld	(ht08),a	; Height - 8	zasm, number of lines of code
@@ -605,16 +607,16 @@ nint00:	ld	(maxlin),a
 ; itself.  Otherwise DMA address is left where Z8E stopped loading itself.
 ; (Last statement no longer true - see patch 3.3.1)
 
-	ld	de,80h
+	ld	de,0080h
 	ld	c,26
 	call	bdos
 
 	ld	a,jp		;Initialize where L80 fears to tread
 
 ; The next instruction is PATCHED before it is executed
-nint03:	ld	(38h),a		;Init trap to breakpoint handler
+nint03:	ld	(0038h),a	;Init trap to breakpoint handler
 
-	ld	hl,5dh		;Save current contents of default fcb
+	ld	hl,005dh	;Save current contents of default fcb
 	ld	a,(hl)
 	cp	'('		;Is first char in fcb a paren?
 	dec	hl
@@ -652,7 +654,7 @@ nint10:	ex	de,hl		;HL - input buffer pointer
 	ex	de,hl		;DE - evaluated argument
 	ld	hl,fcb5c
 	jr	nz,nint25	;Arg error - ignore input
-	ld	hl,81h		;Start of command line tail
+	ld	hl,0081h	;Start of command line tail
 nint15:	ld	a,(hl)
 	ld	(hl),' '	;Replace the text which appeared between
 				;the parentheses and the parentheses them-
@@ -679,7 +681,7 @@ nint22:	ex	de,hl
 nint25:	ld	de,zbuf		;Local buffer
 	ld	bc,16
 	ldir			;Move FCB contents to local memory
-	ld	hl,80h		;Command line buffer address
+	ld	hl,0080h	;Command line buffer address
 	ld	a,(hl)
 	and	a		;Test for no input
 	jr	z,nint55	;No input - clear symbol table
@@ -688,7 +690,7 @@ nint25:	ld	de,zbuf		;Local buffer
 	add	hl,bc		;Point to last char in buffer
 	inc	hl
 	ld	(hl),b		;Set end of line null after last char
-	ld	hl,81h
+	ld	hl,0081h
 nint30:	ld	a,(hl)		;Look for start	of first file name
 	and	a		;Found the end of line?
 	jr	z,nint55	;Z - no	files to load
@@ -747,7 +749,7 @@ nint75:	ex	de,hl		;hl - start of z8e in hi memory
 	add	hl,de
 
 ; The next instruction will be PATCHED by the time it is executed.
-nint71:	ld	(39h),hl	;Init RST 38h trap location
+nint71:	ld	(0039h),hl	;Init RST 38h trap location
 
 	ld	hl,z8eorg
 	ldir			;z8e now in hi memory - relocate addresses
@@ -812,7 +814,7 @@ nint95:	inc	hl
 ;*
 ;*	LFCB called to parse the input buffer (inbf) in low memory.
 ;*	INBF contains the command line tail which bdos passed to us at
-;*	80h and which we have since moved to inbf (so that prsr thinks
+;*	0080h and which we have since moved to inbf (so that prsr thinks
 ;*	it's just keyboard input).
 ;*
 ;*	All valid file names are opened for input.
@@ -1538,11 +1540,11 @@ load40:	ld	hl,(06)
 	ld	hl,lldr10-z8eorg
 	ld	bc,(z8eb)
 load50:	add	hl,bc           ;hl - actual address of lldr10 in hi memory
-	ex	de,hl           ;now clear out the buffer at 80h so the user
+	ex	de,hl           ;now clear out the buffer at 0080h so the user
 				;program doesn't mistakenly think that our
 				;command line tail is really his.
 	ld	hl,iobuf
-	ld	(hl),0          ;set number of chars zero (80h)
+	ld	(hl),00          ;set number of chars zero (0080h)
 	inc	hl
 	ld	b,127           ;clear until start of tpa
 load60:	ld	(hl),' '
@@ -2133,7 +2135,7 @@ e???:	ex	de,hl
 ;*
 ;****************************************************************************
 
-term:	ld	bc,200h		; Get user's request.
+term:	ld	bc,0200h	; Get user's request.
 	call	iedt
 	cp	cr		; Did user type a CR?
 	jr	nz,e???		; If not, error.
@@ -2176,7 +2178,7 @@ term10:	cp	'A'		; Does user want to use auxiliary terminal?
 ;*	of the code.  The user enters the starting address to animate
 ;*	optionally preceded by a subroutine qualifier.  The subroutine
 ;*	qualifier may be either a "*" which instructs Z8E not to trace
-;*	any subroutines which are located below 100h (ie. bdos calls),
+;*	any subroutines which are located below 0100h (ie. bdos calls),
 ;*	or it may be a "/" which means no tracing of any subroutines.
 ;*	Jdbg will also paint the original screen with the register
 ;*	contents as well as the memory window.  The contents of the
@@ -2245,7 +2247,7 @@ jdbg2a:				;+
 	add	a,'/'-'*'	;check for star	- no trace of bdos subs
 	jr	nz,jdbg05
 	inc	a		;set flag one to indicate no trace of subs
-				;at address < 100h (bdos calls)
+				;at address < 0100h (bdos calls)
 jdbg03:	ld	(hl),a		;set wflag
 	xor	a		;if slash or space replace with	null in	inbf
 				;so parser will	ignore
@@ -2270,9 +2272,9 @@ jdbg10:	ld	(timer),a
 	call	rgdisp		;display current user regs
 	call	zwnw		;display disassembled window
 	call	clmbin		;display BINARY values of registers
-	ld	a,(wnwsiz)
+	ld	a,(wnwsiz+1)
 	and	a		;test if window being displayed
-	jr	z,jdbg28
+	jr	z,jdbg28	;nope
 	ld	de,window	;save user specified memory block til next bp
 	ld	hl,(wnwtab)	;start of memory window address
 	ld	b,0
@@ -2288,29 +2290,15 @@ jdbg25:	ld	a,(fwndow)
 
 	ld	(de),a		;save this byte in window between bps
 	call	outhex
-;;; -----------------------------------------------------
-;	inc	b		;move and display user specified number
-;				;of bytes (wnwsiz)
-;	ld	a,(wnwsiz)
-;	sub	b
-;	jr	nz,jdbg27	;not done, keep going
-;	ld	a,(wnwsiz)	;is the window size == 255 (0FFh)
-;	inc	a		;will roll to zero if true
-;	jr	nz,jdbg27	;nope, not 255, so we are done
-;	inc	b		;lets do one more byte since 256 is legal
-;jdbg27: inc	hl
-;	inc	de
-;	ld	a,(nlmask)	;check for new line time
-;	and	b
-;	jr	nz,jdbg25	;not end of line - display next byte else...
-;	jr	jdbg20		;...display address first
-;jdbg28: ld	a,3		;point to very first instruction
-;;; -----------------------------------------------------
-	inc	b		;move and display user specified number
-				;of bytes (wnwsiz)
+
+;;; need to test A against B using BASE ZERO values (do not increment B yet)
+;;; a value of zero (0) is equal to a count of one (1).
+;;;	inc	b		;move and display user specified number
+;;;				;of bytes (wnwsiz)
 	ld	a,(wnwsiz)
 	sub	b
 	jr	z,jdbg28
+	inc	b		;;; moved from 4 lines above, to here
 	inc	hl
 	inc	de
 	ld	a,(nlmask)	;check for new line time
@@ -2392,24 +2380,23 @@ jdbg45:	inc	hl
 	ld	b,0
 	call	pswDsp		;now display flag reg mnemonics
 
-	ld	a,(wnwsiz)	;check window size
+	ld	a,(wnwsiz+1)	;check window size
 	and	a
 	jr	z,jdbg60	;z - no memory window in effect
 	ld	hl,(wnwtab)	;hl - address of start of window
-	ld	b,0
+	ld	b,0-1		;start B pre-decremented
 	ld	c,3
 	ld	de,window	;old contents of window stored here
-jdbg50:	ld	a,(de)		;compare old vs new
+jdbg50:	inc	b		;bump memory window byte count
+	ld	a,(de)		;compare old vs new
 	cp	(hl)
 	jr	z,jdbg55	;same - no reason to display
 	ld	a,(fwndow)	;col position of byte is (rel pos * 3) + 50
 	call	curs
 	ld	a,(hl)		;display byte
-
 	ld	(de),a		;we only need to move byte if it changed
-
 	call	outhex
-jdbg55:	inc	b		;bump memory window byte count
+jdbg55:
 	ld	a,(wnwsiz)	;max size
 	inc	hl
 	inc	de
@@ -2765,7 +2752,7 @@ hsym10:	ld	a,(maxlen)	;Max size of symbol name
 				;defined symbol table
 	and	a
 	jr	z,hsym10
-	dec	a		;Neg means this is jp opcode (0c3h) of jump to
+	dec	a		;Neg means this is jp opcode (0C3h) of jump to
 				;BDOS
 	ret	m
 	ld	a,(maxlen)
@@ -2836,7 +2823,7 @@ usym10:	ld	a,(maxlen)
 				;defined symbol table
 	and	a
 	jr	z,usym10
-	dec	a		;neg means this is jp opcode (0c3h) of jump to
+	dec	a		;neg means this is jp opcode (0C3h) of jump to
 				;bdos
 	jp	p,usym20
 	call	pcrlf		;hit end of table - put crlf in buffer
@@ -2967,7 +2954,7 @@ dump50:	ld	a,(bsizhi)
 	and	a		;Block size greater than 256?
 	jr	nz,dump55	;NZ - greater
 	ld	a,(bsizlo)
-	and	0f0h		;Block size less than 16?
+	and	0F0h		;Block size less than 16?
 	jr	z,dump60	;Z - less
 dump55:	ld	a,(bsizlo)
 	and	0fh		;Block size multiple of	16?
@@ -3467,6 +3454,16 @@ obrk20:	call	crlf
 ;*
 ;*	size:		  number of bytes to display (MAX = 256)
 ;*
+;*	wnwsiz	  count of bytes (base zero) 00->255, total of 256 bytes
+;*	wnwsiz+1  flag, ==0 no display, <>0 display memory
+;*
+;*	All this horrid code below is because the DOCS said the maximum
+;*	number of memory bytes to display is 256, which is more than 1 byte.
+;*	Rather than use a word (two byte value) to store the count, I am
+;*	using two bytes with the second byte being a FLAG to indicate bytes
+;*	to display rather than using a value of zero to indicate no display.
+;*	All the places that use wnwsiz also need to be changed to match.
+;*	Ugh!  ..clm..
 ;***************************************************************************
 
 kdmp:	call	iedtbc		;let user input address of memory to display
@@ -3476,14 +3473,32 @@ kdmp:	call	iedtbc		;let user input address of memory to display
 	ex	de,hl		;de - save memory address
 	call	iarg		;now get count
 	ld	a,0
-	jr	nz,kdmp20	;error during input - display 00 bytes
+	ld	(wnwsiz+1),a	;assume we are displaying NOTHING, flag = 0
+	jr	nz,kdmp20	;error during input - display no bytes
 	or	h
-	jr	z,kdmp05	;<256 ?  use given value
-	srl	a		;was value exactly 256 (docs say 256 is OK)
-	jp	nz,e???		;nope, too big
-	or	l		;H == 1 (256+), but is L == 0 ?
-	jp	nz,e???		;nope, value > 256
-	ld	l,255		;else exactly 256; use default max of 255
+	jr	z,kdmp02	;H==0; if L==0, no display; L<>0 is count
+;;; H<>0, check if H>1, error (>256 value)
+	dec	a
+	jp	nz,e???		;H>1, so value > 256 is error
+;;; H==1, so check L==0 (256 entered), L>0 then error (>256 entered)
+	or	l
+	jp	nz,e???		;H==1, L>0 is error (>256 entered)
+	dec	a		;H==1, L==0
+	ld	(wnwsiz),a	;count of 255 is display of 256 bytes
+	ld	(wnwsiz+1),a	;set flag to display memory
+	ld	l,a		;count in L
+	jr	kdmp05		; test maximm allowed by screen rows
+
+kdmp02:	;; H==0; if L==0, no display; L<>0 is count
+	or	l
+	jr	z,kdmp20	;user entered zero, no display
+	ld	(wnwsiz+1),a	;flag non-zero, we have bytes to display
+	dec	a		;count=count-1 [00..254] total of 255 entries
+	ld	(wnwsiz),a	;save count
+	ld	l,a		;count to L
+	
+;;; ...test maximum allowed by displayable rows and adjust count
+
 kdmp05:	ld	a,(maxlen)	;max symbol length
 	ld	b,2		;assume big names
 	cp	15
@@ -3495,14 +3510,14 @@ kdmp09:	sub	10-3		;clm moved kdmp display down 7 lines (row 10)
 kdmp10:	add	a,a		;times two, times four, [times eight]
 	djnz	kdmp10		;number of lines*4 (or *8) is bytes per line
 
-	jr	nc,kdmp11	;< 256
-	ld	a,255		;>= 256, reset to 255
-kdmp11:	
+	jr	nc,kdmp11	;screen lines permit < 256 bytes
+	xor	a		;screen could do >=256, so default to 255
+kdmp11:	dec	a		;compare A-L using BASE ZERO (0 is count of 1)
 	cp	l		;if number of bytes specified by user is too
 	jr	c,kdmp20	;large to display on screen then use default
 	ld	a,l		;use value specified by user
-kdmp20:	ld	(wnwtab),de
-	ld	(wnwsiz),a
+kdmp20:	ld	(wnwsiz),a	;(wnwsiz+1) non-zero already, set above
+kdmp21:	ld	(wnwtab),de
 	ret
 	page
 ;**************************************************************************
@@ -3702,7 +3717,7 @@ g550:	ld	c,z802cl	;check if this is relative jump
 
 	ld	(hl),05		;dec b instruction
 	inc	hl
-	ld	a,0c2h		;jp nz absolute
+	ld	a,0C2h		;jp nz absolute
 g555:	ld	(hl),a
 	inc	hl
 	ld	bc,(jropnd)	;if this is a conditional jr we need the
@@ -3788,7 +3803,7 @@ step20:	call	xval		;evaluate contents of parse buffer
 	jp	nz,e???
 	ld	de,(pcreg)
 	ld	a,(de)		;first byte of op code at current pc
-	cp	0c7h		;test for rst
+	cp	0C7h		;test for rst
 	jp	z,e???		;no tracing of rsts
 step40:	ld	(nstep),hl	;save step count
 	ld	hl,sbps		;set step flag nz - trace in effect
@@ -3953,7 +3968,7 @@ ibld:	ld	hl,objbuf	;object	code temp buffer
 	inc	hl		;point to byte two of object code
 ibld00:	cp	40h
 	jr	c,ibld55	;c - 8080 instruction
-	cp	0a0h
+	cp	0A0h
 	jr	nc,ibld10	;nc - not ed instruction
 	ld	(hl),0edh	;init byte one of object code
 	inc	hl
@@ -3965,17 +3980,17 @@ ibld00:	cp	40h
 	add	a,20h		;add bias to obtain object byte
     endif
 	jr	ibld55
-ibld10:	cp	0e0h
+ibld10:	cp	0E0h
 	jr	nc,ibld20
-	add	a,20h		;8080 type - range 0c0h	to 0ffh
+	add	a,20h		;8080 type - range 0C0h	to 0FFh
 	jr	ibld55		;object	byte built
-ibld20:	cp	0e8h
+ibld20:	cp	0E8h
 	jr	c,ibld50	;8 bit reg-reg arithmetic or logic
-	cp	0f7h		;check for halt	disguised as ld (hl),(hl)
+	cp	0F7h		;check for halt	disguised as ld (hl),(hl)
 	jr	nz,ibld30
 	ld	a,76h		;halt object code
 	jr	ibld55
-ibld30:	cp	0f8h
+ibld30:	cp	0F8h
 	jr	nc,ibld50	;8 bit reg-reg load
 	ld	d,a		;temp save instruction key value
 	ld	a,(objbuf)
@@ -3985,12 +4000,12 @@ ibld30:	cp	0f8h
 	inc	hl
 	jr	z,ibld40	;z - not ix or iy instruction
 	inc	hl		;bump object code pointer - this is four byter
-ibld40:	add	a,0a8h		;add bias for comparison purposes
+ibld40:	add	a,0A8h		;add bias for comparison purposes
 	cp	98h
 	jr	c,ibld50	;c - shift or rotate instruction
 	rrca
 	rrca
-	and	0c0h		;this is skeleton for bit instuctions
+	and	0C0h		;this is skeleton for bit instuctions
 	jr	ibld55
 ibld50:	add	a,a		;form skeleton
 	add	a,a
@@ -4194,10 +4209,10 @@ rslv40:	dec	a
 rslv50:	dec	a		;test restart instruction or bit number
 	jr	nz,rslv60	;nz - bit or interrupt mode number
 	ld	a,(de)		;check restart value specified
-	and	0c7h		;betweed 0 and 38h?
+	and	0C7h		;betweed 0 and 38h?
 	ret	nz		;error
 	ld	a,(de)		;fetch lo order	operand	value
-	or	0c7h		;or with instruction skeleton
+	or	0C7h		;or with instruction skeleton
 	dec	hl
 	ld	(hl),a		;rewind	object code pointer
 	inc	de
@@ -4206,7 +4221,7 @@ rslv50:	dec	a		;test restart instruction or bit number
 	ret
 rslv60:	dec	hl		;rewind	object code buffer pointer
 	ld	a,(de)
-	and	0f8h		;ensure	bit number in range 0 -	7
+	and	0F8h		;ensure	bit number in range 0 -	7
 	ret	nz		;error
 	ld	a,(ikey)	;fetch opcode key value
 	sub	13h		;is this bit number of interrupt mode number?
@@ -4218,7 +4233,7 @@ rslv60:	dec	hl		;rewind	object code buffer pointer
 	ld	(hl),56h
 	dec	a		;im 1?
 	ret	z
-	ld	(hl),5eh
+	ld	(hl),5Eh
 	dec	a		;error if not im 2
 	ret
 rslv70:	add	a,a		;shift bit number left three
@@ -4760,7 +4775,7 @@ zlen00:	ld	a,(de)		;fetch first byte of op	code
 	jr	z,zlen10
 	cp	4dh		;test for reti
 	ret	nz		;non-pc	modifying two byte ED
-zlen10:	ld	a,0c9h		;treat as ordinary return instruction
+zlen10:	ld	a,0C9h		;treat as ordinary return instruction
 	jp	zlen80
 zlen15:	cp	0ddh		;check for dd and fd index reg instructions
 	jr	z,zlen20
@@ -4769,12 +4784,12 @@ zlen15:	cp	0ddh		;check for dd and fd index reg instructions
 zlen20:	inc	de		;fetch byte two	of index reg instruction
 	ld	a,(de)
 	dec	de		;restore pointer
-	cp	0e9h		;check for reg indirect	jump
+	cp	0E9h		;check for reg indirect	jump
 	jr	nz,zlen30	;
 	inc	b		;reg indirect jump - set pc modified flag nz
 	ld	a,(de)		;recheck for ix	or iy
 	ld	hl,(ixreg)	;assume	ix
-	cp	0ddh
+	cp	0DDh
 	ret	z		;correct assumption
 	ld	hl,(iyreg)
 	ret
@@ -4790,15 +4805,15 @@ zlen30:	ld	hl,z80fd	;check for dd or fd two	byter
 	ret	z		;correct assumption
 	dec	c		;must be three
 	ret
-zlen40:	and	0c7h		;check for 8 bit immediate load
+zlen40:	and	0C7h		;check for 8 bit immediate load
 	cp	06
 	ld	c,2		;assume	so
 	ret	z
 	dec	c		;assume	one byte op code
 	ld	a,(de)
-	cp	3fh
+	cp	3Fh
 	jr	c,zlen50	;opcodes 0 - 3f	require	further	investigation
-	cp	0c0h		;8 bit reg-reg loads and arithmetics do	not
+	cp	0C0h		;8 bit reg-reg loads and arithmetics do	not
 	ret	c
 zlen50:	ld	hl,z803		;check for three byter
 	ld	c,z803l
@@ -4871,7 +4886,7 @@ zlen70:	ld	hl,z801		;check for return instruction
 	cpir
 	ld	c,1		;length	must be	1 in any case
 	ret	nz
-	cp	0e9h
+	cp	0E9h
 	jr	nz,zlen80	;nz - not  jp (hl)
 	inc	b		;set pc	modified flag
 	ld	hl,(hlreg)	;next pc contained in hlreg
@@ -4882,7 +4897,7 @@ zlen80:	ld	hl,(spreg)	;return	instructions hide next pc in stack
 	ld	h,(hl)
 	ld	l,b		;hl - return address removed from stack
 	ld	b,c		;set b nz - pc modification flag
-	cp	0c9h
+	cp	0C9h
 	ret	z		;unconditional return
 zlen85:	ld	a,(sbps)	;count of special step breakpoints
 	and	a		;test for zero
@@ -4933,7 +4948,7 @@ psw00:	ld	hl,pswbit		;table of bit mask for flags
 	add	a,a
 	ld	c,a
 	ld	a,(freg)		;fetch current flag of user
-	and	0f7h
+	and	0F7h
 	and	(hl)			;unused	bit in flag - ensure it's off
 	ld	hl,pswmap
 	add	hl,bc			;pointer to mnemonic is	8 bytes	away
@@ -4961,7 +4976,7 @@ psw50:	call	iedtbc
 	ret	m			;no input
 psw55:	call	prsr
 	ret	nz			;parse error - end command
-	ld	bc,116h			;
+	ld	bc,0116h			;
 	call	oprn20			;check validity	of this	token
 	ld	a,c
 	ld	bc,pswcnt		;number	of flag	reg mnemonics
@@ -4980,7 +4995,7 @@ psw55:	call	prsr
 	and	(hl)			;and with current user flag
 	ld	(hl),a			;return	flag reg with bit now off
 	jr	psw55			;check for more	input
-psw60:	and	0f7h			;turn off on/off flag (bit 4)
+psw60:	and	0F7h			;turn off on/off flag (bit 4)
 	or	(hl)
 	ld	(hl),a			;now turn on specified bit
 	jr	psw55
@@ -5129,8 +5144,8 @@ qev01:	jp	outadr		; output 2-byte result
 ;	Calls iedtbc to get command tail
 ;	      lfcb   twice to extract file names
 ;
-;	exit:	FCB name fields at 5Ch and 6Ch initialised
-;		Command tail set up at 80h
+;	exit:	FCB name fields at 005Ch and 006Ch initialised
+;		Command tail set up at 0080h
 ;
 ;------------------------------------------------------------------------------
 
@@ -5149,7 +5164,7 @@ ifcb00:	ld	(hl),0
 	ld	l,fcb5c+17
 	call	iblank
 	pop	hl		;Get input buffer pointer
-	ld	de,80h		;Destination is command line buffer
+	ld	de,0080h	;Destination is command line buffer
 	ld	b,(hl)		;Get input buffer length
 	ld	a,b		;Load length ready to put in command buffer
 	inc	b		;Account for the length byte itself
@@ -5260,7 +5275,7 @@ lldr00:	call	crlf
 	call	print
 	ld	a,','
 	cp	c		;C - terminator	following file name (from lfcb)
-	ld	hl,100h		;Assume	no bias
+	ld	hl,0100h		;Assume	no bias
 	jr	nz,lldr05	;NZ - no comma means no	load bias
 	call	iarg		;Check for load	bias
 	jp	nz,esntx	;Error - bad argument
@@ -5284,7 +5299,7 @@ lbin00:	push	hl
 	ld	c,20		;CP/M sequential file read
 	call	bdos
 	pop	de		;Recover DMA address
-	ld	hl,80h
+	ld	hl,0080h
 	add	hl,de		;Compute next DMA address
 	ld	(cflag),a	;Save EOF indicator as continuation flag
 	ld	c,a
@@ -5355,8 +5370,8 @@ lbin40:	call	nz,ttyo		;Print tens digit
 	jp	z,lbin		;User wants more loading
 z8ej:				;+
 	ld	c,26		;+ "Set DMA" function
-	ld	de,80h		;+ Restore default DMA for user program
-	call	bdos		;+
+	ld	de,0080h	;+ Restore default DMA for user program
+	call	bdos	;+
 	jp	z8e		;Next command
 
 
@@ -5909,15 +5924,15 @@ zasm45:	cpir			;check for FD, DD, ED or CB
 	jr	z,zasm55	;z - found
 zasm50:	cp	40h
 	jr	c,zasm90	;opcode	range 00 - 3F
-	ld	b,0e0h		;
-	cp	0c0h		;
+	ld	b,0E0h		;
+	cp	0C0h		;
 	jr	nc,zasm90	;opcode	range C0 - CC
 	cp	80h
 	jr	nc,zasm85	;opcode	range 80 - BF
-	ld	b,0f8h		;
+	ld	b,0F8h		;
 	cp	76h		;test for halt instruction
 	jr	nz,zasm85	;opcode	range 40 - 7F
-	ld	a,0ffh		;set halt instruction key value	to F7h
+	ld	a,0FFh		;set halt instruction key value	to F7h
 	jr	zasm90
 zasm55:	inc	de
 	ld	a,(de)		;byte two of multi-byte	instruction
@@ -5931,11 +5946,11 @@ zasm55:	inc	de
 	jr	nc,zasm60	;opcode	range ED 40 - ED 7F
 	cp	40h
 	jr	nc,zasm90	;legal
-	ld	a,09fh
+	ld	a,09Fh
 	jr	zasm90		;map to	question marks
 
-zasm60:	ld	b,0e0h		;set bias
-	cp	0c0h		;test for illegal ED
+zasm60:	ld	b,0E0h		;set bias
+	cp	0C0h		;test for illegal ED
 	jr	c,zasm90	;legal
 	ld	a,0BFh		;map to	question marks
 	jr	zasm90		;opcode	range ED A0 - ED BB
@@ -5943,7 +5958,7 @@ zasm60:	ld	b,0e0h		;set bias
 
 zasm65:	inc	c
 	jr	z,zasm80	;z - CB	instruction
-	cp	0cbh		;FD or DD - check for CB in byte two
+	cp	0CBh		;FD or DD - check for CB in byte two
 	jr	nz,zasm70
 	inc	de		;fetch last byte of FDCB or DDCB
 	inc	de
@@ -6407,7 +6422,7 @@ opn210:	inc	hl		;
 	jr	z,opn215	;no conversion of ix and iy displacements
 				;to ascii
 	ld	a,(zasmkv)	;check for in or out instruction
-	cp	0b3h
+	cp	0B3h
 	jr	z,opn215	;no conversion of port addresses to ascii
 	cp	0bbh
 	jr	z,opn215
@@ -6480,7 +6495,7 @@ opn500:	and	007		;register specified in bits 0-2
 	xor	e		;test if pc was	incremented
 	ld	(hl),'('	;set leading paren
 	inc	hl
-	ld	b,080h		;set sign bit -	closed paren required
+	ld	b,80h		;set sign bit -	closed paren required
 	ex	de,hl		;de - buffer
 	jp	z,opn012
 
@@ -6610,25 +6625,25 @@ opn830:	call	zhex20		;convert to ascii
 ;*
 ;****************************************************************************
 
-zed180:	cp	0c0h		;Opcode range ED 00 to ED BF?
+zed180:	cp	0C0h		;Opcode range ED 00 to ED BF?
 	jr	c,zed10		;If so, keep checking.
-zed05:	ld	a,9fh		;Else, illegal, map to question marks.
+zed05:	ld	a,9Fh		;Else, illegal, map to question marks.
 	ret			;Go build instruction key.
 
-zed10:	cp	0a0h		;Opcode range ED 00 to ED 9F?
+zed10:	cp	0A0h		;Opcode range ED 00 to ED 9F?
 	jr	c,zed15		;If so, keep checking.
 	bit	2,a		;Else, is bit 2 on?
 	jr	nz,zed05	;If so, illegal opcode.
-	ld	b,0e0h		;Else, bias is e0h.
+	ld	b,0E0h		;Else, bias is e0h.
 	ret			;Go build instruction key.
 
 zed15:	cp	83h		;OTIM?
 	jr	z,zed20
-	cp	8bh		;OTDM?
+	cp	8Bh		;OTDM?
 	jr	z,zed20
 	cp	93h		;OTIMR?
 	jr	z,zed20
-	cp	9bh		;OTDMR?
+	cp	9Bh		;OTDMR?
 	jr	nz,zed25
 zed20:	inc	b		;Bias is 1.
 	ret			;Go build instruction key.
@@ -6767,7 +6782,7 @@ zndx00:	inc	de		;cb or ed - bump instruction pointer
 
 
 zhex:	ld	d,a
-	cp	0a0h		;test if left nibble > 9
+	cp	0A0h		;test if left nibble > 9
 	jr	c,zhex00	;starts	with decimal digit - skip the leading zero
 	ld	(hl),'0'
 	inc	hl
@@ -7790,7 +7805,7 @@ matail:	defb	' terminal enabled...'
 
 z80fd:	defb	009h,019h,02bh		; add hl,bc ; add hl,de ; dec hl
 	defb	023h,029h,039h,0e1h	; inc hl    ; add hl,hl ; add hl,sp ; pop hl
-	defb	0e3h,0e5h,0e9h,0f9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
+	defb	0E3H,0e5h,0e9h,0f9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
 z80fdl	equ	$-z80fd
 
 z80f4:	defb	021h,022h,02ah,036h,0cbh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),* ; **BIT**
@@ -8599,7 +8614,7 @@ terminal defl	auxiliary	; Load auxiliary data
 	endif
 
 wnwtab:	defw	0
-wnwsiz:	defw	0
+wnwsiz:	defb	00,00		; [count 0..255], [flag: 0=no display, 1=display]
 
 port:	defw	0
 
