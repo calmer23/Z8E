@@ -2382,7 +2382,9 @@ jdbg55:	inc	b		;bump memory window byte count
 	inc	de
 	sub	b
 	jr	nz,jdbg50	;loop until entire window examined
-
+;;; ==================================================================
+	call	clmbin		;display BINARY values of registers
+;;; ==================================================================
 jdbg60:	ld	a,18		;init count of disassembled instructions
 
 ht04	equ	$-1		;[Patch to screen height - 6]
@@ -2509,6 +2511,68 @@ rgdisp:	call	home		;home cursor
 	call	pswDsp		;display flag reg
 	jp	crlf
 
+;;; display BINARY value of some registers when in full screen 'J' command
+clmbin:	push	af		; what the heck, save them all
+	push	hl
+	push	de
+	push	bc
+	push	ix
+	push	iy
+	ld	b,0
+	ld	c,b
+	ld	ix,zopnm+2
+	ld	iy,clmbr
+clmbnx:	
+	inc	(iy)		; advance row number
+
+	ld	a,(ix)
+	inc	ix
+	inc	ix
+	ld	(clmbn),a	; insert register name
+
+	ld	hl,clmbd
+	add	hl,bc
+	ld	a,(hl)		; offset from afreg to register value
+
+	ld	hl,afreg
+	add	a,l
+	ld	l,a
+	jr	nc,clmbnc
+	inc	h		; add in the carry from L to H
+clmbnc:	
+	ld	a,(hl)		; register value to convert
+
+	ld	hl,clmba	; stuff ones and zeroes here
+	push	bc		; Preserve BC on stack
+	ld	b,8		; Loop for all 8 bits
+clmblp:
+	rlca		; Shift high bit of A into carry bit
+	ld	c,a	; Preserve A in C
+	ld	a,'0'	; "ld" opcodes do not change carry flag
+	adc	a,0	; if no carry, then A = '0'.  If carry, then A = '1'
+	ld	(hl),a	; store in buffer(hl) ('0' or '1')
+	inc	hl
+	ld	a,c	; Restore A
+	djnz	clmblp	; Continue looping until B = 0
+
+	ld	de,clmbh
+	call	print
+	pop	bc		; Restore BC
+	inc	c		; next register
+	ld	a,clmbc
+	sub	c
+	jr	nz,clmbnx	; more to do
+
+	ld	a,'2'-1
+	ld	(iy),a		; reset row address to beginning
+
+	pop	iy
+	pop	ix
+	pop	bc
+	pop	de
+	pop	hl
+	pop	af
+	ret
 
 
 curs:	push	bc		;This routine has been simplified and shortened
@@ -8322,6 +8386,22 @@ siotbl:	defb	0f5h,0f7h
 
 symflg:	defb	0ffh		;symbol	table flag   00	- table	present
 				;		     ff	- no table
+
+;;; =============================================================================
+
+clmbh:	db	esc,'[2'	; position cursor (30,62)
+clmbr:	db	'2'-1		; rows 22->28
+	db	';63H'		; column 63
+clmbn:	db	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
+clmba:	db	'76543210',00H	; ASCII bits and terminator
+
+clmbd:	db	afreg-afreg+1
+	db	hlreg-afreg+1, hlreg-afreg+0
+	db	dereg-afreg+1, dereg-afreg+0
+	db	bcreg-afreg+1, bcreg-afreg+0
+clmbc	equ	($ - clmbd)	; count of registers to display
+
+;;; =============================================================================
 
 bsiz:				;dump block size storage
 bsizlo:	defb	0		;     lo order
