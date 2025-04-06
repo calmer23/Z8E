@@ -33,7 +33,7 @@
 ;			
 ; 12 Feb 15 jrs v4.1	Minor optimisation to enable sharing of terminal I/O
 ;			code when using an auxiliary terminal with the same
-;			characteriscs as the console.  (This is usually the
+;			characteristics as the console.  (This is usually the
 ;			situation when running Z8E on a CP/M emulator.)
 ;
 ;			Cleaned up some labels, removing many "if ASMB" tests
@@ -456,7 +456,7 @@ getSCB	equ	49
 
 mbannr:
 	defb	esc,'[3;0;0t'	;Move terminal window to upper left corner of screen
-	defb	esc,'[8;99;99t'	;Set windown size to 99 rows by 99 columns
+	defb	esc,'[8;99;99t'	;Set window size to 99 rows by 99 columns
 	defb	esc,'[1;1H'	;Move cursor to row/column 1/1.
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1FH ;Set window TITLE
@@ -810,20 +810,20 @@ zsym:	call	lfcb		;Initialize fcb
 	call	nprint		;Output	crlf - then print
 	ld	de,prsbf
 	call	print		;Display file name
-	ld	a,c 		;lfcb returns delimeter in c reg
+	ld	a,c 		;lfcb returns delimiter in c reg
 	ld	(delim),a	;Temp save delimiter so we know if a bias has
 				;been specified
 	call	crlf
 	call	lopn		;Try to	open symbol table file
 	dec	a		;
 	jp	m,zfnf		;m - file not found
-	ld	a,(delim)	;Check delimeter
+	ld	a,(delim)	;Check delimiter
 	cp	','
 	ld	hl,00
 	jr	nz,zsym10	;nz - no comma means no	symbol bias
 	call	prsr		;Let prsr extract symbol bias
 	jp	nz,zoff		;Parse error - use bias	of 0000
-	ld	(delim),a	;Save delimeter	which followed bias
+	ld	(delim),a	;Save delimiter	which followed bias
 	ld	de,prsbf
 	ld	hl,00
 	call	xval		;Evaluate bias
@@ -1362,7 +1362,7 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
                                 ;table to search thru if the user specified a
                                 ;symbol name bias as part of the command line
 
-.eof50:	ld	a,(delim)       ;check command line delimter
+.eof50:	ld	a,(delim)       ;check command line delimiter
 	and	a               ;test for end of line null
 	jp	nz,zsym         ;nz - not null means more files
 
@@ -1581,12 +1581,12 @@ hexc00:	and	0fh
 	;function is to convert ascii addresses
 	;into binary.  Since we are reading files in
 	;a known format we don't init any loop counts;
-	;instead, we look for delimeters. 
+	;instead, we look for delimiters. 
 
 
 hex:	call	nchr            ;get char from disk i/o buffer
 hex00:	cp	3ah             ;convert ascii to hex
-	jp	c,hex10         ;c - must be delimeter
+	jp	c,hex10         ;c - must be delimiter
 	sub	7
 hex10:	sub	'0'
 	ex	de,hl           ;shift hl left four
@@ -2229,8 +2229,8 @@ jdbg05:	call	iarg		;now evaluate address
 	ld	(jstepf),a	;indicate screen corrupted
 	jp	e???		;error -
 jdbg08:	ld	(pcreg),hl	;save address at which to start	tracing
-	and	a		;check delimter
-	ld	a,10		;no delimeter use default timer value
+	and	a		;check delimiter
+	ld	a,10		;no delimiter use default timer value
 	jr	z,jdbg10
 	call	iarg		;check if user wants non-default timer
 	ld	a,10
@@ -2258,7 +2258,7 @@ jdbg25:	ld	a,(fwndow)
 
 	ld	(de),a		;save this byte in window between bps
 	call	outhex
-	inc	b		;move and display user specifed number 
+	inc	b		;move and display user specified number 
                                 ;of bytes (wnwsiz)
 	ld	a,(wnwsiz)
 	sub	b
@@ -3184,10 +3184,10 @@ brk80:	xor	a
 	ld	(de),a
 	or	c		;test if this was step calling
 	ret	p		;i'm positive it was
-	ld	a,(delim)	;check delimeter which followed	bp address
+	ld	a,(delim)	;check delimiter which followed	bp address
 	and	a
 	ret	z		;end of	line null - terminate command
-	cp	','		;check for pass	count delimeter
+	cp	','		;check for pass	count delimiter
 	jp	nz,brk10	;not comma means treatt	this as	new bp
 	call	iarg		;get next arg
 	jp	nz,e???		;nz - evaluation error
@@ -3195,7 +3195,7 @@ brk80:	xor	a
 	ld	(hl),d		;store pass count in table
 	dec	hl
 	ld	(hl),e
-	and	a		;check delimeter
+	and	a		;check delimiter
 	jp	nz,brk10	;nz - more arguments follow
 	ret			;end of	line null - terminate command
 	page
@@ -3267,7 +3267,7 @@ cbrk30:	ld	h,0ffh		;rewind	to point to bp address
 	add	hl,de		;de - ptr to pass count	 hl - next in table
 	sla	c		;number	of pass	counts to move
 	ldir
-	ld	a,(delim)	;recheck delimeter
+	ld	a,(delim)	;recheck delimiter
 	and	a
 	jr	nz,cbreak	;not end of line terminator - clear more
 	ret
@@ -3719,7 +3719,7 @@ asm030:	ld	hl,00
 	ld	(isympt),hl	;save pointer to symbol	value in symbol	table
 	call	prsr		;extract opcode
 	jp	m,asm005	;m - statement contains	label only
-asm040:	ld	a,(delim)	;check delimeter
+asm040:	ld	a,(delim)	;check delimiter
 	cp	','		;check for invalid terminator
 	jp	z,asm??o
     if Z180
@@ -4436,18 +4436,18 @@ isym00:	ld	a,(maxlen)	;rewind	point to start of table	entry
 ;*
 ;*	prsr will extract one argument from the	input buffer (inbf) and
 ;*	write it into the parse	buffer (prsbf).	an argument is treated
-;*	as starting with the first non-delimeter character encountered
-;*	in the input buffer and ends with the next delimeter found.
-;*	all intervening	characters between the two delimeters are
+;*	as starting with the first non-delimiter character encountered
+;*	in the input buffer and ends with the next delimiter found.
+;*	all intervening	characters between the two delimiters are
 ;*	treated	as the argument	and are	moved to prsbf.
 ;*
 ;*	as each character is extracted from inbf a zero is written back
 ;*	to replace it.  thus a program which needs to extract multiple args
 ;*	need not save pointers in between calls	since prsr is trained
-;*	to strip leading delimeters while looking for the start	of an
+;*	to strip leading delimiters while looking for the start	of an
 ;*	argument:
 ;*
-;*	     delimeters: null, space, comma
+;*	     delimiters: null, space, comma
 ;*
 ;*	exit:	    de - starting address of parse buffer
 ;*		     b - sign bit: set if unbalanced parens, else sign reset
@@ -4478,8 +4478,8 @@ prsr20:	ld	a,(de)		;from input buffer
 	dec	c		;decrement buffer size tally
 	ret	m		;error -  end of input buffer reached
 	inc	de		;bump input buffer pointer
-	call	zdlm00		;check for delimeter
-	jr	z,prsr20	;delimeter found - continue search
+	call	zdlm00		;check for delimiter
+	jr	z,prsr20	;delimiter found - continue search
 	ld	(parenf),a
 	ld	c,nprsbf-prsbf	;parse buffer size
 prsr30:	ld	(hl),a
@@ -4499,7 +4499,7 @@ prsr50:	dec	c		;decrement buffer size tally
 	ex	de,hl
 	inc	de
 	inc	b		;bumping character count tests quote flag
-	call	p,zdlm		;only look for delimeters if quote flag off
+	call	p,zdlm		;only look for delimiters if quote flag off
 	inc	hl		;bump parse buffer pointer
 	jr	nz,prsr30
 	dec	hl
@@ -5644,7 +5644,7 @@ zasm0:				;+
 	jp	nz,e???
 	ex	de,hl
 	call	iarg		;read in block size
-	ld	b,a		;save delimeter
+	ld	b,a		;save delimiter
 	jr	z,zasm00
 
 
@@ -5670,7 +5670,7 @@ zasm05:	ld	(zasmct),hl	;save as permanent block count
 	ld	(zasmpc),hl
 zasm06:				;+ eg 3.3.2
 	call	crlf
-	ld	a,b		;check command line delimeter
+	ld	a,b		;check command line delimiter
 	ld	(dwrite),a	;save as write to disk flag:
 				;z - no write   nz - write
 	and	a
@@ -5892,7 +5892,7 @@ zasm99:	ld	de,zopnd1	;table of first	operands
 ;*   instruction key value is used to fetch operand key value:
 ;*
 ;*	operand	key value is in	the range 0 - 1fh
-;*	operand key value interpretted as follows:
+;*	operand key value interpreted as follows:
 ;*
 ;*      0 - 17h  use as index to fetch literal from operand
 ;*		 name table (sign bit set - parens required)
@@ -5909,7 +5909,7 @@ zasm99:	ld	de,zopnd1	;table of first	operands
 ;*   entry point   key         action
 ;*
 ;*     opn100	   18h	 relative jump
-;*     opn200	   19h	 regoster specified in instruction
+;*     opn200	   19h	 register specified in instruction
 ;*     opn300	   1ah	 convert 16 bit	operand	to hex
 ;*     opn400	   1ch	 convert 8 bit operand to hex
 ;*     opn600	   1dh	 hl/ix/iy instruction
@@ -6334,7 +6334,7 @@ opn500:	and	007		;register specified in bits 0-2
 
 opn600:
 	call	zndx		;determine if ix or iy
-	jr	z,opn605	;z - must be ix	of iy
+	jr	z,opn605	;z - must be ix	or iy
 	ld	a,80h
 	and	b
 	jp	opn010
@@ -6730,7 +6730,7 @@ xsym00:	ld	a,(de)
 ;*			z - no errors
 ;*
 ;*		       nz - no input entered
-;*			  - untable to evaluate argument
+;*			  - unable to evaluate argument
 ;*			  - destination	address	< source
 ;*
 ;******************************************************************************
@@ -7624,49 +7624,49 @@ matail:	defb	' terminal enabled...'
     endif
 
 
-z80fd:	defb	009h,019h,02bh
-	defb	023h,029h,039h,0e1h
-	defb	0e3h,0e5h,0e9h,0f9h
+z80fd:	defb	009h,019h,02bh		; add hl,bc ; add hl,de ; dec hl
+	defb	023h,029h,039h,0e1h	; inc hl    ; add hl,hl ; add hl,sp ; pop hl
+	defb	0e3h,0e5h,0e9h,0f9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
 z80fdl	equ	$-z80fd
 
-z80f4:	defb	021h,022h,02ah,036h,0cbh
+z80f4:	defb	021h,022h,02ah,036h,0cbh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),* ; **BIT**
 z80f4l	equ	$-z80f4
 
 
-z801:	defb	0c0h,0e9h,0c9h,0d8h
-	defb	0d0h,0c8h,0e8h,0e0h
-	defb	0f8h,0f0h
+z801:	defb	0c0h,0e9h,0c9h,0d8h 	; ret nz ; jp (hl) ; ret    ; ret c
+	defb	0d0h,0c8h,0e8h,0e0h	; ret nc ; ret z   ; ret pe ; ret po
+	defb	0f8h,0f0h		; ret m  ; ret p
 z801l	equ	$-z801
 
 
-z802:	defb	036h,0c6h,0ceh,0d3h
-	defb	0d6h,0dbh,0deh,0e6h
-	defb	0eeh,0f6h,0feh
-z802c:	defb	018h,038h,030h
-	defb	028h,020h,010h
+z802:	defb	036h,0c6h,0ceh,0d3h 	; ld (hl),* ; add a,*  ; adc a,* ; out (*),a
+	defb	0d6h,0dbh,0deh,0e6h	; sub *     ; in a,(*) ; sbc a,* ; and *
+	defb	0eeh,0f6h,0feh		; xor *     ; or *     ; cp *
+z802c:	defb	018h,038h,030h		; jr *      ; jr c,*   ; jr nc,*
+	defb	028h,020h,010h		; jr z,*    ; jr nz,*  ; djnz *
 z802l	equ	$-z802
 z802cl	equ	$-z802c
 
 
 z80r:
-z803:	defb	001h,011h,021h,022h
-	defb	02ah,031h,032h,03ah
+z803:	defb	001h,011h,021h,022h 	; ld bc,**   ; ld de,** ; ld hl,**  ; ld (**),hl
+	defb	02ah,031h,032h,03ah	; ld hl,(**) ; ld sp,** ; ld (**),a ; ld a,(**)
 
-z803s:	defb	0cdh
-	defb	0dch,0d4h,0cch,0c4h
-	defb	0ech,0e4h,0fch,0f4h
+z803s:	defb	0cdh			; call **
+	defb	0dch,0d4h,0cch,0c4h	; call c,**  ; call nc,** ; call z,** ; call nz,**
+	defb	0ech,0e4h,0fch,0f4h	; call pe,** ; call po,** ; call m,** ; call p,**
 
 z803sl	equ	$-z803s			;number	of call	instructions
 
-z803c:	defb	0c3h
-	defb	0dah,0d2h,0cah,0c2h
-	defb	0eah,0e2h,0fah,0f2h
+z803c:	defb	0c3h			; jp **
+	defb	0dah,0d2h,0cah,0c2h	; jp c,**  ; jp nc,** ; jp z,** ; jp nz,**
+	defb	0eah,0e2h,0fah,0f2h	; jp pe,** ; jp po,** ; jp m,** ; jp p,**
 
 z803l	equ	$-z803			;number	of 3 byte instructions
 z803cl	equ	$-z803s			;number	of 3 byte pc mod instructions
 
-z80ed:	defb	043h,04bh,053h
-	defb	05bh,073h,07bh
+z80ed:	defb	043h,04bh,053h		; ld (**),bc ; ld bc,(**) ; ld (**),de
+	defb	05bh,073h,07bh		; ld de,(**) ; ld (**),sp ; ld sp,(**)
 
 z80edl	equ	$-z80ed
 
@@ -7674,14 +7674,14 @@ z80rl	equ	$-z80r			;number	relocatable z80	instructions
 
     if	Z180
 
-z8ed3:	defb	000h,008h,010h,018h
+z8ed3:	defb	000h,008h,010h,018h 	; Z180
 	defb	020h,028h,038h,001h
 	defb	009h,011h,019h,021h
 	defb	029h,039h,064h,074h
 
 z8ed3l	equ	$-z8ed3			;number of 3 byte ED instructions
 
-edbias:	defb	04Eh,053h,09Dh,09Ch	;ED 00 to 03
+edbias:	defb	04Eh,053h,09Dh,09Ch	;ED 00 to 03 	; Z180
 	defb	051h,09Ah,099h,098h	;ED 04 to 07
 	defb	055h,05Ah,095h,094h	;ED 08 to 0B
 	defb	05Fh,092h,091h,090h	;ED 0C to 0F
@@ -7698,7 +7698,7 @@ edbias:	defb	04Eh,053h,09Dh,09Ch	;ED 00 to 03
 	defb	05Eh,05Eh,065h,064h	;ED 38 to 3B
 	defb	061h,062h,061h,060h	;ED 3C to 3F
 
-edbad:	defb	04Eh,054h,055h,05Dh
+edbad:	defb	04Eh,054h,055h,05Dh 	; Z180
 	defb	065h,066h,06Dh,06Eh
 	defb	070h,071h,075h,077h
 	defb	07Dh,07Eh,07Fh
@@ -7708,12 +7708,12 @@ edbadl	equ	$-edbad			;# of illegal ED opcodes in 40h to 7Fh
     endif
 
 z80f3:
-	defb	034h,035h,046h,04eh
-	defb	056h,05eh,066h,06eh
-	defb	070h,071h,072h,073h
-	defb	074h,075h,077h,07eh
-	defb	086h,08eh,096h,09eh
-	defb	0a6h,0aeh,0b6h,0beh
+	defb	034h,035h,046h,04eh 	; inc (hl)   ; dec (hl)   ; ld b,(hl) ; ld c,(hl)
+	defb	056h,05eh,066h,06eh	; ld d,(hl)  ; ld e,(hl)  ; ld h,(hl) ; ld l,(hl)
+	defb	070h,071h,072h,073h	; ld (hl),b  ; ld (hl),c  ; ld (hl),d ; ld (hl),e
+	defb	074h,075h,077h,07eh	; ld (hl),h  ; ld (hl),l  ; ld (hl),a ; ld a,(hl)
+	defb	086h,08eh,096h,09eh	; add a,(hl) ; adc a,(hl) ; sub (hl)  ; sbc a,(hl)
+	defb	0a6h,0aeh,0b6h,0beh	; and (hl)   ; xor (hl)   ; or (hl)   ; cp (hl)
 z80f3l	equ	$-z80f3
 
 	org	($+3) and 0fffch
@@ -8338,7 +8338,7 @@ execbf:				;execute buffer	for relocated code
 jlines:
 parenf:	
 nument:	defb	0		;number	of digits entered
-delim:	defb	0		;argument delimeter character
+delim:	defb	0		;argument delimiter character
 	defb	0
 base10:	defb	0
 jmp2jp:	defb	0
