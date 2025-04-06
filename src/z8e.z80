@@ -1583,9 +1583,12 @@ hexc:	ld	h,a
 	ld	l,a
 	ld	a,h
 hexc00:	and	0fh
-	add	a,90h
-	daa
-	adc	a,40h
+	;; add	a,90h
+	;; daa
+	;; adc	a,40h
+	;; daa
+ 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+ 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ret
 
@@ -2258,6 +2261,9 @@ jdbg10:	ld	(timer),a
 	ld	a,(wnwsiz)
 	and	a		;test if window being displayed
 	jr	z,jdbg28
+;;; ==================================================================
+	call	clmbin		;display BINARY values of registers
+;;; ==================================================================
 	ld	de,window	;save user specified memory block til next bp
 	ld	hl,(wnwtab)	;start of memory window address
 	ld	b,0
@@ -2621,8 +2627,6 @@ curs40:	ld	a,0fch
 	pop	bc
 	ret
 
-
-
 clok:
 	ld	d,50		;idle loop - decrement to 0 and reload
 	ld	e,00
@@ -2632,7 +2636,21 @@ clok10:	dec	de
 	ld	a,e
 	or	d
 	jr	nz,clok10
+	call	clmspin
 	jr	clok
+
+clmspin:
+	ld	de,(clmsp)
+	ld	a,(de)
+	ld	(clmsb),a
+	inc	de
+	ld	a,e
+	and	07H
+	jr	nz,clmsp7
+	ld	de,clmsc
+clmsp7:	ld	(clmsp),de
+	ld	de,clmss
+	jp	print
 
 	page
 ;******************************************************************************
@@ -5745,7 +5763,7 @@ zasm0:				;+
 
 				; That was another 16-bit constant load ...
 	ld	h,0		; ... now recoded as two 8-bit loads
-	ld	l,1		; v4.1 jrs 21 Feb 2015
+	ld	l,10		; v4.1 jrs 21 Feb 2015
 ;ht09	equ	$-1		; In case we want to patch it to height-8
 
 zasm00:	xor	a
@@ -6715,17 +6733,23 @@ zhex10:	rrca
 	rrca
 	rrca
 	and	0fh
-	add	a,90h
+	;; add	a,90h
+	;; daa
+	;; adc	a,40h
+	;; daa			;a - ascii digit
+ 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+ 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
-	adc	a,40h
-	daa			;a - ascii digit
 	ld	(hl),a
 	inc	hl
 	ld	a,d		;lo nibble conversion
 zhex20:	and	0fh
-	add	a,90h
-	daa
-	adc	a,40h
+	;; add	a,90h
+	;; daa
+	;; adc	a,40h
+	;; daa
+ 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+ 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ld	(hl),a
 	inc	hl
@@ -7143,11 +7167,15 @@ binx:	rrca
 	rrca
 	rrca
 binx00:	and	0fh
-	add	a,90h
-	daa
-	adc	a,40h
+	;; add	a,90h
+	;; daa
+	;; adc	a,40h
+	;; daa
+ 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+ 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ret
+
 	page
 ilin:	push	bc
 	push	de
@@ -8388,6 +8416,12 @@ symflg:	defb	0ffh		;symbol	table flag   00	- table	present
 				;		     ff	- no table
 
 ;;; =============================================================================
+
+	org	($ + 15) AND 0FFF0H
+clmsc:	db	'|\-/+\-/'
+clmsp:	dw	clmsc
+clmss:	db	esc,'7',esc,'[1;90H'
+clmsb:	db	'#',esc,'8', 00H
 
 clmbh:	db	esc,'[2'	; position cursor (30,62)
 clmbr:	db	'2'-1		; rows 22->28
