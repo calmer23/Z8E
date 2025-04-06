@@ -41,7 +41,7 @@
 ;			in source.
 ;			Added ANSI terminal escape sequences to position and
 ;			resize terminal emulator window to upper left area
-;			of screen at 99 rows, 99 columns (Mac Terminal v2.9.5).
+;			of screen at 90 rows, 90 columns (Mac Terminal v2.9.5).
 ;
 ; 18 Feb 18 hp  v4.2	Fixed the "Symbol Table Not Found" error that happened
 ;			when loading a .SYM symbol file that ended exactly at
@@ -459,7 +459,7 @@ getSCB	equ	49
 
 	export	height
 ;height:
-	defb	99		;Default (patchable) Screen height (in lines).
+	defb	90		;Default (patchable) Screen height (in lines).
 				;(Don't bother patching if running CP/M Plus
 				; because Z8E will get the screen height from
 				; the SCB.)
@@ -475,21 +475,19 @@ getSCB	equ	49
 				;needs high-order bit set on occasions.
 
 mbannr:		;Move XTERM terminal window near to upper left corner of screen
-	defb	esc,'[3;100;000t'  ;COL;ROW; use 3-digit numbers, easy patching
-	defb	esc,'[8;099;099t'  ;ROW;COL; window size to 99 rows by 99 cols
+	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
+	defb	esc,'[8;090;090t'  ;ROW;COL; window size to 90 rows by 90 cols
 	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1FH	;Set window TITLE
-;;; 		yes, that really is a right bracket; and terminated by CNTL-G
-
-;;	defb	cr,lf		;Maybe patch with "clear screen" code
+;;;		yes, that really is a right bracket; and terminated by CNTL-G
 	defb	cr,lf,tab,tab
     if Z180
 	defb	'18E'
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm31 - 14 Mar 2025'
+	defb	' v4.2.clm33 - 21_Mar_2025'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -502,7 +500,7 @@ mbannr:		;Move XTERM terminal window near to upper left corner of screen
     if CPM3
 scbpb:	defb	1Ch,0,0,0	;Ready to get console height (CP/M+ only)
     endif
-	
+
 nint:
 	ld	sp,stack
 	ld	a,i		;Save i reg for user
@@ -549,7 +547,11 @@ setHeight:
 	sub	3
 	ld	(ht04),a	; Height - 6	'J' end of disassembled instructions
 	ld	(ht07a),a	; Height - 6	'J' number of instructions to disassemble
-	ld	(ht07b),a	; Height - 6	'J' number of instructions to disassemble
+;;	cp	64
+;;	jr	c,setH07	; we only allow max of 63 lines for kdmp display
+;;	ld	a,63		; 63*4=252=0FCh=11111100, slightly less than 255 bytes
+;;setH07:	
+	ld	(ht07b),a	; Height - 6	'J' number of lines for kdmp display
 	sub	2
 	ld	(ht08),a	; Height - 8	zasm, number of lines of code
 ;;	ld	(ht09),a	; Probably better to leave this one unpatched.
@@ -1596,8 +1598,8 @@ hexc00:	and	0fh
 	;; daa
 	;; adc	a,40h
 	;; daa
- 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
- 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ret
 ;;
@@ -2286,22 +2288,37 @@ jdbg25:	ld	a,(fwndow)
 
 	ld	(de),a		;save this byte in window between bps
 	call	outhex
+;;; -----------------------------------------------------
+;	inc	b		;move and display user specified number
+;				;of bytes (wnwsiz)
+;	ld	a,(wnwsiz)
+;	sub	b
+;	jr	nz,jdbg27	;not done, keep going
+;	ld	a,(wnwsiz)	;is the window size == 255 (0FFh)
+;	inc	a		;will roll to zero if true
+;	jr	nz,jdbg27	;nope, not 255, so we are done
+;	inc	b		;lets do one more byte since 256 is legal
+;jdbg27: inc	hl
+;	inc	de
+;	ld	a,(nlmask)	;check for new line time
+;	and	b
+;	jr	nz,jdbg25	;not end of line - display next byte else...
+;	jr	jdbg20		;...display address first
+;jdbg28: ld	a,3		;point to very first instruction
+;;; -----------------------------------------------------
 	inc	b		;move and display user specified number
 				;of bytes (wnwsiz)
 	ld	a,(wnwsiz)
 	sub	b
-	jr	nz,jdbg27	;not done, keep going
-	ld	a,(wnwsiz)	;is the window size == 255 (0FFh)
-	inc	a		;will roll to zero if true
-	jr	nz,jdbg27	;nope, not 255, so we are done
-	inc	b		;lets do one more byte since 256 is legal
-jdbg27:	inc	hl
+	jr	z,jdbg28
+	inc	hl
 	inc	de
 	ld	a,(nlmask)	;check for new line time
 	and	b
 	jr	nz,jdbg25	;not end of line - display next byte else...
 	jr	jdbg20		;...display address first
 jdbg28:	ld	a,3		;point to very first instruction
+;;; -----------------------------------------------------
 	jp	jdbg75
 ;;
 				;breakpoint handler jumps here for full
@@ -2343,7 +2360,7 @@ jdbg40:
 	add	a,c		;+*10
 	sub	3		;+col = reg * 10 if prime
 ;;; ---------------------------------
-	add	a,5		; move prime reg display farther right 5 cols
+	add	a,3		; move prime reg display farther right 3 cols
 ;;; --------------------------------- see also, code after "xreg00:"
 jdbg42:
 	add	a,3		;+
@@ -2542,7 +2559,7 @@ clmbin:	push	af		; what the heck, save them all
 	ld	iy,clmbr
 	ld	a,'3'-1		; esc [0x;63H    row 3
 	ld	(iy),a		; reset row address to beginning
-clmbnx:	
+clmbnx:
 	inc	(iy)		; advance row number
 
 	ld	a,(ix)
@@ -2559,7 +2576,7 @@ clmbnx:
 	ld	l,a
 	jr	nc,clmbnc
 	inc	h		; add in the carry from L to H
-clmbnc:	
+clmbnc:
 	ld	a,(hl)		; register value to convert
 
 	ld	hl,clmba	; stuff ones and zeroes here
@@ -3472,10 +3489,15 @@ kdmp05:	ld	a,(maxlen)	;max symbol length
 	cp	15
 	ld	a,18+0-0	;number of disassembled lines displayed
 ht07b	equ	$-1		;[Patch to screen height - 6]
-	jr	z,kdmp10
+	jr	z,kdmp09
 	ld	b,3		;double number of lines one extra time
+kdmp09:	sub	10-3		;clm moved kdmp display down 7 lines (row 10)
 kdmp10:	add	a,a		;times two, times four, [times eight]
 	djnz	kdmp10		;number of lines*4 (or *8) is bytes per line
+
+	jr	nc,kdmp11	;< 256
+	ld	a,255		;>= 256, reset to 255
+kdmp11:	
 	cp	l		;if number of bytes specified by user is too
 	jr	c,kdmp20	;large to display on screen then use default
 	ld	a,l		;use value specified by user
@@ -5648,7 +5670,7 @@ xreg00:	call	xreg05		;display reg name and contents
 ;;; ---------------------------------
 	ld	a,c
 	push	bc
-	ld	c,5		;add 5 more spaces before prime registers
+	ld	c,3		;add 3 more spaces before prime registers
 	cp	4
 	call	z,spaces
 	pop	bc
@@ -6761,8 +6783,8 @@ zhex10:	rrca
 	;; daa
 	;; adc	a,40h
 	;; daa			;a - ascii digit
- 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
- 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ld	(hl),a
 	inc	hl
@@ -6772,8 +6794,8 @@ zhex20:	and	0fh
 	;; daa
 	;; adc	a,40h
 	;; daa
- 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
- 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ld	(hl),a
 	inc	hl
@@ -7195,8 +7217,8 @@ binx00:	and	0fh
 	;; daa
 	;; adc	a,40h
 	;; daa
- 	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
- 	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ret
 
@@ -8445,7 +8467,7 @@ clmsp:	dw	clmsc
 	org	($ + 15) AND 0FFF0H
 clmsc:	db	'|\-/+\-/'
 
-clmss:	db	esc,'[?25l',esc,'7',esc,'[1;90H'	; [0](0,89) code row,col
+clmss:	db	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
 clmsb:	db	'#',esc,'8',esc,'[?25h', 00H		; spin cursor at '#' location
 
 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
