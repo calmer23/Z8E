@@ -439,7 +439,7 @@ getSCB	equ	49
 
 	export	height
 ;height:
-	defb	24		;Default (patchable) Screen height (in lines).
+	defb	99		;Default (patchable) Screen height (in lines).
 				;(Don't bother patching if running CP/M Plus
 				; because Z8E will get the screen height from
 				; the SCB.)
@@ -455,7 +455,13 @@ getSCB	equ	49
 				;needs high-order bit set on occasions.
 
 mbannr:
-	defb	cr,lf		;Maybe patch with "clear screen" code
+	defb	esc,'[3;0;0t'	;Move terminal window to upper left corner of screen
+	defb	esc,'[8;99;99t'	;Set windown size to 99 rows by 99 columns
+	defb	esc,'[1;1H'	;Move cursor to row/column 1/1.
+	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
+	defb	esc,']2;Z8E Debugger', 'G' AND 1FH ;Set window TITLE
+	
+;	defb	cr,lf		;Maybe patch with "clear screen" code
 	defb	cr,lf,tab,tab
     if Z180
 	defb	'18E'
@@ -2304,7 +2310,8 @@ jdbg40:
 	bit	2,c		;+is it a prime (alternate) register?
 	jr	z,jdbg42	;+skip if not
 	add	a,c		;+*10
-	sub	3		;+col = reg * 10 if prime
+;	sub	3		;+col = reg * 10 if prime
+	add	a,12-3		; move prime reg display farther right 12 cols
 jdbg42:
 	add	a,3		;+
 	ld	c,a		;+
@@ -5508,6 +5515,12 @@ xreg:	call	cret
 	ld	bc,0		;init reg index
 xreg00:	call	xreg05		;display reg name and contents
 	inc	c
+	push	bc
+	ld	a,c
+	ld	c,12
+	cp	4
+	call	z,spaces
+	pop	bc
 	ld	a,c
 	cp	8
 	call	z,crlf
@@ -5643,7 +5656,7 @@ zasm0:				;+
 				; That was another 16-bit constant load ...
 	ld	h,0		; ... now recoded as two 8-bit loads
 	ld	l,1		; v4.1 jrs 21 Feb 2015
-ht09	equ	$-1		; In case we want to patch it to height-8
+;ht09	equ	$-1		; In case we want to patch it to height-8
 
 zasm00:	xor	a
 	or	h
@@ -6774,7 +6787,7 @@ defcode	defl	true		; Load code here
 defdata	defl	false		; Do not load data yet
 terminal defl	console		; Load console routines
 	include	TERMINAL.INC	; 	Must be UPPER CASE for M80
-	if	m80
+	if	m80		; error here???
 	conincl
 	endif
 terminal defl	auxiliary	; Load auxiliary routines
@@ -8380,7 +8393,7 @@ defdata	defl	true		; Load data here
 defcode	defl	false		; Inhibit code
 terminal defl	console		; Load console data
 	include	TERMINAL.INC	; 	Must be UPPER CASE for M80
-	if	m80
+	if	m80		; or error here?
 	conincl
 	endif
 terminal defl	auxiliary	; Load auxiliary data
