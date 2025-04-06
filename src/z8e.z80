@@ -481,7 +481,7 @@ mbannr:
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1FH ;Set window TITLE
 
-;	defb	cr,lf		;Maybe patch with "clear screen" code
+;;	defb	cr,lf		;Maybe patch with "clear screen" code
 	defb	cr,lf,tab,tab
     if Z180
 	defb	'18E'
@@ -551,7 +551,7 @@ setHeight:
 	ld	(ht07b),a	; Height - 6	'J' number of instructions to disassemble
 	sub	2
 	ld	(ht08),a	; Height - 8	zasm, number of lines of code
-;	ld	(ht09),a	; Probably better to leave this one unpatched.
+;;	ld	(ht09),a	; Probably better to leave this one unpatched.
 
 ; Patch code for a specific breakpoint routine address.
 ;
@@ -1836,7 +1836,7 @@ znmbuf:
 	export	init
 ;init:
 	ret
-;	defs	255		; Patch space for extra initialisation code.
+;;	defs	255		; Patch space for extra initialisation code.
 				; (Not needed!)
 	page
 ;******************************************************************************
@@ -1893,7 +1893,7 @@ z8e10:	call	inchar		;Read in command character
 	ld	a,(lcmd)	;+Nothing - see if S or J was last command
 	cp	'J'		;+Repeat 'J' command?
 	jp	z,jdbg00	;+
-;	ld	hl,1		;+
+;;	ld	hl,1		;+
 	ld	h,0		;+ (4.1 jrs 21 Feb 15)
 	ld	l,1		;+
 	cp	'S'		;+Repeat 'S' command?
@@ -2082,16 +2082,16 @@ bphn90:	call	xreg		;display all registers
 	call	ttyq		;test for abort	trace
 	cp	cr
 	jp	z,z8e
-	call	crlf		;
+	call	crlf
 	jp	step40		;continue trace
-
+;*
 
 bp???:	ld	de,bpemsg
 	call	print
 	ld	hl,(pcreg)
 	call	outadr
 	jp	z8e
-
+;*
 
 e???:	ex	de,hl
 	ld	de,em???
@@ -2143,7 +2143,7 @@ term:	ld	bc,200h		; Get user's request.
 	call	print
 	ld	de,matail
 	call	print
-;	ld	a,false		;-Transfer control of 18E to main.
+;;	ld	a,false		;-Transfer control of 18E to main.
 	xor	a		;+
 	ld	(auxon),a
 	ret			; Done.
@@ -2316,12 +2316,12 @@ jdbg35:	ld	a,(de)		;compare old vs new
 	cp	(hl)
 	jr	z,jdbg45	;z - hi and lo bytes the same so try next reg
 jdbg40:
-;	ld	a,4		;col position of reg pair is (rel pos * 9) + 3
-;	and	b
-;	jr	z,jdbg42
-;	ld	a,3
-;	and	b		;- 9 bytes deleted here
-;	inc	a
+;;	ld	a,4		;col position of reg pair is (rel pos * 9) + 3
+;;	and	b
+;;	jr	z,jdbg42
+;;	ld	a,3
+;;	and	b		;- 9 bytes deleted here
+;;	inc	a
 	push	bc		;+save register number
 	ld	c,b		;+move it to c while we build line number
 	ld	b,0		;+assume first line for now
@@ -2347,9 +2347,9 @@ jdbg42:
 	call	xycp		;+
 	pop	bc		;+ added 29 bytes
 
-;	add	a,3		;- deleted another 5 bytes here
-;	call	curs		;- net cost = 14 bytes for new code
-;				;- but we save 19 bytes in 'curs:' routine
+;;	add	a,3		;- deleted another 5 bytes here
+;;	call	curs		;- net cost = 14 bytes for new code
+;;				;- but we save 19 bytes in 'curs:' routine
 
 	ld	a,(hl)		;display upper byte of reg contents
 	call	outhex
@@ -2591,9 +2591,9 @@ curs:	push	bc		;This routine has been simplified and shortened
 	push	hl		;register display positioning.  jrs 20/4/87
 	ld	d,a
 	ld	e,c		;save base row address
-;	cp	3		;test if reg or memory window (3 is reg)
-;	ld	a,7
-;	jr	z,curs00	;z - regs are eight per line (first line)
+;;	cp	3		;test if reg or memory window (3 is reg)
+;;	ld	a,7
+;;	jr	z,curs00	;z - regs are eight per line (first line)
 
 	ld	a,(nlmask)
 curs00:	and	b		;item number mod lnmask is the relative pos of
@@ -2602,20 +2602,20 @@ curs00:	and	b		;item number mod lnmask is the relative pos of
 	add	a,c
 	ld	c,a		;c - rel pos times three
 
-;	ld	a,d		;if base column address is < 50 then this is
+;;	ld	a,d		;if base column address is < 50 then this is
 				;reg display
-;	sub	3
-;	ld	h,a
-;	ld	a,c
-;	jr	nz,curs20	;nz - not reg display - must be memory
-;	add	a,a		;so multiply times three again
-;	add	a,c		;times 9 in all for register display
+;;	sub	3
+;;	ld	h,a
+;;	ld	a,c
+;;	jr	nz,curs20	;nz - not reg display - must be memory
+;;	add	a,a		;so multiply times three again
+;;	add	a,c		;times 9 in all for register display
 
 curs20:	add	a,d		;add in base
 	ld	c,a		;c - absolute col number
-;	xor	a		;test if this is reg or memory window display
-;	or	h
-;	jr	z,curs30	;z - this is register display
+;;	xor	a		;test if this is reg or memory window display
+;;	or	h
+;;	jr	z,curs30	;z - this is register display
 	ld	a,(fwndow)
 	cp	68		;14-char symbols in effect?
 	jp	z,curs40
@@ -3436,7 +3436,15 @@ obrk20:	call	crlf
 	jp	p,obrk00
 	ret
 
-
+;**************************************************************************
+;*
+;*	kdmp:	Set Memory Window (display memory during 'J' command)
+;*
+;*	address	entered:  start of memory to display
+;*
+;*	size:		  number of bytes to display (MAX = 256)
+;*
+;***************************************************************************
 
 kdmp:	call	iedtbc		;let user input address of memory to display
 	ret	m		;no input ends command
@@ -3447,24 +3455,25 @@ kdmp:	call	iedtbc		;let user input address of memory to display
 	ld	a,0
 	jr	nz,kdmp20	;error during input - display 00 bytes
 	or	h
-	jp	nz,e???		;greater than 256 is error
-	ld	a,(maxlen)	;max symbol length
+	jr	z,kdmp05	;<256 ?  use given value
+	srl	a		;was value exactly 256 (docs say 256 is OK)
+	jp	nz,e???		;nope, too big
+	or	l		;H == 1 (256+), but is L == 0 ?
+	jp	nz,e???		;nope, value > 256
+	ld	l,255		;else exactly 256; use default max of 255
+kdmp05:	ld	a,(maxlen)	;max symbol length
 	ld	b,2		;assume big names
 	cp	15
 	ld	a,18+0-0	;number of disassembled lines displayed
 ht07b	equ	$-1		;[Patch to screen height - 6]
-	jr	z,kdmp00
+	jr	z,kdmp10
 	ld	b,3		;double number of lines one extra time
-kdmp00:	add	a,a		;times two
-	djnz	kdmp00
-	cp	l
-	jr	c,kdmp20	;if number of bytes specified by user is too
-				;large then use default
+kdmp10:	add	a,a		;times two, times four, [times eight]
+	djnz	kdmp00		;number of lines*4 (or *8) is bytes per line
+	cp	l		;if number of bytes specified by user is too
+	jr	c,kdmp20	;large to display on screen then use default
 	ld	a,l		;use value specified by user
 kdmp20:	ld	(wnwtab),de
-
-	ld	a,255		;=FFH  63 lines of dump (4 bytes per line)
-
 	ld	(wnwsiz),a
 	ret
 	page
@@ -3487,7 +3496,7 @@ kdmp20:	ld	(wnwtab),de
 
 go:	call	iedtbc		;query user for	execution address
 
-;	ret	m		;- eg 3.3.3 no input - reprompt
+;;	ret	m		;- eg 3.3.3 no input - reprompt
 	jp	p,g001		;+ Skip if argument supplied, else:
 	ld	hl,(pcreg)	;+ Use current PC
 	jr	g002		;+
@@ -4914,8 +4923,8 @@ psw10:	ld	c,(hl)			;fetch index into operand name table
 	call	crlf
 	ld	a,(lcmd)
 
-;	cp	'J'			;- eg 3.3.5a
-;	ret	z			;-
+;;	cp	'J'			;- eg 3.3.5a
+;;	ret	z			;-
 	cp	'P'			;+ Routine can now be called from
 	ret	nz			;+  elsewhere
 
@@ -5209,7 +5218,7 @@ lldr:	call	iedtbc		;Get file name
 	ld	a,l
 	or	h
 	jp	z,e???
-;	ld	c,a		;-
+;;	ld	c,a		;-
 	ld	c,10		;+ 3.5.5 jrs 5/jan/89
 	jp	lbin22
 lldr00:	call	crlf
@@ -5299,13 +5308,13 @@ lbin40:	call	nz,ttyo		;Print tens digit
 	or	'0'
 	call	ttyo		;Print units
 	call	crlf
-;	xor	a		;- eg 3.3.7a Test eof flag
-;	or	c		;-
+;;	xor	a		;- eg 3.3.7a Test eof flag
+;;	or	c		;-
 	ld	a,c		;+ Test EOF flag
 	cp	10		;+ Was it set by GADR (see 3.3.11)
 	jp	z,z8e		;+ Exit if so
 	or	a		;+
-;	jp	nz,z8e		;- nz - true eof means file loading complete
+;;	jp	nz,z8e		;- nz - true eof means file loading complete
 	jr	nz,z8ej		;+
 	ld	de,mmem??	;Print "out of memory" message
 	call	print
@@ -5406,11 +5415,11 @@ lopn:
 ;;	dec	hl
 ;;	ld	a,(hl)		;drive specifier
 ;;	and	a		;test for default drive
-;	jr	z,lopn00	;z - default means no selection	required
-;	dec	a		;select	drive
-;	ld	e,a
-;	ld	c,14
-;	call	bdos
+;;	jr	z,lopn00	;z - default means no selection	required
+;;	dec	a		;select	drive
+;;	ld	e,a
+;;	ld	c,14
+;;	call	bdos
 lopn00:	ld	de,fcb
 	ld	b,nfcb-fcbext
 	ld	hl,fcbext	;clear remainder of fcb
@@ -5734,7 +5743,7 @@ xreg30:	and	7fh		;ignore	sign
 
 zasm:
 	call	iedtbc
-;	ret	m		;- eg 3.3.2
+;;	ret	m		;- eg 3.3.2
 	jp	p,zasm0		;+ Skip if arguments supplied, otherwise ...
 	ld	b,0		;+ Signal no file write
 ;;;	ld	hl,16		;+ Assume 16 lines of code
@@ -6250,7 +6259,7 @@ opn080:	dec	hl
 	;	This makes Z operation consistent with that of other commands
 	;	which can be continued.
 
-;	jr	z,opn095
+;;	jr	z,opn095
 	jr	nz,opn095
 
 	jr	opn090
@@ -6343,13 +6352,13 @@ opn105:	add	hl,bc		;adjust	pc
 	call	fadr
 	call	z,xsym
 	jp	z,opn040	;symbol	found
-;	ld	(hl),'$'	;- eg 3.3.4a
-;	inc	hl		;-
-;	ld	a,c		;-
-;	inc	a		;-
+;;	ld	(hl),'$'	;- eg 3.3.4a
+;;	inc	hl		;-
+;;	ld	a,c		;-
+;;	inc	a		;-
 	ld	b,0
-;	cp	82h		;-
-;	jp	opn610		;- convert displacement to ascii
+;;	cp	82h		;-
+;;	jp	opn610		;- convert displacement to ascii
 	jp	opn316		;+
 
 opn200:	call	zmqf		;check for interactive disassembly
@@ -6466,7 +6475,7 @@ opn605:
 opn606:				;+
 	ld	a,'i'		;+First character
 	and	c		;+Select case
-;	ld	(hl),'i'	;-Set first character
+;;	ld	(hl),'i'	;-Set first character
 	ld	(hl),a		;+Set first character
 	inc	hl
 	pop	af		;+Second character
@@ -7544,11 +7553,11 @@ asci:	and	7fh		;Convert contents of accumulator to ascii
 	cp	20h		;	check for control character
 	jp	nc,ttyo		;	no - output as is
 asci00:				;	yes - translate to '.'
-;   if	hazeltine
+;;   if	hazeltine
 	ld	a,'.'		;Non-printables replaced with dot
-;   else
-;	ld	a,tilde		;Non-printables replaced with squiggle
-;   endif
+;;   else
+;;	ld	a,tilde		;Non-printables replaced with squiggle
+;;   endif
 	jp	ttyo
 
 
@@ -7672,7 +7681,7 @@ jtcmd:
 	defw	writ			; w
 	defw	cuser			; >
 	defw	qeval			; ?
-;	defw	gadr			; #
+;;	defw	gadr			; #
     if auxterm ne none
 	defw	term			; t
     endif
@@ -7680,7 +7689,7 @@ cmd:
     if	auxterm ne none
 	defb	'T'
     endif
-;	defb	'#?>WKXQDLOSHFCB'
+;;	defb	'#?>WKXQDLOSHFCB'
 	defb	'?>WKXQDLOSHFCB'
 	defb	'PVMYGREZJNUAI'
 ncmd	equ	$-cmd		;number	of commands
@@ -8638,7 +8647,7 @@ zasmbf	equ	nzasm-128	;start of disassembly buffer
 	defs	40
 stack:
 nmem	equ	((($+255) and 0ff00h)-z8eorg) and 0ff00h
-;	was	(256*(($+255)/256)-z8eorg) and 0ff00h
+;;	was	(256*(($+255)/256)-z8eorg) and 0ff00h
 
 	if M80 or SLR
 	.list			;enable printer output for symbol table
