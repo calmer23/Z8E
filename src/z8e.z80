@@ -3,7 +3,9 @@
 	.Z80			; Tell M80 to assemble Zilog mnemonics
 	.xall			; generate code.
 	.SFCOND			; suppress listings of false conditionals
-;;; if you are not using M80, you should delete the three lines above.
+;;;	Time-stamp: "2024-07-22 16:48:35 clmercer"
+
+;;; if you are not using M80, you should delete the dot (.) lines above.
 ;------------------------------------------------------------------------------
 ;
 ;  Copyright (C) 1984, 1985   by Richard A. Surwilo.  All rights reserved.
@@ -25,7 +27,12 @@
 ;------------------------------------------------------------------------------
 ;
 ;                       Revision history
-; 17 Jul 2024 clm v4.2clm
+; 21 Jul 2024 clm v4.2clm2
+;			Added display of registers as bits when "K" active.
+;			Spin character in upper right when 'J' looping.
+;			Changed DAA sequence to shorter code.
+;
+; 17 Jul 2024 clm v4.2clm1
 ;			Fixed several misspellings.  Added comments.
 ;			Added 'SLL ' to zopcnm and updated zopcpt offsets that
 ;			changed.
@@ -481,7 +488,7 @@ mbannr:
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm - 17 Jul 2024'
+	defb	' v4.2.clm2 - 21 Jul 2024'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -8417,11 +8424,12 @@ symflg:	defb	0ffh		;symbol	table flag   00	- table	present
 
 ;;; =============================================================================
 
+clmsp:	dw	clmsc
 	org	($ + 15) AND 0FFF0H
 clmsc:	db	'|\-/+\-/'
-clmsp:	dw	clmsc
-clmss:	db	esc,'7',esc,'[1;90H'
-clmsb:	db	'#',esc,'8', 00H
+
+clmss:	db	esc,'[?25l',esc,'7',esc,'[1;90H'
+clmsb:	db	'#',esc,'8',esc,'[?25h', 00H
 
 clmbh:	db	esc,'[2'	; position cursor (30,62)
 clmbr:	db	'2'-1		; rows 22->28
