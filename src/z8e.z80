@@ -474,12 +474,13 @@ getSCB	equ	49
 				;to screen.  Patch to 0FFh if your terminal
 				;needs high-order bit set on occasions.
 
-mbannr:
-	defb	esc,'[3;0;0t'	;Move terminal window to upper left corner of screen
-	defb	esc,'[8;99;99t'	;Set window size to 99 rows by 99 columns
-	defb	esc,'[1;1H'	;Move cursor to row/column 1/1.
+mbannr:		;Move XTERM terminal window near to upper left corner of screen
+	defb	esc,'[3;100;000t'  ;COL;ROW; use 3-digit numbers, easy patching
+	defb	esc,'[8;099;099t'  ;ROW;COL; window size to 99 rows by 99 cols
+	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
-	defb	esc,']2;Z8E Debugger', 'G' AND 1FH ;Set window TITLE
+	defb	esc,']2;Z8E Debugger', 'G' AND 1FH	;Set window TITLE
+;;; 		yes, that really is a right bracket; and terminated by CNTL-G
 
 ;;	defb	cr,lf		;Maybe patch with "clear screen" code
 	defb	cr,lf,tab,tab
@@ -488,7 +489,7 @@ mbannr:
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm30 - 27 Feb 2025'
+	defb	' v4.2.clm31 - 14 Mar 2025'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -1599,7 +1600,7 @@ hexc00:	and	0fh
  	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
 	daa
 	ret
-
+;;
 
 ;hex:
 	;This routine is called by the symbol table
@@ -1610,17 +1611,17 @@ hexc00:	and	0fh
 	;instead, we look for delimiters.
 
 
-hex:	call	nchr            ;get char from disk i/o buffer
-hex00:	cp	3ah             ;convert ascii to hex
-	jp	c,hex10         ;c - must be delimiter
+hex:	call	nchr		;get char from disk i/o buffer
+hex00:	cp	'9'+1		;convert ascii to hex
+	jp	c,hex10		;c - must be delimiter
 	sub	7
 hex10:	sub	'0'
-	ex	de,hl           ;shift hl left four
+	ex	de,hl		;shift hl left four
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
 	add	hl,hl
-	or	l               ;or in this new digit
+	or	l		;or in this new digit
 	ld	l,a
 	ex	de,hl
 	ld	a,(bytes)
@@ -1628,8 +1629,8 @@ hex10:	sub	'0'
 	ld	(bytes),a
 	jp	nz,hex
 	call	nchr
-	cp	'I'             ;global?
-	call	z,nchr          ;z - need to read next to determine absolute
+	cp	'I'		;global?
+	call	z,nchr		;z - need to read next to determine absolute
 				;    or relocatable
 
 	ld	(relchr),a      ;we need to save this character for .prn files
@@ -2209,8 +2210,8 @@ jdbg00:	ld	hl,lastro
 	call	xycp
 	ld	c,2
 	call	spaces
-	ld	b,23+0-0
 
+	ld	b,23+0-0
 ht02	equ	$-1		;[Patch to screen height - 1]
 
 	ld	c,0
@@ -2289,8 +2290,12 @@ jdbg25:	ld	a,(fwndow)
 				;of bytes (wnwsiz)
 	ld	a,(wnwsiz)
 	sub	b
-	jr	z,jdbg28
-	inc	hl
+	jr	nz,jdbg27	;not done, keep going
+	ld	a,(wnwsiz)	;is the window size == 255 (0FFh)
+	inc	a		;will roll to zero if true
+	jr	nz,jdbg27	;nope, not 255, so we are done
+	inc	b		;lets do one more byte since 256 is legal
+jdbg27:	inc	hl
 	inc	de
 	ld	a,(nlmask)	;check for new line time
 	and	b
@@ -2298,8 +2303,7 @@ jdbg25:	ld	a,(fwndow)
 	jr	jdbg20		;...display address first
 jdbg28:	ld	a,3		;point to very first instruction
 	jp	jdbg75
-
-
+;;
 				;breakpoint handler jumps here for full
 				;screen single step
 jdbg30:	ld	c,3
@@ -2453,7 +2457,7 @@ jdbg75:	ld	(lastro),a	;save position of arrow
 	jr	z,jdbg80
 	cp	'0'
 	jr	c,jdbg78
-	cp	3ah
+	cp	'9'+1
 	jr	nc,jdbg95
 	and	0fh
 	ld	(hl),a
@@ -2515,15 +2519,17 @@ zwnw20:	call	printb
 	ld	c,20
 	call	xycp
 	ret
-
+;;
 
 				;display regs at top of screen:
 rgdisp:	call	home		;home cursor
 	call	xreg		;display regs
 	call	pswDsp		;display flag reg
 	jp	crlf
-
+;;
 ;;; display BINARY value of some registers when in full screen 'J' command
+;;; quick-and-dirty code to see if it works OK.  I'll optimize code later.
+
 clmbin:	push	af		; what the heck, save them all
 	push	hl
 	push	de
@@ -3469,7 +3475,7 @@ ht07b	equ	$-1		;[Patch to screen height - 6]
 	jr	z,kdmp10
 	ld	b,3		;double number of lines one extra time
 kdmp10:	add	a,a		;times two, times four, [times eight]
-	djnz	kdmp00		;number of lines*4 (or *8) is bytes per line
+	djnz	kdmp10		;number of lines*4 (or *8) is bytes per line
 	cp	l		;if number of bytes specified by user is too
 	jr	c,kdmp20	;large to display on screen then use default
 	ld	a,l		;use value specified by user
@@ -4321,11 +4327,11 @@ xval05:	ld	a,(de)		;char from parse buffer
 	inc	de		;bump parse buffer pointer
 	cp	'0'		;check for valid ascii hex digit
 	jr	c,xval25
-	cp	':'
+	cp	'9'+1
 	jr	c,xval15
 	cp	'A'
 	jr	c,xval25
-	cp	'G'
+	cp	'F'+1
 	jr	nc,xval25
 	xor	a		;check number entered flag (b reg sign bit)
 	or	b
@@ -6739,12 +6745,12 @@ zndx00:	inc	de		;cb or ed - bump instruction pointer
 
 
 zhex:	ld	d,a
-	cp	0a0h		;test byte to convert
-	jr	c,zhex00	;starts	with decimal digit - 86	the lead zero
+	cp	0a0h		;test if left nibble > 9
+	jr	c,zhex00	;starts	with decimal digit - skip the leading zero
 	ld	(hl),'0'
 	inc	hl
 	jr	zhex10
-zhex00:	cp	10
+zhex00:	cp	9+1
 	jr	c,zhex20
 zhex10:	rrca
 	rrca
