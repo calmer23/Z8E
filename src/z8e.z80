@@ -488,7 +488,7 @@ mbannr:
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm2 - 21 Jul 2024'
+	defb	' v4.2.clm30 - 27 Feb 2025'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -547,7 +547,8 @@ setHeight:
 	ld	(ht05),a	; Height - 3	'J' position cursor during execution
 	sub	3
 	ld	(ht04),a	; Height - 6	'J' end of disassembled instructions
-	ld	(ht07),a	; Height - 6	'J' number of instructions to disassemble
+	ld	(ht07a),a	; Height - 6	'J' number of instructions to disassemble
+	ld	(ht07b),a	; Height - 6	'J' number of instructions to disassemble
 	sub	2
 	ld	(ht08),a	; Height - 8	zasm, number of lines of code
 ;	ld	(ht09),a	; Probably better to leave this one unpatched.
@@ -2052,7 +2053,7 @@ bphn50:	or	b		;test if we had step bps
 	ld	(lcmd),a	;clear command letter so xreg disassembles
 	call	home		;home cursor
 	call	xreg
-	ld	b,22		;cursor on penultimate line
+	ld	b,22+0-0	;cursor on penultimate line
 
 ht01	equ	$-1		;[Patch to screen height - 2]
 
@@ -2208,7 +2209,7 @@ jdbg00:	ld	hl,lastro
 	call	xycp
 	ld	c,2
 	call	spaces
-	ld	b,23
+	ld	b,23+0-0
 
 ht02	equ	$-1		;[Patch to screen height - 1]
 
@@ -2265,16 +2266,14 @@ jdbg10:	ld	(timer),a
 	call	xcls		;clear screen
 	call	rgdisp		;display current user regs
 	call	zwnw		;display disassembled window
+	call	clmbin		;display BINARY values of registers
 	ld	a,(wnwsiz)
 	and	a		;test if window being displayed
 	jr	z,jdbg28
-;;; ==================================================================
-	call	clmbin		;display BINARY values of registers
-;;; ==================================================================
 	ld	de,window	;save user specified memory block til next bp
 	ld	hl,(wnwtab)	;start of memory window address
 	ld	b,0
-	ld	c,3
+	ld	c,10		;	ld	c,3
 jdbg20: ld	a,(fwndow)	;position cursor starting at column
 	sub	6
 	call	curs
@@ -2395,10 +2394,10 @@ jdbg55:	inc	b		;bump memory window byte count
 	inc	de
 	sub	b
 	jr	nz,jdbg50	;loop until entire window examined
-;;; ==================================================================
+jdbg60:
 	call	clmbin		;display BINARY values of registers
-;;; ==================================================================
-jdbg60:	ld	a,18		;init count of disassembled instructions
+
+	ld	a,18+0-0	;init count of disassembled instructions
 
 ht04	equ	$-1		;[Patch to screen height - 6]
 
@@ -2430,7 +2429,7 @@ jdbg65:	ld	hl,(pcreg)
 	jr	jdbg75
 jdbg70:	ld	a,(jlines)
 	neg
-	add	a,21		;a - screen row	on which to position cursor
+	add	a,21+0-0	;a - screen row	on which to position cursor
 
 ht05	equ	$-1		;[Patch to screen height - 3]
 
@@ -2473,7 +2472,7 @@ jdbg90:	ld	de,regsav	;move current reg contents to save area
 
 
 				;user requested abort from console
-jdbg95: ld	b,22		;position cursor on line 23 for prompt
+jdbg95: ld	b,22+0-0	;position cursor on line 23 for prompt
 
 ht06	equ	$-1		;[Patch to screen height - 2]
 
@@ -2486,9 +2485,9 @@ ht06	equ	$-1		;[Patch to screen height - 2]
 
 
 zwnw:				;display disassembly window
-	ld	a,18		;number of instructions to disassemble
+	ld	a,18+0-0	;number of instructions to disassemble
 
-ht07	equ	$-1		;[Patch to screen height - 6]
+ht07a	equ	$-1		;[Patch to screen height - 6]
 
 zwnw05:	ld	hl,(pcreg)
 	ld	(zasmfl),hl	;save pc of first line
@@ -2535,6 +2534,8 @@ clmbin:	push	af		; what the heck, save them all
 	ld	c,b
 	ld	ix,zopnm+2
 	ld	iy,clmbr
+	ld	a,'3'-1		; esc [0x;63H    row 3
+	ld	(iy),a		; reset row address to beginning
 clmbnx:	
 	inc	(iy)		; advance row number
 
@@ -2575,9 +2576,6 @@ clmblp:
 	ld	a,clmbc
 	sub	c
 	jr	nz,clmbnx	; more to do
-
-	ld	a,'2'-1
-	ld	(iy),a		; reset row address to beginning
 
 	pop	iy
 	pop	ix
@@ -3453,7 +3451,8 @@ kdmp:	call	iedtbc		;let user input address of memory to display
 	ld	a,(maxlen)	;max symbol length
 	ld	b,2		;assume big names
 	cp	15
-	ld	a,18		;number of disassembled lines displayed
+	ld	a,18+0-0	;number of disassembled lines displayed
+ht07b	equ	$-1		;[Patch to screen height - 6]
 	jr	z,kdmp00
 	ld	b,3		;double number of lines one extra time
 kdmp00:	add	a,a		;times two
@@ -3463,6 +3462,9 @@ kdmp00:	add	a,a		;times two
 				;large then use default
 	ld	a,l		;use value specified by user
 kdmp20:	ld	(wnwtab),de
+
+	ld	a,255		;=FFH  63 lines of dump (4 bytes per line)
+
 	ld	(wnwsiz),a
 	ret
 	page
@@ -5748,7 +5750,7 @@ zasm:
 				;  is contrary to the coding instructions.
 
 	ld	h,0		;  Better done like this ...
-	ld	l,16		;  ... and this instruction will be patched
+	ld	l,16+0-0	;  ... and this instruction will be patched
 ht08	equ	$-1		;  during initialisation
 
 	ld	(zasmwt),hl	;+
@@ -5770,8 +5772,8 @@ zasm0:				;+
 
 				; That was another 16-bit constant load ...
 	ld	h,0		; ... now recoded as two 8-bit loads
-	ld	l,10		; v4.1 jrs 21 Feb 2015
-;ht09	equ	$-1		; In case we want to patch it to height-8
+	ld	l,1+0-0		; v4.1 jrs 21 Feb 2015
+ht09	equ	$-1		; In case we want to patch it to height-8
 
 zasm00:	xor	a
 	or	h
@@ -8428,12 +8430,13 @@ clmsp:	dw	clmsc
 	org	($ + 15) AND 0FFF0H
 clmsc:	db	'|\-/+\-/'
 
-clmss:	db	esc,'[?25l',esc,'7',esc,'[1;90H'
-clmsb:	db	'#',esc,'8',esc,'[?25h', 00H
+clmss:	db	esc,'[?25l',esc,'7',esc,'[1;90H'	; [0](0,89) code row,col
+clmsb:	db	'#',esc,'8',esc,'[?25h', 00H		; spin cursor at '#' location
 
-clmbh:	db	esc,'[2'	; position cursor (30,62)
-clmbr:	db	'2'-1		; rows 22->28
-	db	';63H'		; column 63
+	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
+clmbh:	db	esc,'[0'	; position cursor starts at [zero based](3,62)
+clmbr:	db	'3'-1		; rows [1]03-09 (we subtract 1 because code adds 1 before use)
+	db	';63H'		; column [1]63
 clmbn:	db	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
 clmba:	db	'76543210',00H	; ASCII bits and terminator
 
