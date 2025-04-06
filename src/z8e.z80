@@ -663,6 +663,7 @@ nint15:	ld	a,(hl)
 	jr	z,nint20
 	inc	hl		;Point to char following closing parenthesis
 	jr	nint15
+
 nint20:	ex	de,hl		;Arg to hl for mult times maxlen bytes per
 				;symbol table entry
 	add	hl,hl
@@ -698,6 +699,7 @@ nint30:	ld	a,(hl)		;Look for start of first file name
 	inc	hl
 	dec	c		;Decrement command line byte count
 	jr	nint30		;Keep looking for start of file name
+
 nint35:	ld	de,znmbuf	;Save name here for later display
 	ld	(de),a
 	inc	de
@@ -711,6 +713,7 @@ nint40:	inc	hl		;Find first trailing space
 	jr	z,nint55	;z - only one file specified
 	dec	c
 	jr	nint40
+
 nint45:	ld	a,c		;Check byte count
 	cp	inbfsz		;versus size of our local input buffer
 	jr	c,nint50	;carry - size is ok
@@ -876,6 +879,7 @@ zsym00:	ld	a,(de)
 	ld	(de),a
 	inc	de		;Store converted character
 	jp	zsym00
+
 zsym05:	ld	de,prsbf
 	call	fsym00		;Search symbol table
 	jp	nz,zoff		;nz - not found
@@ -2127,7 +2131,7 @@ term:	ld	bc,0200h	; Get user's request.
 	call	print
 	ld	de,matail
 	call	print
-;;			ld	a,false	;-Transfer control of 18E to main.
+;;		ld	a,false	;-Transfer control of 18E to main.
 	xor	a		;+
 	ld	(auxon),a
 	ret			; Done.
@@ -2215,6 +2219,7 @@ jdbg02:	ld	a,(hl)		;check first char of input
 	ld	hl,jstepf	;+
 	ld	(hl),01		;+ Signal repaint request
 	jr	jdbg01		;+
+
 jdbg2a:				;+
 	ex	de,hl		;de - save input buffer address
 	ld	hl,wflag	;wflag tells us whether to trace subroutines
@@ -2237,6 +2242,7 @@ jdbg05:	call	iarg		;now evaluate address
 	jr	z,jdbg00	;treat as single step
 	ld	(jstepf),a	;indicate screen corrupted
 	jp	e???		;error -
+
 jdbg08:	ld	(pcreg),hl	;save address at which to start tracing
 	and	a		;check delimiter
 	ld	a,10		;no delimiter use default timer value
@@ -2303,12 +2309,12 @@ jdbg35:	ld	a,(de)		;compare old vs new
 	cp	(hl)
 	jr	z,jdbg45	;z - high and low bytes the same so try next reg
 jdbg40:
-;;			ld	a,4	;col position of reg pair is (rel pos * 9) + 3
-;;			and	b
-;;			jr	z,jdbg42
-;;			ld	a,3
-;;			and	b	;- 9 bytes deleted here
-;;			inc	a
+;;		ld	a,4	;col position of reg pair is (rel pos * 9) + 3
+;;		and	b
+;;		jr	z,jdbg42
+;;		ld	a,3
+;;		and	b	;- 9 bytes deleted here
+;;		inc	a
 	push	bc		;+save register number
 	ld	c,b		;+move it to c while we build line number
 	ld	b,0		;+assume first line for now
@@ -2334,9 +2340,9 @@ jdbg42:
 	call	xycp		;+
 	pop	bc		;+ added 29 bytes
 
-;;			add	a,3	;- deleted another 5 bytes here
-;;			call	curs	;- net cost = 14 bytes for new code
-;;					;- but we save 19 bytes in 'curs:' routine
+;;		add	a,3	;- deleted another 5 bytes here
+;;		call	curs	;- net cost = 14 bytes for new code
+;;				;- but we save 19 bytes in 'curs:' routine
 
 	ld	a,(hl)		;display upper byte of reg contents
 	call	outhex
@@ -2412,6 +2418,7 @@ jdbg65:	ld	hl,(pcreg)
 				;screen starting at current pc
 	ld	a,3		;disassembled instructions start on line 4
 	jr	jdbg75
+
 jdbg70:	ld	a,(jlines)
 	neg
 	add	a,21+0-0	;a - screen row on which to position cursor
@@ -2443,6 +2450,7 @@ jdbg75:	ld	(lastro),a	;save position of arrow
 	ld	(hl),a
 	ld	b,a
 	jr	jdbg80
+
 jdbg78:	cp	cr		;carriage return ends command
 	jr	z,jdbg95
 
@@ -2682,7 +2690,6 @@ exam10:	ld	hl,argbc	;byte count to c
 	ld	de,(exampt)
 	jr	exam00
 
-
 	page
 ;------------------------------------------------------------------------------
 ;
@@ -2827,6 +2834,7 @@ usym25:	ld	a,(hl)		;fetch char of symbol name
 	jr	z,usym40	;z - just moved last char
 	inc	hl
 	jr	usym25
+
 usym40:	ld	a,tab		;tab separates name and next address
 	call	putc		;insert tab before address field
 	ld	a,(lines)
@@ -3038,6 +3046,7 @@ rgst22:	call	istr		;query user for reg value replacement
 	jr	z,rgst22
 rgst25:	call	e???
 	jr	rgst40		;accept new reg name
+
 rgst30:	ex	de,hl
 	ld	(hl),e
 	dec	b		;test for 16 bit reg
@@ -3518,10 +3527,11 @@ kdmp21:	ld	(wnwtab),de
 
 go:	call	iedtbc		;query user for execution address
 
-;;			ret	m	;- eg 3.3.3 no input - reprompt
+;;		ret	m	;- eg 3.3.3 no input - reprompt
 	jp	p,g001		;+ Skip if argument supplied, else:
 	ld	hl,(pcreg)	;+ Use current PC
 	jr	g002		;+
+
 g001:				;+
 	call	iarg
 	jp	nz,e???		;error - invalid argument
@@ -3552,6 +3562,7 @@ g300:	ld	e,(hl)
 	jr	nz,g400		;no match - set bp
 	ld	c,b		;set flag - current pc matches breakpoint
 	jr	g500
+
 g400:	ld	a,rst38		;set rst38 instruction
 	ld	(de),a		;save user byte in brktbl
 g500:	inc	hl
@@ -3865,10 +3876,11 @@ asm040:	ld	a,(delim)	;check delimiter
 ;; else
 ;;	ld	c,67		;number of Z80 opcodes in table as index
 ;; endif
-;;; Let assembler compute number of entries in table.  Do not need conditional test above
+;;;		Let assembler compute number of entries in table.
+;;;		Do not need conditional test above.
 
 	ld	c,cnmcnt	;number of opcodes in table as index
-	;; decrementing C by one lets us start at beginning of last entry
+	;; decrementing C by 1 lets us start at beginning of last entry
 asm050:	dec	c
 	jp	m,asm??o	;opcode not found
 	ld	b,00
@@ -4005,7 +4017,7 @@ ibld55:	ld	(hl),a		;store object byte
 	ld	a,(ikey)
 
 ;;	sub     67		;org directive?
-;;; Tisk! Don't hard code values when you should let assembler compute it for you
+;;; Tisk!  Don't hard code values when the assembler will compute it for you.
 ;;; I updated the zopcnm table, so value is no longer 67.
 
 	sub	cnmorg		;'ORG '  directive offset
@@ -4046,6 +4058,7 @@ ibld60:	ld	de,objbuf
 	ld	a,e
 	call	othxsp
 	jp	asm005		;ready for next input
+
 ibld65:	dec	b		;set count of object bytes to 2
 	ld	c,(hl)		;exchange high and low order bytes for ddb
 	dec	hl
@@ -4760,6 +4773,7 @@ zlen00:	ld	a,(de)		;fetch first byte of op code
 	ret	nz		;non-pc modifying two byte ED
 zlen10:	ld	a,0C9h		;treat as ordinary return instruction
 	jp	zlen80
+
 zlen15:	cp	0DDh		;check for dd and fd index reg instructions
 	jr	z,zlen20
 	cp	0FDh
@@ -4954,8 +4968,8 @@ psw10:	ld	c,(hl)			;fetch index into operand name table
 	jp	p,psw00
 	call	crlf
 	ld	a,(lcmd)
-;;			cp	'J'	;- eg 3.3.5a
-;;			ret	z	;-
+;;		cp	'J'		;- eg 3.3.5a
+;;		ret	z		;-
 	cp	'P'			;+ Routine can now be called from
 	ret	nz			;+  elsewhere
 
@@ -5115,6 +5129,7 @@ qeval:	call	iedtbc		; get input
 	call	ttyo
 	ld	a,27h
 	jp	ttyo
+
 qev01:	jp	outadr		; output 2-byte result
 
 
@@ -5256,7 +5271,7 @@ lldr:	call	iedtbc		;Get file name
 	ld	a,l
 	or	h
 	jp	z,e???
-;;			ld	c,a		;-
+;;		ld	c,a	;-
 	ld	c,10		;+ 3.5.5 jrs 5/jan/89
 	jp	lbin22
 
@@ -5347,13 +5362,13 @@ lbin40:	call	nz,ttyo		;Print tens digit
 	or	'0'
 	call	ttyo		;Print units
 	call	crlf
-;;			xor	a		;- eg 3.3.7a Test eof flag
-;;			or	c		;-
+;;		xor	a	;- eg 3.3.7a Test eof flag
+;;		or	c	;-
 	ld	a,c		;+ Test EOF flag
 	cp	10		;+ Was it set by GADR (see 3.3.11)
 	jp	z,z8e		;+ Exit if so
 	or	a		;+
-;;			jp	nz,z8e	;- nz - true eof means file loading complete
+;;		jp	nz,z8e	;- nz - true eof means file loading complete
 	jr	nz,z8ej		;+
 	ld	de,mmem??	;Print "out of memory" message
 	call	print
@@ -5510,6 +5525,7 @@ writ:	call	iedtbc		;fetch line of input
 	ld	de,(loadb)	;use default begin and end address of the last
 	ld	hl,(loadn)	;file loaded
 	jr	writ30
+
 writ10:	call	iarg		;get address
 	jp	nz,e???		;invalid address
 	ex	de,hl
@@ -5701,7 +5717,7 @@ xreg00:	call	xreg05		;display reg name and contents
 	ret	z		;z - no disassembly required
 	ld	hl,(pcreg)
 	ld	(zasmpc),hl
-;	jp	zasm30		;- eg 3.3.5b
+;;		jp	zasm30	;- eg 3.3.5b
 	call	zasm30		;+
 	jp	pswDsp		;+
 
@@ -5784,10 +5800,10 @@ xreg30:	and	7Fh		;ignore sign
 ;******************************************************************************
 
 zasm:	call	iedtbc
-;;	ret	m		;- eg 3.3.2
+;;		ret	m	;- eg 3.3.2
 	jp	p,zasm0		;+ Skip if arguments supplied, otherwise ...
 	ld	b,0		;+ Signal no file write
-;;;	ld	hl,0016		;+ Assume 16 lines of code
+;;;		ld	hl,0016	;+ Assume 16 lines of code
 				;
 				;  No
 				;
@@ -5934,6 +5950,7 @@ zasm50:	cp	40h
 	jr	nz,zasm85	;opcode range 40 - 7F
 	ld	a,0FFh		;set halt instruction key value to F7h
 	jr	zasm90
+
 zasm55:	inc	de
 	ld	a,(de)		;byte two of multi-byte instruction
 	dec	c		;test for ED instruction
@@ -6316,8 +6333,8 @@ opn080:	dec	hl
 	jr	nz,opn095
 
 	jr	opn090
-opn085:
-	call	ttyq
+
+opn085:	call	ttyq
 	cp	cr
 
 	; Changing this one breaks things.
@@ -6404,13 +6421,13 @@ opn105:	add	hl,bc		;adjust pc
 	call	fadr
 	call	z,xsym
 	jp	z,opn040	;symbol found
-;;	ld	(hl),'$'	;- eg 3.3.4a
-;;	inc	hl		;-
-;;	ld	a,c		;-
-;;	inc	a		;-
+;;		ld	(hl),'$';- eg 3.3.4a
+;;		inc	hl	;-
+;;		ld	a,c	;-
+;;		inc	a	;-
 	ld	b,0
-;;	cp	82h		;-
-;;	jp	opn610		;- convert displacement to ascii
+;;		cp	82h	;-
+;;		jp	opn610	;- convert displacement to ascii
 	jp	opn316		;+
 
 opn200:	call	zmqf		;check for interactive disassembly
@@ -6525,7 +6542,7 @@ opn605:				;+Fix display of IX/IY when upper case is set
 opn606:				;+
 	ld	a,'i'		;+First character
 	and	c		;+Select case
-;;	ld	(hl),'i'	;-Set first character
+;;		ld	(hl),'i'	;-Set first character
 	ld	(hl),a		;+Set first character
 	inc	hl
 	pop	af		;+Second character
@@ -7818,7 +7835,8 @@ z80fd:	defb	009h,019h,02Bh		; add hl,bc ; add hl,de ; dec hl
 	defb	0E3h,0E5h,0E9h,0F9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
 z80fdl	equ	$-z80fd
 
-z80f4:	defb	021h,022h,02Ah,036h,0CBh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),* ; **BIT**
+		;								 **BIT**
+z80f4:	defb	021h,022h,02Ah,036h,0CBh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),*
 z80f4l	equ	$-z80f4
 
 
@@ -8475,7 +8493,7 @@ siotbl:	defb	0F5h,0F7h
 symflg:	defb	0FFh		;symbol table flag   00h - table present
 				;		     FFh - no table
 
-;;; =============================================================================
+;;; ===========================================================================
 
 clmsp:	defw	clmsc
 	org	($ + 15) AND 0FFF0h
@@ -8486,7 +8504,7 @@ clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
 
 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
 clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
-clmbr:	defb	'3'-1		; rows [1]03-09 (we subtract 1 because code adds 1 before use)
+clmbr:	defb	'3'-1		; rows [1]03-09  (-1 because code adds 1 before use)
 	defb	';63H'		; column [1]63
 clmbn:	defb	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
 clmba:	defb	'76543210',00h	; ASCII bits and terminator
@@ -8497,7 +8515,7 @@ clmbd:	defb	afreg-afreg+1
 	defb	bcreg-afreg+1, bcreg-afreg+0
 clmbc	equ	($ - clmbd)	; count of registers to display
 
-;;; =============================================================================
+;;; ===========================================================================
 
 bsiz:				;dump block size storage
 bsizlo:	defb	00		;     low  order
