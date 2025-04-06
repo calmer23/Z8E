@@ -501,10 +501,10 @@ mbannr:		;Move XTERM terminal window near to upper left corner of screen
 	defb	cr,lf
 	defb	tab,'    by Jon Saxton (tesseract@triton.vg)'
 	defb	cr,lf,lf
-	defb	0
+	defb	00
 
     if CPM3
-scbpb:	defb	1Ch,0,0,0	;Ready to get console height (CP/M+ only)
+scbpb:	defb	1Ch,00,00,00	;Ready to get console height (CP/M+ only)
     endif
 
 nint:
@@ -1778,22 +1778,22 @@ fstr20:	pop	de
 .m80sz	equ	$ - .m80?? - 1
 
 tsym:
-tsymhi:	defb	0
-tsymlo:	defb	0
+tsymhi:	defb	00
+tsymlo:	defb	00
 
-usymbl:	defw	0
+usymbl:	defw	0000
 
-pstrng:	defw	0
+pstrng:	defw	0000
 
-relchr:	defb	0
+relchr:	defb	00
 
-.idprn:	defb	0
+.idprn:	defb	00
 
-star:	defb	0
+star:	defb	00
 
 nsym:
-nsymhi:	defb	0
-nsymlo:	defb	0
+nsymhi:	defb	00
+nsymlo:	defb	00
 mhex:	defb	'    '
 	defb	'$'
 
@@ -1803,14 +1803,14 @@ tsym..:	defb	cr,lf
 	defb	'Total Symbols:   $'
 
 msymnf:	defb	'Symbol Table Not Found'
-	defb	cr,lf,0
+	defb	cr,lf,00
 
 minvof:	defb	'Invalid Offset - Using 0000'
-	defb	cr,lf,0
+	defb	cr,lf,00
 
 msymld:	defb	cr,lf
 	defb	'Symbol Table:    '
-	defb	0
+	defb	00
 
 mz8eld:	defb	cr,lf
       if Z180
@@ -1819,7 +1819,7 @@ mz8eld:	defb	cr,lf
 	defb	'Z8E'
       endif
 	defb	' Relocated:   '
-	defb	0
+	defb	00
 
 mnvmem:	defb	cr,lf
 	defb	'Top Of Memory:   '
@@ -1827,21 +1827,21 @@ mnvmem:	defb	cr,lf
 
 z8eb:	defb	00
 z8ebh:	defb	00
-ntpa:	defw	00
+ntpa:	defw	0000
 
 bytes:	defb	00
 
 zbuf:	defb	00
-zbufnm:	defb	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+zbufnm:	defb	00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 znmbuf:
 	rept	18
-	defw	0,0
+	defw	0000,0000
 	endm
 
 	export	init
 ;init:
 	ret
-;;	defs	255		; Patch space for extra initialisation code.
+;;		defs	255	; Patch space for extra initialisation code.
 				; (Not needed!)
 	page
 ;******************************************************************************
@@ -1898,9 +1898,9 @@ z8e10:	call	inchar		;Read in command character
 	ld	a,(lcmd)	;+Nothing - see if S or J was last command
 	cp	'J'		;+Repeat 'J' command?
 	jp	z,jdbg00	;+
-;;	ld	hl,1		;+
-	ld	h,0		;+ (4.1 jrs 21 Feb 15)
-	ld	l,1		;+
+;;			ld	hl,0001		;+
+	ld	h,00		;+ (4.1 jrs 21 Feb 15)
+	ld	l,01		;+
 	cp	'S'		;+Repeat 'S' command?
 	jp	z,step40	;+
 	ld	a,cr		;+
@@ -2148,7 +2148,7 @@ term:	ld	bc,0200h	; Get user's request.
 	call	print
 	ld	de,matail
 	call	print
-;;	ld	a,false		;-Transfer control of 18E to main.
+;;			ld	a,false	;-Transfer control of 18E to main.
 	xor	a		;+
 	ld	(auxon),a
 	ret			; Done.
@@ -2293,8 +2293,8 @@ jdbg25:	ld	a,(fwndow)
 
 ;;; need to test A against B using BASE ZERO values (do not increment B yet)
 ;;; a value of zero (0) is equal to a count of one (1).
-;;;	inc	b		;move and display user specified number
-;;;				;of bytes (wnwsiz)
+;;;		inc	b	;move and display user specified number
+;;;				;of bytes (wnwsiz).  Move down 4 lines.
 	ld	a,(wnwsiz)
 	sub	b
 	jr	z,jdbg28
@@ -2325,12 +2325,12 @@ jdbg35:	ld	a,(de)		;compare old vs new
 	cp	(hl)
 	jr	z,jdbg45	;z - high and low bytes the same so try next reg
 jdbg40:
-;;	ld	a,4		;col position of reg pair is (rel pos * 9) + 3
-;;	and	b
-;;	jr	z,jdbg42
-;;	ld	a,3
-;;	and	b		;- 9 bytes deleted here
-;;	inc	a
+;;			ld	a,4	;col position of reg pair is (rel pos * 9) + 3
+;;			and	b
+;;			jr	z,jdbg42
+;;			ld	a,3
+;;			and	b	;- 9 bytes deleted here
+;;			inc	a
 	push	bc		;+save register number
 	ld	c,b		;+move it to c while we build line number
 	ld	b,0		;+assume first line for now
@@ -2356,9 +2356,9 @@ jdbg42:
 	call	xycp		;+
 	pop	bc		;+ added 29 bytes
 
-;;	add	a,3		;- deleted another 5 bytes here
-;;	call	curs		;- net cost = 14 bytes for new code
-;;				;- but we save 19 bytes in 'curs:' routine
+;;			add	a,3	;- deleted another 5 bytes here
+;;			call	curs	;- net cost = 14 bytes for new code
+;;					;- but we save 19 bytes in 'curs:' routine
 
 	ld	a,(hl)		;display upper byte of reg contents
 	call	outhex
@@ -2601,9 +2601,9 @@ curs:	push	bc		;This routine has been simplified and shortened
 	push	hl		;register display positioning.  jrs 20/4/87
 	ld	d,a
 	ld	e,c		;save base row address
-;;	cp	3		;test if reg or memory window (3 is reg)
-;;	ld	a,7
-;;	jr	z,curs00	;z - regs are eight per line (first line)
+;;			cp	3		;test if reg or memory window (3 is reg)
+;;			ld	a,7
+;;			jr	z,curs00	;z - regs are eight per line (first line)
 
 	ld	a,(nlmask)
 curs00:	and	b		;item number mod lnmask is the relative pos of
@@ -2612,20 +2612,20 @@ curs00:	and	b		;item number mod lnmask is the relative pos of
 	add	a,c
 	ld	c,a		;c - rel pos times three
 
-;;	ld	a,d		;if base column address is < 50 then this is
-				;reg display
-;;	sub	3
-;;	ld	h,a
-;;	ld	a,c
-;;	jr	nz,curs20	;nz - not reg display - must be memory
-;;	add	a,a		;so multiply times three again
-;;	add	a,c		;times 9 in all for register display
+;;			ld	a,d		;if base column address is < 50 then this is
+;;						;reg display
+;;			sub	3
+;;			ld	h,a
+;;			ld	a,c
+;;			jr	nz,curs20	;nz - not reg display - must be memory
+;;			add	a,a		;so multiply times three again
+;;			add	a,c		;times 9 in all for register display
 
 curs20:	add	a,d		;add in base
 	ld	c,a		;c - absolute col number
-;;	xor	a		;test if this is reg or memory window display
-;;	or	h
-;;	jr	z,curs30	;z - this is register display
+;;			xor	a		;test if this is reg or memory window display
+;;			or	h
+;;			jr	z,curs30	;z - this is register display
 	ld	a,(fwndow)
 	cp	68		;14-char symbols in effect?
 	jp	z,curs40
@@ -2654,7 +2654,7 @@ clok10:	dec	de
 	call	clmspin
 	jr	clok
 
-clmspin:
+clmspin:		;spin some characters in upper-right when 'J' runs
 	ld	de,(clmsp)
 	ld	a,(de)
 	ld	(clmsb),a
@@ -3539,7 +3539,7 @@ kdmp21:	ld	(wnwtab),de
 
 go:	call	iedtbc		;query user for execution address
 
-;;	ret	m		;- eg 3.3.3 no input - reprompt
+;;			ret	m	;- eg 3.3.3 no input - reprompt
 	jp	p,g001		;+ Skip if argument supplied, else:
 	ld	hl,(pcreg)	;+ Use current PC
 	jr	g002		;+
@@ -3882,6 +3882,7 @@ asm030:	ld	hl,00
 asm040:	ld	a,(delim)	;check delimiter
 	cp	','		;check for invalid terminator
 	jp	z,asm??o
+
 ;; if Z180
 ;;	ld	c,83		;Number of HD64180 opcode names
 ;; else
@@ -4023,9 +4024,11 @@ ibld55:	ld	(hl),a		;store object byte
 	call	nz,rslv		;more work to do
 	jp	nz,asm??v	;error - invalid operand size
 	ld	a,(ikey)
+
 ;;	sub     67		;org directive?
 ;;; Tisk! Don't hard code values when you should let assembler compute it for you
 ;;; I updated the zopcnm table, so value is no longer 67.
+
 	sub	cnmorg		;'ORG '  directive offset
 	jr	nz,ibld60
 	ld	d,(hl)
@@ -4966,8 +4969,8 @@ psw10:	ld	c,(hl)			;fetch index into operand name table
 	call	crlf
 	ld	a,(lcmd)
 
-;;	cp	'J'			;- eg 3.3.5a
-;;	ret	z			;-
+;;			cp	'J'	;- eg 3.3.5a
+;;			ret	z	;-
 	cp	'P'			;+ Routine can now be called from
 	ret	nz			;+  elsewhere
 
@@ -5261,7 +5264,7 @@ lldr:	call	iedtbc		;Get file name
 	ld	a,l
 	or	h
 	jp	z,e???
-;;	ld	c,a		;-
+;;			ld	c,a		;-
 	ld	c,10		;+ 3.5.5 jrs 5/jan/89
 	jp	lbin22
 lldr00:	call	crlf
@@ -5351,13 +5354,13 @@ lbin40:	call	nz,ttyo		;Print tens digit
 	or	'0'
 	call	ttyo		;Print units
 	call	crlf
-;;	xor	a		;- eg 3.3.7a Test eof flag
-;;	or	c		;-
+;;			xor	a		;- eg 3.3.7a Test eof flag
+;;			or	c		;-
 	ld	a,c		;+ Test EOF flag
 	cp	10		;+ Was it set by GADR (see 3.3.11)
 	jp	z,z8e		;+ Exit if so
 	or	a		;+
-;;	jp	nz,z8e		;- nz - true eof means file loading complete
+;;			jp	nz,z8e	;- nz - true eof means file loading complete
 	jr	nz,z8ej		;+
 	ld	de,mmem??	;Print "out of memory" message
 	call	print
@@ -7745,7 +7748,7 @@ bpemsg:
 	defb	'*ERROR*'
 bpmsg:
 	defb	'*BP* @ '
-	defb	0
+	defb	00
 prompt:
 	defb	'*',' ',bs,0
 
@@ -7757,15 +7760,15 @@ m??:	defb	' ??  '
 
 
 asmflg:	defb	' '
-	defb	0
+	defb	00
 
 lcmd:	defb	' '
 em???:	defb	' ??'
-	defb	0
+	defb	00
 
 mldg:
 	defb	'Loading: '
-	defb	0
+	defb	00
 
 mfilnf:
 	defb	'File Not Found'
@@ -7774,32 +7777,32 @@ mfilnf:
 
 mlodm:
 	defb	'Loaded:  '
-	defb	0
+	defb	00
 mlodpg:
 
 	defb	'Pages:   '
-	defb	0
+	defb	00
 
 msntx:
 	defb	'Syntax Error'
-	defb	cr,lf,0
+	defb	cr,lf,00
 
 mmem??:	defb	'Out Of Memory'
-	defb	0
+	defb	00
 
 mcntu:	defb	' - Continue? '
-	defb	0
+	defb	00
 
 mireg:
 	defb	'IR: '
-	defb	0
+	defb	00
 	page
     if	auxterm ne none
 mterm:	defb	'  Main'
-	defb	0
+	defb	00
 axterm:	defb	'  Auxiliary'
 matail:	defb	' terminal enabled...'
-	defb	0
+	defb	00
     endif
 
 
@@ -8478,40 +8481,40 @@ symflg:	defb	0FFh		;symbol table flag   00h - table present
 
 ;;; =============================================================================
 
-clmsp:	dw	clmsc
+clmsp:	defw	clmsc
 	org	($ + 15) AND 0FFF0h
-clmsc:	db	'|\-/+\-/'
+clmsc:	defb	'|\-/+\-/'
 
-clmss:	db	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-clmsb:	db	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
+clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
+clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
 
 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
-clmbh:	db	esc,'[0'	; position cursor starts at [zero based](3,62)
-clmbr:	db	'3'-1		; rows [1]03-09 (we subtract 1 because code adds 1 before use)
-	db	';63H'		; column [1]63
-clmbn:	db	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
-clmba:	db	'76543210',00h	; ASCII bits and terminator
+clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
+clmbr:	defb	'3'-1		; rows [1]03-09 (we subtract 1 because code adds 1 before use)
+	defb	';63H'		; column [1]63
+clmbn:	defb	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
+clmba:	defb	'76543210',00h	; ASCII bits and terminator
 
-clmbd:	db	afreg-afreg+1
-	db	hlreg-afreg+1, hlreg-afreg+0
-	db	dereg-afreg+1, dereg-afreg+0
-	db	bcreg-afreg+1, bcreg-afreg+0
+clmbd:	defb	afreg-afreg+1
+	defb	hlreg-afreg+1, hlreg-afreg+0
+	defb	dereg-afreg+1, dereg-afreg+0
+	defb	bcreg-afreg+1, bcreg-afreg+0
 clmbc	equ	($ - clmbd)	; count of registers to display
 
 ;;; =============================================================================
 
 bsiz:				;dump block size storage
-bsizlo:	defb	0		;     low  order
-bsizhi:	defb	1		;     high order
+bsizlo:	defb	00		;     low  order
+bsizhi:	defb	01		;     high order
 blkptr:	defw	0100h		;dump block address
 
 loadb:	defw    0100h		;z8e load bias for lldr command
-loadn:	defw	00		;end of load address
+loadn:	defw	0000		;end of load address
 
 asmbpc:				;next pc location for assembly
 zasmpc:	defw	0100h		;next pc location for disassemble
 				;default at load time: start of TPA
-zasmfl:	defw	00		;first disassembled address on jdbg screen
+zasmfl:	defw	0000		;first disassembled address on jdbg screen
 
 
 from:
@@ -8520,65 +8523,65 @@ rlbias:
 lines:
 exampt:
 endw:
-zasmnx:	defb	0		;address of next instruction to disassemble
-oprx01:	defb	0
+zasmnx:	defb	00		;address of next instruction to disassemble
+oprx01:	defb	00
 bias:
 biaslo:
-zasmct:	defb	0		;disassembly count
+zasmct:	defb	00		;disassembly count
 biashi:
-oprn02:	defb	0
+oprn02:	defb	00
 oprx02:
-zasmwt:	defw	0		;disassembly count - working tally
-opnflg:	defb	0		;00 - operand 1   FFh - operand 2   zasm
+zasmwt:	defw	0000		;disassembly count - working tally
+opnflg:	defb	00		;00 - operand 1   FFh - operand 2   zasm
 				;and input character storage for interactive
 				;disassembly
-quoflg:	defb	0
+quoflg:	defb	00
 wflag:	defb	0FFh		;trace subroutine flag: nz - trace subs
 				;			 z - no trace
 
 nstep:
-nstepl:	defb	0
-nsteph:	defb	0
+nstepl:	defb	00
+nsteph:	defb	00
 
-sbps:	defb	0		;number of step breakpoints
-bps:	defb	0		;number of normal breakpoints
+sbps:	defb	00		;number of step breakpoints
+bps:	defb	00		;number of normal breakpoints
 
-zmflag:	defb	0
-zasmf:	defb	0
+zmflag:	defb	00
+zasmf:	defb	00
 execbf:				;execute buffer for relocated code
 jlines:
 parenf:
-nument:	defb	0		;number of digits entered
-delim:	defb	0		;argument delimiter character
-	defb	0
-base10:	defb	0
-jmp2jp:	defb	0
-jmp2:	defb	0
+nument:	defb	00		;number of digits entered
+delim:	defb	00		;argument delimiter character
+	defb	00
+base10:	defb	00
+jmp2jp:	defb	00
+jmp2:	defb	00
 dwrite:
-cflag:	defb	0
+cflag:	defb	00
 
 ikey:
 zasmkv:
-jmp:	defb	0
+jmp:	defb	00
 mexp:
-jmplo:	defb	0
+jmplo:	defb	00
 strngf:
-jmphi:	defb	0
+jmphi:	defb	00
 timer:
-first:	defb	0
-regtrm:	defb	0
-trmntr: defb	0
-isympt:	defw	0
+first:	defb	00
+regtrm:	defb	00
+trmntr: defb	00
+isympt:	defw	0000
 
 jropnd:
-pass2:	defw	0
+pass2:	defw	0000
 
-fndsym:	defw	0
+fndsym:	defw	0000
 
 maxlen:
-	defw	14
+	defw	0014
 
-maxlin:	defw	62
+maxlin:	defw	0062
 
 fwndow:	defb	00
 
@@ -8597,7 +8600,7 @@ jstepf:	defb	0FFh		;00 -   screen is intact, if user wants j
 lastro:	defb	03
 
 	if	auxterm
-auxon:	defb	0
+auxon:	defb	00
 	endif
 
 defdata	defl	true		; Load data here
@@ -8613,10 +8616,10 @@ terminal defl	auxiliary	; Load auxiliary data
 	auxincl
 	endif
 
-wnwtab:	defw	0
+wnwtab:	defw	0000
 wnwsiz:	defb	00,00		; [count 0..255], [flag: 0=no display, 1=display]
 
-port:	defw	0
+port:	defw	0000
 
 brktbl:	defs	(maxbp+2)*3
 psctbl:	defs	maxbp*2
@@ -8626,19 +8629,19 @@ regcon:
 afreg:
 freg:	defb	00
 	defb	00
-bcreg:	defw	00
-dereg:	defw	00
-hlreg:	defw	00
-afpreg:	defw	00
-bcpreg:	defw	00
-depreg:	defw	00
-hlpreg:	defw	00
+bcreg:	defw	0000
+dereg:	defw	0000
+hlreg:	defw	0000
+afpreg:	defw	0000
+bcpreg:	defw	0000
+depreg:	defw	0000
+hlpreg:	defw	0000
 pcreg:
 pcregl:	defb	00
 pcregh:	defb	01
-spreg:	defw	00
-ixreg:	defw	00
-iyreg:	defw	00
+spreg:	defw	0000
+ixreg:	defw	0000
+iyreg:	defw	0000
 
 regsiz	equ	$-regcon
 
@@ -8646,8 +8649,8 @@ rreg:	defb	00
 ireg:	defb	00
 
 
-fstart:	defw	0
-argbc:	defw	0
+fstart:	defw	0000
+argbc:	defw	0000
 argbpt:	defw	argbf
 
 regsav	equ	$		;storage for register contents in between bps
@@ -8670,7 +8673,7 @@ gpbsiz	equ	164		;size of general purpose buffer
 symbuf:
 objbuf:				;object code buffer
 	rept	gpbsiz
-	defb	0
+	defb	00
 	endm
 inbfsz	equ	gpbsiz/2
 inbfmx	equ	objbuf+4	;input buffer - max byte count storage
