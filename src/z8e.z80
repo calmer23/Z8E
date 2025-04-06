@@ -485,7 +485,7 @@ mbannr:		;Move XTERM terminal window near to upper left corner of screen
 	defb	esc,'[8;090;090t'  ;ROW;COL; window size to 90 rows by 90 cols
 	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
-	defb	esc,']2;Z8E Debugger', 'G' AND 1FH	;Set window TITLE
+	defb	esc,']2;Z8E Debugger', 'G' AND 1Fh	;Set window TITLE
 ;;;		yes, that really is a right bracket; and terminated by CNTL-G
 	defb	cr,lf,tab,tab
     if Z180
@@ -616,7 +616,7 @@ nint00:	ld	(maxlin),a
 ; The next instruction is PATCHED before it is executed
 nint03:	ld	(0038h),a	;Init trap to breakpoint handler
 
-	ld	hl,005dh	;Save current contents of default fcb
+	ld	hl,005Dh	;Save current contents of default fcb
 	ld	a,(hl)
 	cp	'('		;Is first char in fcb a paren?
 	dec	hl
@@ -733,7 +733,7 @@ nint60:	ld	(hl),a		;nulls to entire local symbol table
 	ld	(z8eb),hl	;monitor bias - for relocation work
 	ld	de,(usymbl)
 	sbc	hl,de
-	ld	(ntpa),hl	;end of tpa - for symbol loading
+	ld	(ntpa),hl	;end of TPA - for symbol loading
 	ld	a,d		;check for no user symbol table
 	or	e
 	jr	z,nint75	;no table - no clearing required
@@ -743,7 +743,7 @@ nint70:	ld	(hl),0		;fill user symbol table with nulls
 	ld	a,d
 	or	e
 	jr	nz,nint70
-nint75:	ex	de,hl		;hl - start of z8e in hi memory
+nint75:	ex	de,hl		;hl - start of z8e in high memory
 
 	ld	hl,bphn-z8eorg	;entry point to breakpoint handler
 	add	hl,de
@@ -752,14 +752,14 @@ nint75:	ex	de,hl		;hl - start of z8e in hi memory
 nint71:	ld	(0039h),hl	;Init RST 38h trap location
 
 	ld	hl,z8eorg
-	ldir			;z8e now in hi memory - relocate addresses
-	ld	hl,(z8eb)	;recover hi memory starting address
+	ldir			;z8e now in high memory - relocate addresses
+	ld	hl,(z8eb)	;recover high memory starting address
 	ld	de,z8ecmd-z8eorg
 	add	hl,de		;first instruction to relocate
 	ex	de,hl
 nint80:	call	zlen00		;calculate instruction length
 	ld	h,d
-	ld	l,e		;de - current instruction   hl - ditto
+	ld	l,e		;de - current instruction,   hl - ditto
 	ld	b,0
 	add	hl,bc
 	ex	de,hl		;de - next address to relocate
@@ -779,7 +779,7 @@ nint80:	call	zlen00		;calculate instruction length
 	sub	z8eorg shr 8	;test for absolute address < z8eorg
 	jr	c,nint85	;absolute - no relocation needed
 	ld	b,a
-	ld	a,(z8ebh)	;hi order byte of address bias
+	ld	a,(z8ebh)	;high order byte of address bias
 	add	a,b		;plus upper byte of operand address
 	ld	(hl),a		;set relocated address
 nint85:	inc	hl
@@ -800,7 +800,7 @@ nint90:	ld	bc,nrel-z8eorg	;end of relocatable portion of monitor
 	ld	bc,zopjtb	;add length of operand name table
 	add	hl,bc		;point to first entry in jump table
 nint95:	inc	hl
-	ld	a,(hl)		;hi byte jump table entry
+	ld	a,(hl)		;high byte jump table entry
 	add	a,d		;plus bias
 	ld	(hl),a		;replace in table
 	inc	hl
@@ -863,7 +863,7 @@ zsym:	call	lfcb		;Initialize fcb
 	ld	a,(maxlen)
 	cpl
 	ld	e,a
-	ld	d,0ffh		;Lower end of TPA by amount equal to
+	ld	d,0FFh		;Lower end of TPA by amount equal to
 				; the value of maxlen negated to insert
 				; jump to bdos
 	add	hl,de
@@ -884,7 +884,7 @@ zsym05:	ld	de,prsbf
 	ld	a,(maxlen)
 	or	l
 	ld	l,a
-	ld	a,(hl)		;Fetch hi order address associated
+	ld	a,(hl)		;Fetch high order address associated
 				; with symbol
 	dec	hl
 	ld	l,(hl)
@@ -1077,7 +1077,7 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	jp	.eof50		;check for more symbol files to load
 
 .prn00:
-	ld	bc,(ntpa)	;bc - current end of the tpa
+	ld	bc,(ntpa)	;bc - current end of the TPA
 	dec	bc		;this points us into the next lower
 				;symbol table block
 				;this is first char of symbol table
@@ -1206,7 +1206,7 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 
 ;Macro-80 v3.44 symbol loading routine
 
-.pr4:	ld	a,(maxlen)	;lower tpa address by maxlen
+.pr4:	ld	a,(maxlen)	;lower TPA address by maxlen
 	cpl
 	and	c		;for storing next symbol and address
 	ld	c,a		;bc - next address of symbol table entry
@@ -1341,13 +1341,13 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	cpl
 	and	c
 	ld	c,a
-	ld	(ntpa),bc	;save current end of tpa address
-	ld	a,(nsymhi)	;hi order number of symbols loaded (bcd)
+	ld	(ntpa),bc	;save current end of TPA address
+	ld	a,(nsymhi)	;high order number of symbols loaded (bcd)
 	call	hexc		;convert to ascii
 	ld	h,a		;returned in a - move to h (other digit in l)
 	ld	(mhex),hl	;store in message
 	ld	a,(nsymlo)
-	call	hexc		;convert lo order
+	call	hexc		;convert low order
 	ld	h,a
 	ld	(mhex+2),hl
 	ld	de,msym..	;display number of symbols loaded message
@@ -1382,10 +1382,10 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	ld	(nsym),hl
 	ld	hl,(z8eb)
 	ld	de,symflg-z8eorg
-	add	hl,de		;hl - pointer to symbol flag in hi memory
+	add	hl,de		;hl - pointer to symbol flag in high memory
 	xor	a
 	ld	(hl),a		;zero - symbol table present
-	ld	(symflg),a	;also set flag in lo memory where we are
+	ld	(symflg),a	;also set flag in low memory where we are
 				;currently so that fsym knows theres a symbol
 				;table to search thru if the user specified a
 				;symbol name bias as part of the command line
@@ -1407,7 +1407,7 @@ load:	ld	hl,(ntpa)	;current end of memory
 	inc	e
 	sbc	hl,de		;compensate for pre-increment of pointer
 load00:	ld	de,(06)		;de - real entry point to bdos
-	ld	(06),hl		;point to our origin in hi memory
+	ld	(06),hl		;point to our origin in high memory
 	ld	(hl),jp		;init jump to bdos at start of z8e
 	inc	hl
 	ld	(hl),e
@@ -1415,7 +1415,7 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	ld	(hl),d
 	ld	e,0		;de - old start of bdos address in also our
 				;ending address
-	ld	hl,(z8eb)	;load out starting address in hi memory
+	ld	hl,(z8eb)	;load out starting address in high memory
 	ld	bc,z8e-z8eorg	;fetch the number of bytes between z8e's base
 				;address and the entry point of the command
 				;processor  - internal symbol table size
@@ -1436,7 +1436,7 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 				;return address
 	ex	de,hl		;hl - relocated address z8e
 	inc	hl
-	inc	hl		;hl - points to ld  sp,0000 instruction at the
+	inc	hl		;hl - points to "LD SP,0000" instruction at the
 				;start of the command processor. replace 0000
 				;with the address bdos-1
 	ld	(hl),e		;set real stack address
@@ -1485,10 +1485,10 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 
 	ld	a,(tsymhi)	;total number of symbols from all files (bcd)
 	call	hexc		;convert to ascii
-	ld	h,a		;move hi order ascii digit to h
+	ld	h,a		;move high order ascii digit to h
 	ld	(mhex),hl	;store double ascii digit
 	ld	a,(tsymlo)
-	call	hexc		;convert lo order
+	call	hexc		;convert low order
 	ld	h,a
 	ld	(mhex+2),hl	;save in string
 	ld	de,tsym..	;total symbols message
@@ -1506,24 +1506,24 @@ load30:	ld	c,09
 	call	bdos
 
 load40:	ld	hl,(06)
-	dec	hl		;hl - address of new tpa
+	dec	hl		;hl - address of new TPA
 	ld	de,mnvmem       ;display address as memory available
 	call	print
 	call	outadr
 	call	crlf
-	ld	(hl),0          ;now store two zeros at the top of the tpa and
+	ld	(hl),00         ;now store two zeros at the top of the TPA and
 				;set stack pointer to this very same address.
 				;this allows users to do a warm boot via ret
 				;in the same way as if they had been loaded by
 				;cp/m.
 	dec	hl
-	ld	(hl),0
-	ld	bc,(z8eb)	;our relocated address in hi memory
-	ex	de,hl		;de - last available location in tpa
+	ld	(hl),00
+	ld	bc,(z8eb)	;our relocated address in high memory
+	ex	de,hl		;de - last available location in TPA
 	ld	hl,spreg-z8eorg ;address (relative to the start of z8e) where
 				;we store the user stack pointer address
 	add	hl,bc		;hl - pointer to
-	ld	(hl),e		;save user stack in spreg in hi memory
+	ld	(hl),e		;save user stack in spreg in high memory
 	inc	hl
 	ld	(hl),d
 	ld	hl,z8e-z8eorg
@@ -1534,19 +1534,19 @@ load40:	ld	hl,(06)
 	call	nprint
 	ld	de,znmbuf
 	call	print
-				;enter the monitor in hi memory at entry
+				;enter the monitor in high memory at entry
 				;point lldr10
 
 	ld	hl,lldr10-z8eorg
 	ld	bc,(z8eb)
-load50:	add	hl,bc		;hl - actual address of lldr10 in hi memory
+load50:	add	hl,bc		;hl - actual address of lldr10 in high memory
 	ex	de,hl		;now clear out the buffer at 0080h so the user
 				;program doesn't mistakenly think that our
 				;command line tail is really his.
 	ld	hl,iobuf
 	ld	(hl),00		;set number of chars zero (0080h)
 	inc	hl
-	ld	b,127		;clear until start of tpa
+	ld	b,127		;clear until start of TPA
 load60:	ld	(hl),' '
 	inc	hl
 	djnz	load60
@@ -1584,8 +1584,8 @@ read:	push	bc
 
 ;hexc
 ;Convert byte in a to two ASCII hex digits.
-;return: a - converted hi order digit
-;        l -           lo order digit
+;return: a - converted high order digit
+;        l -           low order digit
 
 hexc:	ld	h,a
 	rrca
@@ -1595,13 +1595,13 @@ hexc:	ld	h,a
 	call	hexc00
 	ld	l,a
 	ld	a,h
-hexc00:	and	0fh
+hexc00:	and	0Fh
 	;; add	a,90h
 	;; daa
 	;; adc	a,40h
 	;; daa
-	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
-	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0Ah ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69h	; subtract 105. [adding FF97h] (106. [adding FF96h] if carry set)
 	daa
 	ret
 ;;
@@ -1661,10 +1661,10 @@ hex30:	ld	a,(maxlen)      ;now point to last byte of symbol table
 	or	c
 	ld	c,a		;never worry about carry - we always start
 				;with 256 boundary
-	ld	a,d		;store lo order symbol address
+	ld	a,d		;store low order symbol address
 	ld	(bc),a
 	dec	bc		;point to penultimate byte in block
-	ld	a,e		;hi order byte of address into symbol table
+	ld	a,e		;high order byte of address into symbol table
 	ld	(bc),a
 	ld	a,(maxlen)	;mask to rewind symbol table pointer to the
 				;start of this block
@@ -1680,7 +1680,7 @@ totsym:	ld	de,nsymlo	;nsym - bcd running count of the number of
 	daa			;keep bcd format
 	ld	(de),a
 	ret	nc
-	dec	de		;account for carry by bumping hi order byte
+	dec	de		;account for carry by bumping high order byte
 	ld	a,(de)
 	add	a,1
 	daa
@@ -1858,7 +1858,7 @@ znmbuf:
 ;*
 ;******************************************************************************
 
-	org	($+255) and 0ff00h
+	org	($+255) and 0FF00h
 ;was	org	256*(($+255)/256)
 
 z8eorg:
@@ -1872,7 +1872,7 @@ z8e:	and	a		;Any do-nothing instruction with the sign
 				;table
 
 	defb	31h		;LD SP,nnnn - Load monitor stack pointer
-z8esp:	defw	8000h		;Actual addres filled in by nint at load
+z8esp:	defw	8000h		;Actual address filled in by nint at load
 				;time when we figure out where bdos is
 
 z8ecmd:	ld	hl,z8e
@@ -1923,7 +1923,7 @@ z8e20:	ld	bc,ncmd		;total number of commands
 	ld	hl,jtcmd	;command jump table
 	add	hl,bc
 	add	hl,bc		;index into table
-	ld	e,(hl)		;lo order command processing routine
+	ld	e,(hl)		;low order command processing routine
 	inc	hl
 	ld	d,(hl)		;upper address
 	ld	c,3
@@ -1987,11 +1987,11 @@ bphn10:	ld	e,(hl)
 	ld	a,(hl)		;saved contents of breakpoint address
 	inc	hl
 	ld	(de),a		;replace rst 38 with actual data
-	ld	a,(pcregl)	;user pc - lo order
+	ld	a,(pcregl)	;user pc - low order
 	xor	e
 	ld	e,a		;versus breakpoint address in table
 	ld	a,(pcregh)
-	xor	d		;check hi order
+	xor	d		;check high order
 	or	e
 	jr	nz,bphn20	;no match - check next entry in table
 	ld	c,b		;pc found in table set c reg nz
@@ -2241,7 +2241,7 @@ jdbg2a:				;+
 	ex	de,hl		;de - save input buffer address
 	ld	hl,wflag	;wflag tells us whether to trace subroutines
 				;or walk around them
-	ld	(hl),0ffh	;conditionally assume trace all
+	ld	(hl),0FFh	;conditionally assume trace all
 	sub	'/'		;slash means don't trace any
 	jr	z,jdbg03	;
 	add	a,'/'-'*'	;check for star - no trace of bdos subs
@@ -2321,9 +2321,9 @@ jdbg35:	ld	a,(de)		;compare old vs new
 	inc	hl
 	inc	de
 	jr	nz,jdbg40	;different - display new
-	ld	a,(de)		;check hi order byte of this reg pair
+	ld	a,(de)		;check high order byte of this reg pair
 	cp	(hl)
-	jr	z,jdbg45	;z - hi and lo bytes the same so try next reg
+	jr	z,jdbg45	;z - high and low bytes the same so try next reg
 jdbg40:
 ;;	ld	a,4		;col position of reg pair is (rel pos * 9) + 3
 ;;	and	b
@@ -2362,10 +2362,10 @@ jdbg42:
 
 	ld	a,(hl)		;display upper byte of reg contents
 	call	outhex
-	dec	hl		;rewind to pick up lo order byte
+	dec	hl		;rewind to pick up low order byte
 	ld	a,(hl)
 	inc	hl
-	call	outhex		;display lo order
+	call	outhex		;display low order
 jdbg45:	inc	hl
 	inc	de
 	inc	b
@@ -2463,7 +2463,7 @@ jdbg75:	ld	(lastro),a	;save position of arrow
 	jr	c,jdbg78
 	cp	'9'+1
 	jr	nc,jdbg95
-	and	0fh
+	and	0Fh
 	ld	(hl),a
 	ld	b,a
 	jr	jdbg80
@@ -2630,7 +2630,7 @@ curs20:	add	a,d		;add in base
 	cp	68		;14-char symbols in effect?
 	jp	z,curs40
 curs30:	srl	b
-curs40:	ld	a,0fch
+curs40:	ld	a,0FCh
 	and	b		;now compute row number
 	rrca
 	rrca
@@ -2660,7 +2660,7 @@ clmspin:
 	ld	(clmsb),a
 	inc	de
 	ld	a,e
-	and	07H
+	and	07h
 	jr	nz,clmsp7
 	ld	de,clmsc
 clmsp7:	ld	(clmsp),de
@@ -2739,7 +2739,7 @@ hsym:	call	ilin		;Read in line of data
 	ld	a,(maxlen)
 	or	l		;Point to next symbol table entry (next block)
 	ld	l,a		;HL - ptr to last byte in this entry
-	inc	hl		;Now next entry toward hi memory
+	inc	hl		;Now next entry toward high memory
 hsym10:	ld	a,(maxlen)	;Max size of symbol name
 	ld	c,a
 	dec	c
@@ -2834,7 +2834,7 @@ usym10:	ld	a,(maxlen)
 
 usym20:	ld	a,(maxlen)
 	or	l
-	ld	l,a		;point to hi order byte of symbol address
+	ld	l,a		;point to high order byte of symbol address
 	call	pbin		;put address in buffer
 	ld	a,' '
 	call	putc		;followed by space just like l80
@@ -2957,7 +2957,7 @@ dump50:	ld	a,(bsizhi)
 	and	0F0h		;Block size less than 16?
 	jr	z,dump60	;Z - less
 dump55:	ld	a,(bsizlo)
-	and	0fh		;Block size multiple of 16?
+	and	0Fh		;Block size multiple of 16?
 	jr	z,dump60	;Multiple of 16
 	neg
 	add	a,16
@@ -3009,7 +3009,7 @@ rgst:	ld	c,' '		;get edited input
 	call	prsr
 	or	b		;unbalanced quotes (prime reg?)
 	jp	p,rgst00
-	and	7fh
+	and	7Fh
 	cp	3
 	jr	nz,rgst25
 	dec	hl
@@ -3100,7 +3100,7 @@ mreg05:	ld	a,b		;b reg set m by prsr if trailing quote
 	ld	a,8		;bias pointer for prime reg contents
 mreg10:	add	a,(hl)
 	ld	c,a		;save mapping byte
-	and	7fh		;strip sign
+	and	7Fh		;strip sign
 				;so iarg knows 16 bit reg pair
 	ld	hl,regcon	;use mapping byte to build pointer
 	add	a,l
@@ -3252,7 +3252,7 @@ qprt60:	cp	' '
 
 break:	call	iedtbc
 	ret	m		;end command - no input
-	ld	c,0ffh		;set neg - distinguish ourselves from step
+	ld	c,0FFh		;set neg - distinguish ourselves from step
 brk10:	ld	a,(bps)		;fetch current bp count
 	cp	maxbp		;table full
 	jp	nc,e???		;full - abort command
@@ -3265,11 +3265,11 @@ brk30:	ld	hl,brktbl
 	or	b		;check for no breakpoints in effect
 	jr	z,brk60		;none - bypass check for duplicate
 brk40:	ld	a,e
-	cp	(hl)		;check lo order address match
+	cp	(hl)		;check low order address match
 	inc	hl
 	jr	nz,brk50	;no match - check next
 	ld	a,d
-	sub	(hl)		;check hi order
+	sub	(hl)		;check high order
 	jr	nz,brk50	;no match - check next
 	or	c
 	ret	p
@@ -3342,18 +3342,18 @@ cbreak:	call	iedtbc
 	ld	(bps),a
 	ret
 
-cbrk10:	ld	a,(de)		;test lo order address for match
+cbrk10:	ld	a,(de)		;test low order address for match
 	cp	l
 	inc	de
 	jr	nz,cbrk20	;no match - examine next entry
 	ld	a,(de)
-	cp	h		;versus hi order bp address
+	cp	h		;versus high order bp address
 cbrk20:	inc	de
 	inc	de		;bump past contents save location
 	jr	z,cbrk30	;zero - found bp in table
 	djnz	cbrk10
 	jp	e???		;error - breakpoint not found
-cbrk30:	ld	h,0ffh		;rewind to point to bp address
+cbrk30:	ld	h,0FFh		;rewind to point to bp address
 	ld	l,-3
 	add	hl,de
 	ex	de,hl		;de - ptr to bp,  hl - ptr to next bp
@@ -3408,7 +3408,7 @@ obrk00:	ld	hl,brktbl	;base of breakpoint storage table
 	add	hl,de		;this is a three byte table
 	add	hl,de
 	add	hl,de
-	ld	e,(hl)		;fetch lo order bp address
+	ld	e,(hl)		;fetch low order bp address
 	inc	hl
 	ld	d,(hl)		;upper address
 	ex	de,hl
@@ -3429,7 +3429,7 @@ obrk00:	ld	hl,brktbl	;base of breakpoint storage table
 	ld	l,a
 	jr	nc,obrk10
 	inc	h
-obrk10:	ld	e,(hl)		;lo order pass count
+obrk10:	ld	e,(hl)		;low order pass count
 	inc	hl
 	ld	d,(hl)		;upper byte
 	ld	a,d		;test if pass count in effect
@@ -3558,7 +3558,7 @@ g100:	ld	(jmplo),hl	;store execution address
 	jp	z,g600		;z - no bps in effect - no restoration needed
 	ld	b,a
 	ld	hl,brktbl
-	ld	c,0ffh
+	ld	c,0FFh
 g300:	ld	e,(hl)
 	inc	hl
 	ld	d,(hl)		;de - breakpoint address removed from table
@@ -3569,7 +3569,7 @@ g300:	ld	e,(hl)
 	cp	e		;check if bp from table matches next pc
 	jr	nz,g400		;no match - set breakpoint
 	ld	a,(jmphi)
-	cp	d		;check hi order next pc address
+	cp	d		;check high order next pc address
 	jr	nz,g400		;no match - set bp
 	ld	c,b		;set flag - current pc matches breakpoint
 	jr	g500
@@ -3578,7 +3578,7 @@ g400:	ld	a,rst38		;set rst38 instruction
 g500:	inc	hl
 	djnz	g300		;examine all entries
 	inc	c		;current pc match breakpoint?
-	jp	z,g600		;z - no (c reg not 0ffh)
+	jp	z,g600		;z - no (c reg not 0FFh)
 	ld	a,(sbps)	;check number of step breakpoints
 	and	a		;tracing?
 	jp	nz,g600		;nz - this is trace
@@ -3781,7 +3781,7 @@ g600:	ld	iy,(iyreg)	;restore user iy
 ;*
 ;******************************************************************************
 
-step:	ld	a,0ffh
+step:	ld	a,0FFh
 	ld	(wflag),a	;set trace subroutine flag on
 	call	iedtbc		;query user for trace count
 	ld	hl,0001
@@ -3853,7 +3853,7 @@ asm015:	ld	(hl),c
 	inc	hl
 	dec	a
 	jp	p,asm015
-	ld	(oprn01),a	;init operand key values to 0ffh
+	ld	(oprn01),a	;init operand key values to 0FFh
 	ld	(oprn02),a
 	call	iedtbc		;get user input
 	ret	m		;m - no input ends command
@@ -3970,7 +3970,7 @@ ibld00:	cp	40h
 	jr	c,ibld55	;c - 8080 instruction
 	cp	0A0h
 	jr	nc,ibld10	;nc - not ed instruction
-	ld	(hl),0edh	;init byte one of object code
+	ld	(hl),0EDh	;init byte one of object code
 	inc	hl
     if Z180
 	call	aed180		;HD64180 encode of ED 00 to ED BB
@@ -3996,7 +3996,7 @@ ibld30:	cp	0F8h
 	ld	a,(objbuf)
 	and	a		;check for previously stored first object byte
 	ld	a,d
-	ld	(hl),0cbh	;init byte regardless
+	ld	(hl),0CBh	;init byte regardless
 	inc	hl
 	jr	z,ibld40	;z - not ix or iy instruction
 	inc	hl		;bump object code pointer - this is four byter
@@ -4064,12 +4064,12 @@ ibld60:	ld	de,objbuf
 	call	othxsp
 	jp	asm005		;ready for next input
 ibld65:	dec	b		;set count of object bytes to 2
-	ld	c,(hl)		;exchange hi and lo order bytes for ddb
+	ld	c,(hl)		;exchange high and low order bytes for ddb
 	dec	hl
 	ld	a,(hl)
-	ld	(hl),c		;new hi order
+	ld	(hl),c		;new high order
 	inc	hl
-	ld	(hl),a		;new hi order replaces old lo order
+	ld	(hl),a		;new high order replaces old low order
 	jr	ibld75
 ibld70:	call	zlen00		;compute length of instruction in bytes
 	ld	b,c		;b - number of bytes of object code
@@ -4091,17 +4091,17 @@ opnm:	ld	a,(de)		;key value computed by operand routine
 	xor	(hl)		;compare with table operand table entry
 	ret	z		;true match of operand key values
 	xor	(hl)		;restore
-	add	a,a		;86 all no operand key values (0ffh)
+	add	a,a		;86 all no operand key values (0FFh)
 	ret	m
 	ld	a,(hl)		;fetch table entry
-	and	7fh		;sans paren flag for comparison purposes
-	cp	1bh		;check table entry 8 bit - 16 bit - $ rel ?
+	and	7Fh		;sans paren flag for comparison purposes
+	cp	1Bh		;check table entry 8 bit - 16 bit - $ rel ?
 	jr	c,opnm00	;c - none of the above
 	ld	a,(de)		;fetch computed key
 	xor	(hl)		;compare with paren flags
 	ret	m		;error - paren mismatch
 	ld	a,(de)		;fetch key once more
-	and	7fh		;remove paren flag
+	and	7Fh		;remove paren flag
 	cp	17h		;computed as 8 bit - 16 bit - $ rel?
 	jr	z,opnm40	;so far so good
 	ret			;
@@ -4128,7 +4128,7 @@ opnm30:	cp	8		;test user entered valid 8 bit reg
 	and	7		;psuedo 8 bit reg: (hl) (ix) (iy)?
 	ret	nz		;no
 opnm40:	ld	a,(hl)		;fetch table entry
-	and	7fh
+	and	7Fh
 	sub	18h		;make values 18 thru 1f relative zero
 	cp	a		;zero means match
 	ret
@@ -4140,7 +4140,7 @@ rslv:	dec	a
 	dec	a		;make neg to indicate shift left required
 rslv00:	ld	c,a
 	ld	a,(de)		;fetch computed operand key
-	and	07		;lo three bits specify reg
+	and	07		;low three bits specify reg
 	xor	6		;create true object code bits
 	inc	c		;test if bits 0-2 or bits 3-5
 	jr	nz,rslv10	;nz - 0 thru 2
@@ -4168,11 +4168,11 @@ rslv20:	inc	de		;point to low order of operand value
 	sbc	hl,bc		;calculate displacement from current counter
 	ex	de,hl		;de - displacement  hl - object code pointer
 	ld	b,a		;restore b reg
-	ld	a,e		;lo order displacement
-	inc	d		;test hi order
-	jr	z,rslv25	;must have been ff (backward displacement)
+	ld	a,e		;low order displacement
+	inc	d		;test high order
+	jr	z,rslv25	;must have been 0FFh (backward displacement)
 	dec	d
-	ret	nz		;error - hi order not zero or ff
+	ret	nz		;error - high order not zero or 0FFh
 	cpl			;set sign bit for valid forward displacement
 rslv25:	xor	80h		;toggle sign bit
 	ret	m		;error - sign bit disagrees with upper byte
@@ -4188,10 +4188,10 @@ rslv30:	dec	a
 	cp	c
 	jr	z,rslv35	;z - (hl),nn
 	inc	hl		;must be  (ix+index),nn  or  (iy+index),nn
-rslv35:	ld	a,(de)		;move lo order operand value to object buffer
+rslv35:	ld	a,(de)		;move low order operand value to object buffer
 	ld	(hl),a
 	inc	de
-	ld	a,(de)		;test hi order
+	ld	a,(de)		;test high order
 	and	a		;
 	ret	z		;z - must be 0 thru +255
 	inc	a		;error if not -1 thru -256
@@ -4211,12 +4211,12 @@ rslv50:	dec	a		;test restart instruction or bit number
 	ld	a,(de)		;check restart value specified
 	and	0C7h		;betweed 0 and 38h?
 	ret	nz		;error
-	ld	a,(de)		;fetch lo order operand value
+	ld	a,(de)		;fetch low order operand value
 	or	0C7h		;or with instruction skeleton
 	dec	hl
 	ld	(hl),a		;rewind object code pointer
 	inc	de
-	ld	a,(de)		;check hi order operand value
+	ld	a,(de)		;check high order operand value
 	and	a		;error if not zero
 	ret
 rslv60:	dec	hl		;rewind object code buffer pointer
@@ -4289,9 +4289,9 @@ oprn30:	inc	hl		;bump table pointer
 	ld	a,ix.. or iy..	;special ix iy hl processing
 	and	c		;test for index reg
 	jr	z,oprn35	;z - must be hl
-	and	10h		;transform index into 0ddh or ofdh
+	and	10h		;transform index into 0DDh or 0FDh
 	add	a,a
-	add	a,0ddh		;a - first byte of index reg opcode
+	add	a,0DDh		;a - first byte of index reg opcode
 oprn35:	ld	c,a		;temp save first object byte
 	ld	hl,objbuf
 	xor	(hl)
@@ -4323,7 +4323,7 @@ oprn40:	ld	(hl),c		;init first byte of object code
 	ld	a,l
 	ld	(objbuf+2),a	;displacement always third byte
 	inc	h		;check upper byte of index value
-	jr	z,oprn50	;must have been 0ffh
+	jr	z,oprn50	;must have been 0FFh
 	dec	h
 	ret	nz		;error - index not -128 to +127
 	cpl
@@ -4379,7 +4379,7 @@ xval10:	ld	a,c		;input character back to accumulator
 	jp	p,xval25	;p - have symbol table or invalid hex digit
 	sub	7
 xval15:	sub	'0'		;ascii hex to hex nibble
-	add	a,a		;shift left five - hi bit of nibble to carry
+	add	a,a		;shift left five - high bit of nibble to carry
 	add	a,a
 	add	a,a
 	add	a,a
@@ -4432,14 +4432,14 @@ xval35:	ld	a,c		;recover character
 	inc	hl
 	ld	(hl),d		;store hex number in temp buffer
 	inc	hl
-	ld	(hl),e		;lo order hex number
+	ld	(hl),e		;low order hex number
 	dec	hl		;point back to upper byte
 	ld	e,a
 	xor	a
 	ld	d,a		;de - hex nibble
-	call	bcdx		;convert hi order byte
+	call	bcdx		;convert high order byte
 	jr	nz,xval40	;nz - error detected during conversion
-	inc	hl		;bump to lo byte to convert
+	inc	hl		;bump to low byte to convert
 	call	bcdx
 	ex	de,hl		;hl - converted value
 xval40:	pop	de
@@ -4456,8 +4456,8 @@ xval50:	cp	quote		;ascii literal processing
 	inc	hl
 	cp	(hl)		;trailing quote found?
 	jr	z,xval55	;found
-	ld	d,e		;make literal just fetch hi order of operand
-	ld	e,(hl)		;fetch new literal as lo order
+	ld	d,e		;make literal just fetch high order of operand
+	ld	e,(hl)		;fetch new literal as low order
 	inc	hl
 	cp	(hl)		;trailing quote?
 	ret	nz		;error - more than two chars between quotes
@@ -4489,9 +4489,9 @@ xval61:	ld	de,(pass2)
 xval62:	ld	a,(maxlen)	;point to last byte of sym table entry
 	or	l
 	ld	l,a
-	ld	a,(hl)		;hi order symbol address
+	ld	a,(hl)		;high order symbol address
 	dec	hl
-	ld	l,(hl)		;lo order
+	ld	l,(hl)		;low order
 	ld	h,a
 xval65:	ld	a,b		;check number entered flag
 	and	a
@@ -4591,7 +4591,7 @@ isym00:	ld	a,(maxlen)	;rewind point to start of table entry
 	ldir
 	ld	hl,(asmbpc)	;fetch value of symbol
 	ex	de,hl		;hl - pointer to address storage
-	ld	(hl),e		;lo order current location into table
+	ld	(hl),e		;low order current location into table
 	inc	hl
 	ld	(hl),d		;upper byte
 	xor	a
@@ -4723,9 +4723,9 @@ opnv:	ex	de,hl		;de - operand value,  hl - operand key storage
 	or	80h		;found null - set paren flag
 opnv00:	ld	(hl),a		;store key value
 	inc	hl
-	ld	(hl),e		;lo order operand value
+	ld	(hl),e		;low order operand value
 	inc	hl
-	ld	(hl),d		;hi order
+	ld	(hl),d		;high order
 	ret
 
 
@@ -4750,10 +4750,10 @@ opnv00:	ld	(hl),a		;store key value
 ;******************************************************************************
 
 zlen00:	ld	a,(de)		;fetch first byte of op code
-	cp	0cbh		;test for shift/bit manipulation instruction
+	cp	0CBh		;test for shift/bit manipulation instruction
 	ld	bc,02
 	ret	z		;10-4 this is a cb and length is always 2
-	cp	0edh		;test for fast eddie
+	cp	0EDh		;test for fast eddie
 	jr	nz,zlen15	;
 	inc	de		;fetch byte two of ed instruction
 	ld	a,(de)
@@ -4773,13 +4773,13 @@ zlen00:	ld	a,(de)		;fetch first byte of op code
 	ld	c,2		;set length for return - if not 2 must be 4
 	cp	45h		;test for retn
 	jr	z,zlen10
-	cp	4dh		;test for reti
+	cp	4Dh		;test for reti
 	ret	nz		;non-pc modifying two byte ED
 zlen10:	ld	a,0C9h		;treat as ordinary return instruction
 	jp	zlen80
-zlen15:	cp	0ddh		;check for dd and fd index reg instructions
+zlen15:	cp	0DDh		;check for dd and fd index reg instructions
 	jr	z,zlen20
-	cp	0fdh
+	cp	0FDh
 	jr	nz,zlen40
 zlen20:	inc	de		;fetch byte two of index reg instruction
 	ld	a,(de)
@@ -4853,7 +4853,7 @@ zlen55:	ld	a,(wflag)	;test for no subroutine trace flag
 	ret	z
 zlen58:	ld	a,(de)		;recover call object byte
 	ld	b,c		;set nz - pc modifying instruction
-	cp	0cdh		;unconditional call??
+	cp	0CDh		;unconditional call??
 	jr	nz,zlen85	;zlen85 - set secondary breakpoint if tracing
 	ret
 
@@ -4925,8 +4925,8 @@ zlen85:	ld	a,(sbps)	;count of special step breakpoints
 ;*	pswmap - table of offsets into operand name table featuring a
 ;*		 two byte entry for each flag bit.
 ;*		 bit 4 (unused by z80) from pswbit entry is on/off flag
-;*		 lo bytes are the off states (p nz nc po).
-;*		 hi bytes are the on states  (m  z  c pe).
+;*		 low bytes are the off states (p nz nc po).
+;*		 high bytes are the on states (m  z  c pe).
 ;*
 ;*	- current state of flag register is displayed
 ;*	- user queried for changes
@@ -5109,7 +5109,7 @@ qeval:	call	iedtbc		; get input
 	ld	a,l
 	call	outhex		; hex byte
 	ld	a,l
-	cp	7fh		; see if printable
+	cp	7Fh		; see if printable
 	ret	nc
 	cp	' '
 	ret	c
@@ -5334,7 +5334,7 @@ lbin22: ld	de,mlodm	;Print loaded message
 lbin25:	ld	h,a		;Save page count
 	ld	a,l
 	call	ttyo
-lbin30:	ld	d,2fh
+lbin30:	ld	d,2Fh
 	ld	a,h
 lbin35:	inc	d		;Tens and units decimal conversion loop
 	sub	10
@@ -5694,7 +5694,7 @@ xreg00:	call	xreg05		;display reg name and contents
 	cp	8
 	call	z,crlf
 	ld	a,c
-	cp	0ch
+	cp	0Ch
 	ld	b,0
 	jr	nz,xreg00
 	ld	a,(lcmd)
@@ -5710,7 +5710,7 @@ xreg05:	ld	hl,regptr	;map of reg name pointers
 	ld	d,b
 	add	hl,bc
 	ld	a,(hl)		;extract pointer
-	and	7fh		;strip sign for name indexing
+	and	7Fh		;strip sign for name indexing
 	ld	e,a
 	ld	b,(hl)		;save copy of offset - need sign later
 	ld	hl,zopnm	;register name table
@@ -5736,11 +5736,11 @@ xreg20:	ld	a,':'
 	ld	a,(hl)
 	jp	p,xreg30	;p - not prime reg
 	add	a,8		;prime contents 8 bytes past non-prime
-xreg30:	and	7fh		;ignore sign
+xreg30:	and	7Fh		;ignore sign
 	ld	e,a
 	ld	hl,regcon	;start of register contents storage
 	add	hl,de
-	ld	d,(hl)		;hi order contents
+	ld	d,(hl)		;high order contents
 	dec	hl
 	ld	e,(hl)
 	ex	de,hl
@@ -5864,7 +5864,7 @@ zasm18:	call	outadr		;display instruction address
 	ld	de,zmflag
 	ld	a,c		;save instruction length and format bits
 	ld	(de),a
-	and	3fh
+	and	3Fh
 	ld	b,a		;b  - length
 	ld	c,a		;c  - ditto
 zasm20:	ld	a,(hl)
@@ -5939,8 +5939,8 @@ zasm55:	inc	de
 	dec	c		;test for ED instruction
 	jr	nz,zasm65	;nz - not an ED
     if	Z180
-	call	zed180		;Do HD64180 decode of ED 00 to ED FF opcode.
-	jr	zasm90		;Go build instruction key.
+	call	zed180		;Do HD64180 decode of ED 00  to  ED FF opcode
+	jr	zasm90		;Go build instruction key
     else
 	cp	80h
 	jr	nc,zasm60	;opcode range ED 40 - ED 7F
@@ -5985,7 +5985,7 @@ zasm80:	cp	40h		;test type of CB instruction
 	jr	c,zasm85	;opcode range CB 00 - CB 3F (shift)
 	rlca
 	rlca
-	and	03		;hi order bits become index
+	and	03		;high order bits become index
 	ld	b,0F0h
 	jr	zasm90		;opcode range CB 40 - CB FF
 zasm85:	rrca
@@ -6026,7 +6026,7 @@ zasm92:	add	hl,bc
 zasm95:	ex	de,hl		;hl - buffer pointer
 	add	hl,bc		;start of operand field in buffer
 	ld	a,(zasmkv)	;save the instruction key value
-	cp	09fh
+	cp	09Fh
 	jr	nz,zasm99
 	ld	de,(zasmpc)
 	ld	a,(zmflag)
@@ -6060,17 +6060,17 @@ zasm99:	ld	de,zopnd1	;table of first operands
 ;*
 ;*   instruction key value is used to fetch operand key value:
 ;*
-;*	operand key value is in the range 0 - 1fh
+;*	operand key value is in the range 0 - 1Fh
 ;*	operand key value interpreted as follows:
 ;*
 ;*      0 - 17h  use as index to fetch literal from operand
 ;*		 name table (sign bit set - parens required)
 ;*
-;*     18 - 1fh  operand requires processing - use as index
+;*     18 - 1Fh  operand requires processing - use as index
 ;*		 into oprerand jump table which is located
 ;*		 immediately after name table
 ;*
-;*	   0ffh  no operand
+;*	    FFh  no operand
 ;*
 ;*   operand key value jump table routines: (buffer address in de)
 ;*
@@ -6079,11 +6079,11 @@ zasm99:	ld	de,zopnd1	;table of first operands
 ;*
 ;*     opn100	   18h	 relative jump
 ;*     opn200	   19h	 register specified in instruction
-;*     opn300	   1ah	 convert 16 bit operand to hex
-;*     opn400	   1ch	 convert 8 bit operand to hex
-;*     opn600	   1dh	 hl/ix/iy instruction
-;*     opn700	   1eh	 mask rst operand from bit 3-5 of rst instruction
-;*     opn800	   1fh	 bit number is specified in bits 3-5 of opcode
+;*     opn300	   1Ah	 convert 16 bit operand to hex
+;*     opn400	   1Ch	 convert 8 bit operand to hex
+;*     opn600	   1Dh	 hl/ix/iy instruction
+;*     opn700	   1Eh	 mask rst operand from bit 3-5 of rst instruction
+;*     opn800	   1Fh	 bit number is specified in bits 3-5 of opcode
 ;*
 ;*    exit: to zasm15 to continue block disassembly
 ;*
@@ -6389,7 +6389,7 @@ opn100:	ld	hl,(zasmpc)
 	add	a,a		;test sign for displacement direction
 	ld	b,0
 	jr	nc,opn105
-	dec	b		;produce zero for forward - ff for back
+	dec	b		;produce zero for forward - FFh for back
 opn105:	add	hl,bc		;adjust pc
 	ex	de,hl		;de - instruction ptr hl - buffer
 	call	fadr
@@ -6424,7 +6424,7 @@ opn210:	inc	hl		;
 	ld	a,(zasmkv)	;check for in or out instruction
 	cp	0B3h
 	jr	z,opn215	;no conversion of port addresses to ascii
-	cp	0bbh
+	cp	0BBh
 	jr	z,opn215
 	ld	a,(hl)
 	call	zascii
@@ -6447,16 +6447,16 @@ opn300:	call	zmqf
 	jr	nz,opn310	;nz - not ix or iy
 	inc	hl
 opn310:	inc	hl
-opn315:	ld	a,(hl)		;fetch lo order 16 bit operand
+opn315:	ld	a,(hl)		;fetch low order 16 bit operand
 	inc	hl
-	ld	h,(hl)		;hi order
+	ld	h,(hl)		;high order
 	ld	l,a
 	ex	de,hl		;de - 16 bit operand   hl - buffer
 	call	fadr
 	call	z,xsym
 	jp	z,opn020	;symbol found
 opn316:				;+ eg 3.3.4b
-	ld	a,d		;convert hi order to hex
+	ld	a,d		;convert high order to hex
 	ld	c,a		;save spare copy
 	call	zhex
 	ld	a,e
@@ -6484,7 +6484,7 @@ opn400:
 opn410:	ld	a,01		;check low bit of operand key value
 	and	b
 	ld	a,(de)		;fetch op code
-	jr	nz,opn500	;nz - index 01bh
+	jr	nz,opn500	;nz - index 01Bh
 	rra			;register specified in bits 0-5
 	rra
 	rra
@@ -6541,7 +6541,7 @@ opn610:	ld	(hl),'+'	;assume forward
 	neg			;force positive
 	ld	(hl),'-'
 opn620:	inc	hl		;bump buffer pointer
-	and	7fh		;strip sign
+	and	7Fh		;strip sign
 	call	zhex		;convert to hex
 	ld	a,9
 	cp	d
@@ -6590,8 +6590,8 @@ opn830:	call	zhex20		;convert to ascii
 ;*
 ;*	Input:	A	2nd opcode of ED instruction to be mapped
 ;*		B	zero
-;*		EDBAD	Table of illegal 2nd opcodes in the range 40H to 7FH
-;*		EDBIAS	Table of biases for 2nd opcodes smaller than 40H
+;*		EDBAD	Table of illegal 2nd opcodes in the range 40h to 7Fh
+;*		EDBIAS	Table of biases for 2nd opcodes smaller than 40h
 ;*
 ;*	Output:	A	Unchanged
 ;*		B	Bias which should be added to A to create instruction
@@ -6599,13 +6599,13 @@ opn830:	call	zhex20		;convert to ascii
 ;*
 ;*	Description:
 ;*		This routine causes all ED opcodes to be mapped into
-;*		instruction keys 40H to 9FH.
+;*		instruction keys 40h to 9Fh.
 ;*
 ;*		All Z80 opcodes are mapped as they were in the "Z80 only"
 ;*		release.
 ;*
-;*		The defb and defw pseudo-ops were moved from 6CH and 6DH
-;*		to 65H and 66H respectively because of a conflict with
+;*		The defb and defw pseudo-ops were moved from 6Ch and 6Dh
+;*		to 65h and 66h respectively because of a conflict with
 ;*		the HD64180-specific MLT HL instruction.
 ;*
 ;*		The HD64180-specific OTIM, OTIMR, OTDM and OTDMR instructions
@@ -6614,13 +6614,13 @@ opn830:	call	zhex20		;convert to ascii
 ;*
 ;*		The HD64180-specific TST m, TSTIO m, SLP, MLT BC, MLT DE,
 ;*		MLT HL and MLT SP instructions are mapped with a bias of 0
-;*		just as all the other ED opcodes in the 40H to 7FH range.
+;*		just as all the other ED opcodes in the 40h to 7Fh range.
 ;*
-;*		The 22 HD64180-specific ED instructions less than 40H are
+;*		The 22 HD64180-specific ED instructions less than 40h are
 ;*		mapped into the remaining "holes" via the EDBIAS lookup
 ;*		table.
 ;*
-;*		ALL illegal ED opcodes will be mapped into 9FH which will
+;*		ALL illegal ED opcodes will be mapped into 9Fh which will
 ;*		cause a defb to be used.
 ;*
 ;****************************************************************************
@@ -6653,13 +6653,13 @@ zed25:	cp	80h		;Opcode range ED 00 to ED 7F?
 
 	cp	40h		;Opcode range ED 00 to ED 3F?
 	jr	c,zed30		;If so, look up bias in EDBIAS.
-	ld	hl,edbad	;Point HL to illegal ED opcodes in 40h to 7fh.
+	ld	hl,edbad	;Point HL to illegal ED opcodes in 40h to 7Fh.
 	ld	c,edbadl
 	cpir			;Illegal?
 	jr	z,zed05		;If so, map to question marks.
 	ret			;Else, go build instruction key.
 
-zed30:	ld	hl,edbias	;Else, point HL to ED biases for opcodes < 3fh.
+zed30:	ld	hl,edbias	;Else, point HL to ED biases for opcodes < 3Fh.
 	ld	c,a
 	add	hl,bc		;Point HL to bias for this ED opcode.
 	ld	b,(hl)		;Get it into B.
@@ -6670,20 +6670,20 @@ zed30:	ld	hl,edbias	;Else, point HL to ED biases for opcodes < 3fh.
 ;*
 ;*	AED180	ED opcode unmapper for HD64180 debugger
 ;*
-;*	Input:	A	Instruction key for ED XX opcode (40H to 9FH)
-;*		EDBIAS	Table of biases for 2nd opcodes smaller than 40H
+;*	Input:	A	Instruction key for ED XX opcode (40h to 9Fh)
+;*		EDBIAS	Table of biases for 2nd opcodes smaller than 40h
 ;*
 ;*	Output:	A	Unmapped 2nd opcode of ED instruction
 ;*
 ;*	Description:
-;*		This routine encodes instruction key values in the range 40H
-;*		to 9FH into 2nd opcodes for ED instructions.
+;*		This routine encodes instruction key values in the range 40h
+;*		to 9Fh into 2nd opcodes for ED instructions.
 ;*
 ;*		All Z80 opcodes are mapped as they were in the "Z80 only"
 ;*		release.
 ;*
-;*		The defb and defw pseudo-ops were moved from 6CH and 6DH
-;*		to 65H and 66H respectively because of a conflict with
+;*		The defb and defw pseudo-ops were moved from 6Ch and 6Dh
+;*		to 65h and 66h respectively because of a conflict with
 ;*		the HD64180-specific MLT HL instruction.
 ;*
 ;*		The HD64180-specific OTIM, OTIMR, OTDM and OTDMR instructions
@@ -6692,9 +6692,9 @@ zed30:	ld	hl,edbias	;Else, point HL to ED biases for opcodes < 3fh.
 ;*
 ;*		The HD64180-specific TST m, TSTIO m, SLP, MLT BC, MLT DE,
 ;*		MLT HL and MLT SP instructions are mapped with a bias of 0
-;*		just as all the other ED opcodes in the 40H to 7FH range.
+;*		just as all the other ED opcodes in the 40h to 7Fh range.
 ;*
-;*		The 22 HD64180-specific ED instructions less than 40H are
+;*		The 22 HD64180-specific ED instructions less than 40h are
 ;*		mapped into the remaining "holes" via the EDBIAS lookup
 ;*		table.
 ;*
@@ -6708,8 +6708,8 @@ aed180:	push	hl		;Save registers.
 
 	ld	bc,40h
 aed05:	dec	c		;Decrement EDBIAS index.
-	jp	m,aed10		;If negative, opcode not 00h to 3fh.
-	ld	hl,edbias	;Point HL to ED biases for opcodes < 3fh.
+	jp	m,aed10		;If negative, opcode not 00h to 3Fh.
+	ld	hl,edbias	;Point HL to ED biases for opcodes < 3Fh.
 	add	hl,bc		;Point HL to bias value for opcode in C.
 	ld	a,(hl)		;Get bias.
 	add	a,c		;Add opcode.
@@ -6724,16 +6724,16 @@ aed10:	ld	a,d		;Restore instruction key.
 
 	cp	84h		;OTIM?
 	jr	z,aed20
-	cp	8ch		;OTDM?
+	cp	8Ch		;OTDM?
 	jr	z,aed20
 	cp	94h		;OTIMR?
 	jr	z,aed20
-	cp	9ch		;OTDMR?
+	cp	9Ch		;OTDMR?
 	jr	nz,aed25
 aed20:	dec	a		;Remove bias of 1.
 	jr	aed30		;Done.
 
-aed25:	add	a,20h		;Remove bias of 0e0h.
+aed25:	add	a,20h		;Remove bias of 0E0h.
 
 aed30:	pop	bc		;Restore registers.
 	pop	de
@@ -6757,20 +6757,20 @@ aed30:	pop	bc		;Restore registers.
 ;*		  d - reg destroyed
 ;*
 ;*	zhex10:	  no leading zero permitted
-;*	zhex20:	  convert lo order nibble only
+;*	zhex20:	  convert low order nibble only
 ;*
 ;******************************************************************************
 
 zndx:	ld	hl,(zasmpc)	;fetch current instruction pointer
 	ex	de,hl		;de - instruction pointer   hl - buffer
 	ld	a,(de)
-	add	a,-0fdh		;iy check
+	add	a,-0FDh		;iy check
 	ret	z
-	sub	0ddh-0fdh	;ix check
+	sub	0DDh-0FDh	;ix check
 	ret	z
 	cp	10h		;ed check
 	jr	z,zndx00
-	cp	0eeh		;cb check
+	cp	0EEh		;cb check
 	ld	a,0		;clear
 	ret	nz
 zndx00:	inc	de		;cb or ed - bump instruction pointer
@@ -6793,24 +6793,24 @@ zhex10:	rrca
 	rrca
 	rrca
 	rrca
-	and	0fh
+	and	0Fh
 	;; add	a,90h
 	;; daa
 	;; adc	a,40h
-	;; daa			;a - ascii digit
-	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
-	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	;; daa		;a - ascii digit
+	cp	10	; 0Ah ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69h	; subtract 105. [adding FF97h] (106. [adding FF96h] if carry set)
 	daa
 	ld	(hl),a
 	inc	hl
-	ld	a,d		;lo nibble conversion
-zhex20:	and	0fh
+	ld	a,d	;low nibble conversion
+zhex20:	and	0Fh
 	;; add	a,90h
 	;; daa
 	;; adc	a,40h
 	;; daa
-	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
-	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0Ah ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69h	; subtract 105. [adding FF97h] (106. [adding FF96h] if carry set)
 	daa
 	ld	(hl),a
 	inc	hl
@@ -6831,7 +6831,7 @@ zascii:	cp	' '
 	ret	c
 	and	a
 	ret	m
-	cp	7fh		;rubout?
+	cp	7Fh		;rubout?
 	jr	z,zasc10
 	cp	quote
 	jr	nz,zasc20
@@ -6840,7 +6840,7 @@ zasc10:	and	a		;set nz - conversion not done
 zasc20:	ex	de,hl
 	ld	(hl),quote	;defb - quoted character
 	inc	hl
-	or	80h		;hi bit on - no case conversion for this guy
+	or	80h		;high bit on - no case conversion for this guy
 	ld	(hl),a
 	inc	hl
 	ld	(hl),quote
@@ -6849,7 +6849,7 @@ zasc20:	ex	de,hl
 
 fadr:	push	bc
 	push	hl
-	ld	hl,(06)		;fetch top of tpa - start of symbol table
+	ld	hl,(06)		;fetch top of TPA - start of symbol table
 	ld	bc,(maxlen)
 	add	hl,bc		;point to start of symbol name
 	inc	hl
@@ -6857,7 +6857,7 @@ fadr00:	ld	a,(hl)		;first byte of symbol name
 	dec	a		;check validity
 	jp	m,fadr30	;end of table
 	add	hl,bc
-	ld	a,(hl)		;fetch hi order address from table
+	ld	a,(hl)		;fetch high order address from table
 	cp	d
 	jp	nz,fadr10
 	dec	hl
@@ -7227,13 +7227,13 @@ binx:	rrca
 	rrca
 	rrca
 	rrca
-binx00:	and	0fh
+binx00:	and	0Fh
 	;; add	a,90h
 	;; daa
 	;; adc	a,40h
 	;; daa
-	cp	10	; 0AH ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
-	sbc	a,69H	; subtract 105. [adding FF97H] (106. [adding FF96H] if carry set)
+	cp	10	; 0Ah ; if 0..9 then CARRY = 1; if 10..15 then CARRY = 0
+	sbc	a,69h	; subtract 105. [adding FF97h] (106. [adding FF96h] if carry set)
 	daa
 	ret
 
@@ -7585,7 +7585,7 @@ bksp00:	ld	a,bs
 	jp	ttyo
 
 
-asci:	and	7fh		;Convert contents of accumulator to ascii
+asci:	and	7Fh		;Convert contents of accumulator to ascii
     if	hazeltine		;Hazeltine terminal?
 	cp	tilde		;	check for tilde or del
 	jr	nc,asci00	;	yes - translate to '.'
@@ -7803,24 +7803,24 @@ matail:	defb	' terminal enabled...'
     endif
 
 
-z80fd:	defb	009h,019h,02bh		; add hl,bc ; add hl,de ; dec hl
-	defb	023h,029h,039h,0e1h	; inc hl    ; add hl,hl ; add hl,sp ; pop hl
-	defb	0E3H,0e5h,0e9h,0f9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
+z80fd:	defb	009h,019h,02Bh		; add hl,bc ; add hl,de ; dec hl
+	defb	023h,029h,039h,0E1h	; inc hl    ; add hl,hl ; add hl,sp ; pop hl
+	defb	0E3h,0E5h,0E9h,0F9h	; ex (sp),hl; push hl   ; jp (hl)   ; ld sp,hl
 z80fdl	equ	$-z80fd
 
-z80f4:	defb	021h,022h,02ah,036h,0cbh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),* ; **BIT**
+z80f4:	defb	021h,022h,02Ah,036h,0CBh ; ld hl,** ; ld (**),hl ; ld hl,(**) ; ld (hl),* ; **BIT**
 z80f4l	equ	$-z80f4
 
 
-z801:	defb	0c0h,0e9h,0c9h,0d8h	; ret nz ; jp (hl) ; ret    ; ret c
-	defb	0d0h,0c8h,0e8h,0e0h	; ret nc ; ret z   ; ret pe ; ret po
-	defb	0f8h,0f0h		; ret m  ; ret p
+z801:	defb	0C0h,0E9h,0C9h,0D8h	; ret nz ; jp (hl) ; ret    ; ret c
+	defb	0D0h,0C8h,0E8h,0E0h	; ret nc ; ret z   ; ret pe ; ret po
+	defb	0F8h,0F0h		; ret m  ; ret p
 z801l	equ	$-z801
 
 
-z802:	defb	036h,0c6h,0ceh,0d3h	; ld (hl),* ; add a,*  ; adc a,* ; out (*),a
-	defb	0d6h,0dbh,0deh,0e6h	; sub *     ; in a,(*) ; sbc a,* ; and *
-	defb	0eeh,0f6h,0feh		; xor *     ; or *     ; cp *
+z802:	defb	036h,0C6h,0CEh,0D3h	; ld (hl),* ; add a,*  ; adc a,* ; out (*),a
+	defb	0D6h,0DBh,0DEh,0E6h	; sub *     ; in a,(*) ; sbc a,* ; and *
+	defb	0EEh,0F6h,0FEh		; xor *     ; or *     ; cp *
 z802c:	defb	018h,038h,030h		; jr *      ; jr c,*   ; jr nc,*
 	defb	028h,020h,010h		; jr z,*    ; jr nz,*  ; djnz *
 z802l	equ	$-z802
@@ -7829,23 +7829,23 @@ z802cl	equ	$-z802c
 
 z80r:
 z803:	defb	001h,011h,021h,022h	; ld bc,**   ; ld de,** ; ld hl,**  ; ld (**),hl
-	defb	02ah,031h,032h,03ah	; ld hl,(**) ; ld sp,** ; ld (**),a ; ld a,(**)
+	defb	02Ah,031h,032h,03Ah	; ld hl,(**) ; ld sp,** ; ld (**),a ; ld a,(**)
 
-z803s:	defb	0cdh			; call **
-	defb	0dch,0d4h,0cch,0c4h	; call c,**  ; call nc,** ; call z,** ; call nz,**
-	defb	0ech,0e4h,0fch,0f4h	; call pe,** ; call po,** ; call m,** ; call p,**
+z803s:	defb	0CDh			; call **
+	defb	0DCh,0D4h,0CCh,0C4h	; call c,**  ; call nc,** ; call z,** ; call nz,**
+	defb	0ECh,0E4h,0FCh,0F4h	; call pe,** ; call po,** ; call m,** ; call p,**
 
 z803sl	equ	$-z803s			;number of call instructions
 
-z803c:	defb	0c3h			; jp **
-	defb	0dah,0d2h,0cah,0c2h	; jp c,**  ; jp nc,** ; jp z,** ; jp nz,**
-	defb	0eah,0e2h,0fah,0f2h	; jp pe,** ; jp po,** ; jp m,** ; jp p,**
+z803c:	defb	0C3h			; jp **
+	defb	0DAh,0D2h,0CAh,0C2h	; jp c,**  ; jp nc,** ; jp z,** ; jp nz,**
+	defb	0EAh,0E2h,0FAh,0F2h	; jp pe,** ; jp po,** ; jp m,** ; jp p,**
 
 z803l	equ	$-z803			;number of 3 byte instructions
 z803cl	equ	$-z803s			;number of 3 byte pc mod instructions
 
-z80ed:	defb	043h,04bh,053h		; ld (**),bc ; ld bc,(**) ; ld (**),de
-	defb	05bh,073h,07bh		; ld de,(**) ; ld (**),sp ; ld sp,(**)
+z80ed:	defb	043h,04Bh,053h		; ld (**),bc ; ld bc,(**) ; ld (**),de
+	defb	05Bh,073h,07Bh		; ld de,(**) ; ld (**),sp ; ld sp,(**)
 
 z80edl	equ	$-z80ed
 
@@ -7887,15 +7887,15 @@ edbadl	equ	$-edbad			;# of illegal ED opcodes in 40h to 7Fh
     endif
 
 z80f3:
-	defb	034h,035h,046h,04eh	; inc (hl)   ; dec (hl)   ; ld b,(hl) ; ld c,(hl)
-	defb	056h,05eh,066h,06eh	; ld d,(hl)  ; ld e,(hl)  ; ld h,(hl) ; ld l,(hl)
+	defb	034h,035h,046h,04Eh	; inc (hl)   ; dec (hl)   ; ld b,(hl) ; ld c,(hl)
+	defb	056h,05Eh,066h,06Eh	; ld d,(hl)  ; ld e,(hl)  ; ld h,(hl) ; ld l,(hl)
 	defb	070h,071h,072h,073h	; ld (hl),b  ; ld (hl),c  ; ld (hl),d ; ld (hl),e
-	defb	074h,075h,077h,07eh	; ld (hl),h  ; ld (hl),l  ; ld (hl),a ; ld a,(hl)
-	defb	086h,08eh,096h,09eh	; add a,(hl) ; adc a,(hl) ; sub (hl)  ; sbc a,(hl)
-	defb	0a6h,0aeh,0b6h,0beh	; and (hl)   ; xor (hl)   ; or (hl)   ; cp (hl)
+	defb	074h,075h,077h,07Eh	; ld (hl),h  ; ld (hl),l  ; ld (hl),a ; ld a,(hl)
+	defb	086h,08Eh,096h,09Eh	; add a,(hl) ; adc a,(hl) ; sub (hl)  ; sbc a,(hl)
+	defb	0A6h,0AEh,0B6h,0BEh	; and (hl)   ; xor (hl)   ; or (hl)   ; cp (hl)
 z80f3l	equ	$-z80f3
 
-	org	($+3) and 0fffch
+	org	($+3) and 0FFFCh
 
     if	Z180
 ;***********************************************************************
@@ -7905,80 +7905,80 @@ z80f3l	equ	$-z80f3
 ;***********************************************************************
 
 zopcpt:
-	defb	022H,01CH,01CH,015H	;NOP	LD	LD	INC	00 - 03
-	defb	015H,00CH,01CH,031H	;INC	DEC	LD	RLCA	04 - 07
-	defb	010H,000H,01CH,00CH	;EX	ADD	LD	DEC	08 - 0B
-	defb	015H,00CH,01CH,036H	;INC	DEC	LD	RRCA	0C - 0F
-	defb	00EH,01CH,01CH,015H	;DJNZ	LD	LD	INC	10 - 13
-	defb	015H,00CH,01CH,02FH	;INC	DEC	LD	RLA	14 - 17
-	defb	01BH,000H,01CH,00CH	;JR	ADD	LD	DEC	18 - 1B
-	defb	015H,00CH,01CH,034H	;INC	DEC	LD	RRA	1C - 1F
-	defb	01BH,01CH,01CH,015H	;JR	LD	LD	INC	20 - 23
-	defb	015H,00CH,01CH,00BH	;INC	DEC	LD	DAA	24 - 27
-	defb	01BH,000H,01CH,00CH	;JR	ADD	LD	DEC	28 - 2B
-	defb	015H,00CH,01CH,00AH	;INC	DEC	LD	CPL	2C - 2F
-	defb	01BH,01CH,01CH,015H	;JR	LD	LD	INC	30 - 33
-	defb	015H,00CH,01CH,03AH	;INC	DEC	LD	SCF	34 - 37
-	defb	01BH,000H,01CH,00CH	;JR	ADD	LD	DEC	38 - 3B
-	defb	015H,00CH,01CH,004H	;INC	DEC	LD	CCF	3C - 3F
+	defb	022h,01Ch,01Ch,015h	;NOP	LD	LD	INC	00 - 03
+	defb	015h,00Ch,01Ch,031h	;INC	DEC	LD	RLCA	04 - 07
+	defb	010h,000h,01Ch,00Ch	;EX	ADD	LD	DEC	08 - 0B
+	defb	015h,00Ch,01Ch,036h	;INC	DEC	LD	RRCA	0C - 0F
+	defb	00Eh,01Ch,01Ch,015h	;DJNZ	LD	LD	INC	10 - 13
+	defb	015h,00Ch,01Ch,02Fh	;INC	DEC	LD	RLA	14 - 17
+	defb	01Bh,000h,01Ch,00Ch	;JR	ADD	LD	DEC	18 - 1B
+	defb	015h,00Ch,01Ch,034h	;INC	DEC	LD	RRA	1C - 1F
+	defb	01Bh,01Ch,01Ch,015h	;JR	LD	LD	INC	20 - 23
+	defb	015h,00Ch,01Ch,00Bh	;INC	DEC	LD	DAA	24 - 27
+	defb	01Bh,000h,01Ch,00Ch	;JR	ADD	LD	DEC	28 - 2B
+	defb	015h,00Ch,01Ch,00Ah	;INC	DEC	LD	CPL	2C - 2F
+	defb	01Bh,01Ch,01Ch,015h	;JR	LD	LD	INC	30 - 33
+	defb	015h,00Ch,01Ch,03Ah	;INC	DEC	LD	SCF	34 - 37
+	defb	01Bh,000h,01Ch,00Ch	;JR	ADD	LD	DEC	38 - 3B
+	defb	015h,00Ch,01Ch,004h	;INC	DEC	LD	CCF	3C - 3F
 
 
-	defb	014H,026H,039H,01CH	;IN	OUT	SBC	LD	ED 40
-	defb	021H,02DH,013H,01CH	;NEG	RETN	IM	LD
-	defb	014H,026H,001H,01CH	;IN	OUT	ADC	LD
-	defb	04EH,02CH,049H,01CH	;MLT	RETI	IN0	LD
-	defb	014H,026H,039H,01CH	;IN	OUT	SBC	LD
-	defb	04AH,04BH,013H,01CH	;OUT0	TST	IM	LD
-	defb	014H,026H,001H,01CH	;IN	OUT	ADC	LD
-	defb	04EH,049H,013H,01CH	;MLT	IN0	IM	LD
-	defb	014H,026H,039H,04AH	;IN	OUT	SBC	OUT0
-	defb	04BH,045H,046H,037H	;TST	defb*	defw*	RRD
-	defb	014H,026H,001H,04BH	;IN	OUT	ADC	TST
-	defb	04EH,049H,047H,032H	;MLT	IN0	DDB*	RLD
-	defb	044H,048H,039H,01CH	;ORG*	equ*	SBC	LD	ED 70
-	defb	04CH,04AH,04DH,04BH	;TSTIO	OUT0	SLP	TST
-	defb	014H,026H,001H,01CH	;IN	OUT	ADC	LD
-	defb	04EH,049H,04AH,04BH	;MLT	IN0	OUT0	TST	ED 7F
+	defb	014h,026h,039h,01Ch	;IN	OUT	SBC	LD	ED 40
+	defb	021h,02Dh,013h,01Ch	;NEG	RETN	IM	LD
+	defb	014h,026h,001h,01Ch	;IN	OUT	ADC	LD
+	defb	04Eh,02Ch,049h,01Ch	;MLT	RETI	IN0	LD
+	defb	014h,026h,039h,01Ch	;IN	OUT	SBC	LD
+	defb	04Ah,04Bh,013h,01Ch	;OUT0	TST	IM	LD
+	defb	014h,026h,001h,01Ch	;IN	OUT	ADC	LD
+	defb	04Eh,049h,013h,01Ch	;MLT	IN0	IM	LD
+	defb	014h,026h,039h,04Ah	;IN	OUT	SBC	OUT0
+	defb	04Bh,045h,046h,037h	;TST	defb*	defw*	RRD
+	defb	014h,026h,001h,04Bh	;IN	OUT	ADC	TST
+	defb	04Eh,049h,047h,032h	;MLT	IN0	DDB*	RLD
+	defb	044h,048h,039h,01Ch	;ORG*	equ*	SBC	LD	ED 70
+	defb	04Ch,04Ah,04Dh,04Bh	;TSTIO	OUT0	SLP	TST
+	defb	014h,026h,001h,01Ch	;IN	OUT	ADC	LD
+	defb	04Eh,049h,04Ah,04Bh	;MLT	IN0	OUT0	TST	ED 7F
 
 
-	defb	01FH,008H,018H,028H	;LDI	CPI	INI	OUTI
-	defb	04FH,049H,04AH,04BH	;OTIM	IN0	OUT0	TST
-	defb	01DH,006H,016H,027H	;LDD	CPD	IND	OUTD
-	defb	050H,049H,04AH,04BH	;OTDM	IN0	OUT0	TST
-	defb	020H,009H,019H,025H	;LDIR	CPIR	INIR	OTIR
-	defb	051H,04BH,049H,04AH	;OTIMR	TST	IN0	OUT0
-	defb	01EH,007H,017H,024H	;LDDR	CPDR	INDR	OTDR
-	defb	052H,04BH,022H,045H	;OTDMR	TST	....	defb*
+	defb	01Fh,008h,018h,028h	;LDI	CPI	INI	OUTI
+	defb	04Fh,049h,04Ah,04Bh	;OTIM	IN0	OUT0	TST
+	defb	01Dh,006h,016h,027h	;LDD	CPD	IND	OUTD
+	defb	050h,049h,04Ah,04Bh	;OTDM	IN0	OUT0	TST
+	defb	020h,009h,019h,025h	;LDIR	CPIR	INIR	OTIR
+	defb	051h,04Bh,049h,04Ah	;OTIMR	TST	IN0	OUT0
+	defb	01Eh,007h,017h,024h	;LDDR	CPDR	INDR	OTDR
+	defb	052h,04Bh,022h,045h	;OTDMR	TST	....	defb*
 
 
-	defb	02BH,029H,01AH,01AH	;RET	POP	JP	JP	C0 - C3
-	defb	003H,02AH,000H,038H	;CALL	PUSH	ADD	RST	C4 - C7
-	defb	02BH,02BH,01AH,022H	;RET	RET	JP	...	C8 - CB
-	defb	003H,003H,001H,038H	;CALL	CALL	ADC	RST	CC - CF
-	defb	02BH,029H,01AH,026H	;RET	POP	JP	OUT	D0 - D3
-	defb	003H,02AH,03FH,038H	;CALL	PUSH	SUB	RST	D4 - D7
-	defb	02BH,011H,01AH,014H	;RET	EXX	JP	IN	D8 - DB
-	defb	003H,022H,039H,038H	;CALL	...	SBC	RST	DC - DF
-	defb	02BH,029H,01AH,010H	;RET	POP	JP	EX	E0 - E3
-	defb	003H,02AH,002H,038H	;CALL	PUSH	AND	RST	E4 - E7
-	defb	02BH,01AH,01AH,010H	;RET	JP	JP	EX	E8 - EB
-	defb	003H,022H,040H,038H	;CALL	...	XOR	RST	EC - EF
-	defb	02BH,029H,01AH,00DH	;RET	POP	JP	DI	F0 - F3
-	defb	003H,02AH,023H,038H	;CALL	PUSH	OR	RST	F4 - F7
-	defb	02BH,01CH,01AH,00FH	;RET	LD	JP	EI	F8 - FB
-	defb	003H,022H,005H,038H	;CALL	...	CP	RST	FC - FF
+	defb	02Bh,029h,01Ah,01Ah	;RET	POP	JP	JP	C0 - C3
+	defb	003h,02Ah,000h,038h	;CALL	PUSH	ADD	RST	C4 - C7
+	defb	02Bh,02Bh,01Ah,022h	;RET	RET	JP	...	C8 - CB
+	defb	003h,003h,001h,038h	;CALL	CALL	ADC	RST	CC - CF
+	defb	02Bh,029h,01Ah,026h	;RET	POP	JP	OUT	D0 - D3
+	defb	003h,02Ah,03Fh,038h	;CALL	PUSH	SUB	RST	D4 - D7
+	defb	02Bh,011h,01Ah,014h	;RET	EXX	JP	IN	D8 - DB
+	defb	003h,022h,039h,038h	;CALL	...	SBC	RST	DC - DF
+	defb	02Bh,029h,01Ah,010h	;RET	POP	JP	EX	E0 - E3
+	defb	003h,02Ah,002h,038h	;CALL	PUSH	AND	RST	E4 - E7
+	defb	02Bh,01Ah,01Ah,010h	;RET	JP	JP	EX	E8 - EB
+	defb	003h,022h,040h,038h	;CALL	...	XOR	RST	EC - EF
+	defb	02Bh,029h,01Ah,00Dh	;RET	POP	JP	DI	F0 - F3
+	defb	003h,02Ah,023h,038h	;CALL	PUSH	OR	RST	F4 - F7
+	defb	02Bh,01Ch,01Ah,00Fh	;RET	LD	JP	EI	F8 - FB
+	defb	003h,022h,005h,038h	;CALL	...	CP	RST	FC - FF
 
-	defb	000H,001H,03FH,039H	;ADD	ADC	SUB	SBC
-	defb	002H,040H,023H,005H	;AND	XOR	OR	CP
+	defb	000h,001h,03Fh,039h	;ADD	ADC	SUB	SBC
+	defb	002h,040h,023h,005h	;AND	XOR	OR	CP
 
-	defb	030H,035H,02EH,033H	;RLC	RRC	RL	RR
-	defb	03BH,03DH,03CH,03EH	;SLA	SRA	SLL	SRL
-	defb	022H,041H,042H,043H	;...	BIT	RES	SET
+	defb	030h,035h,02Eh,033h	;RLC	RRC	RL	RR
+	defb	03Bh,03Dh,03Ch,03Eh	;SLA	SRA	SLL	SRL
+	defb	022h,041h,042h,043h	;...	BIT	RES	SET
 
-	defb	022H,022H,022H,012H	;...	...	...	HALT
+	defb	022h,022h,022h,012h	;...	...	...	HALT
 
-	defb	01CH,01CH,01CH,01CH	;LD	LD	LD	LD
-	defb	01CH,01CH,01CH,01CH	;LD	LD	LD	LD
+	defb	01Ch,01Ch,01Ch,01Ch	;LD	LD	LD	LD
+	defb	01Ch,01Ch,01Ch,01Ch	;LD	LD	LD	LD
 	page
 ;****************************************************************************
 ;*
@@ -7987,77 +7987,77 @@ zopcpt:
 ;****************************************************************************
 
 zopnd1:
-	defb	0FFH,00EH,08EH,00EH	;00 - 03
-	defb	006H,006H,006H,0FFH	;04 - 07
-	defb	00DH,018H,001H,00EH	;08 - 0B
-	defb	007H,007H,007H,0FFH	;0C - 0F
-	defb	01BH,00FH,08FH,00FH	;10 - 13
-	defb	004H,004H,004H,0FFH	;14 - 17
-	defb	01BH,018H,001H,00FH	;18 - 1B
-	defb	005H,005H,005H,0FFH	;1C - 1F
-	defb	013H,018H,09DH,018H	;20 - 23
-	defb	002H,002H,002H,0FFH	;24 - 27
-	defb	011H,018H,018H,018H	;28 - 2B
-	defb	003H,003H,003H,0FFH	;2C - 2F
-	defb	012H,009H,09DH,009H	;30 - 33
-	defb	098H,098H,098H,0FFH	;34 - 37
-	defb	007H,018H,001H,009H	;38 - 3B
-	defb	001H,001H,001H,0FFH	;3C - 3F
+	defb	0FFh,00Eh,08Eh,00Eh	;00 - 03
+	defb	006h,006h,006h,0FFh	;04 - 07
+	defb	00Dh,018h,001h,00Eh	;08 - 0B
+	defb	007h,007h,007h,0FFh	;0C - 0F
+	defb	01Bh,00Fh,08Fh,00Fh	;10 - 13
+	defb	004h,004h,004h,0FFh	;14 - 17
+	defb	01Bh,018h,001h,00Fh	;18 - 1B
+	defb	005h,005h,005h,0FFh	;1C - 1F
+	defb	013h,018h,09Dh,018h	;20 - 23
+	defb	002h,002h,002h,0FFh	;24 - 27
+	defb	011h,018h,018h,018h	;28 - 2B
+	defb	003h,003h,003h,0FFh	;2C - 2F
+	defb	012h,009h,09Dh,009h	;30 - 33
+	defb	098h,098h,098h,0FFh	;34 - 37
+	defb	007h,018h,001h,009h	;38 - 3B
+	defb	001h,001h,001h,0FFh	;3C - 3F
 
-	defb	006H,087H,000H,09DH	;40 - 43
-	defb	0FFH,0FFH,01FH,00CH	;44 - 47
-	defb	007H,087H,000H,00EH	;48 - 4B
-	defb	00EH,0FFH,006H,00BH	;4C - 4F
-	defb	004H,087H,000H,09DH	;50 - 53
-	defb	09CH,006H,01FH,001H	;54 - 57
-	defb	005H,087H,000H,00FH	;58 - 5B
-	defb	00FH,007H,01FH,001H	;5C - 5F
-	defb	002H,087H,000H,09CH	;60 - 63
-	defb	01CH,01CH,01DH,0FFH	;64 - 67	      defb  defw
-	defb	003H,087H,000H,007H	;68 - 6B
-	defb	000H,004H,01DH,0FFH	;6C - 6F		    DDB
-	defb	01DH,01DH,000H,09DH	;70 - 73	ORG   equ
-	defb	01CH,09CH,0FFH,004H	;74 - 77
-	defb	001H,087H,000H,009H	;78 - 7B
-	defb	009H,005H,09CH,005H	;7C - 7F
+	defb	006h,087h,000h,09Dh	;40 - 43
+	defb	0FFh,0FFh,01Fh,00Ch	;44 - 47
+	defb	007h,087h,000h,00Eh	;48 - 4B
+	defb	00Eh,0FFh,006h,00Bh	;4C - 4F
+	defb	004h,087h,000h,09Dh	;50 - 53
+	defb	09Ch,006h,01Fh,001h	;54 - 57
+	defb	005h,087h,000h,00Fh	;58 - 5B
+	defb	00Fh,007h,01Fh,001h	;5C - 5F
+	defb	002h,087h,000h,09Ch	;60 - 63
+	defb	01Ch,01Ch,01Dh,0FFh	;64 - 67	      defb  defw
+	defb	003h,087h,000h,007h	;68 - 6B
+	defb	000h,004h,01Dh,0FFh	;6C - 6F		    DDB
+	defb	01Dh,01Dh,000h,09Dh	;70 - 73	ORG   equ
+	defb	01Ch,09Ch,0FFh,004h	;74 - 77
+	defb	001h,087h,000h,009h	;78 - 7B
+	defb	009h,005h,09Ch,005h	;7C - 7F
 
-	defb	0FFH,0FFH,0FFH,0FFH	;A0 - A3
-	defb	0FFH,002H,09CH,002H	;A4 - A7
-	defb	0FFH,0FFH,0FFH,0FFH	;A8 - AB
-	defb	0FFH,003H,09CH,003H	;AC - AF
-	defb	0FFH,0FFH,0FFH,0FFH	;B0 - B3
-	defb	0FFH,080H,001H,09CH	;B4 - B7
-	defb	0FFH,0FFH,0FFH,0FFH	;B8 - BB
-	defb	0FFH,001H,0FFH,0FFH	;BC - BF
+	defb	0FFh,0FFh,0FFh,0FFh	;A0 - A3
+	defb	0FFh,002h,09Ch,002h	;A4 - A7
+	defb	0FFh,0FFh,0FFh,0FFh	;A8 - AB
+	defb	0FFh,003h,09Ch,003h	;AC - AF
+	defb	0FFh,0FFh,0FFh,0FFh	;B0 - B3
+	defb	0FFh,080h,001h,09Ch	;B4 - B7
+	defb	0FFh,0FFh,0FFh,0FFh	;B8 - BB
+	defb	0FFh,001h,0FFh,0FFh	;BC - BF
 
-	defb	013H,00EH,013H,01DH	;C0 - C3
-	defb	013H,00EH,001H,01EH	;C4 - C7
-	defb	011H,0FFH,011H,0FFH	;C8 - CB
-	defb	011H,01DH,001H,01EH	;CC - CF
-	defb	012H,00FH,012H,09CH	;D0 - D3
-	defb	012H,00FH,01CH,01EH	;D4 - D7
-	defb	007H,0FFH,007H,001H	;D8 - DB
-	defb	007H,0FFH,001H,01EH	;DC - DF
-	defb	015H,018H,015H,089H	;E0 - E3
-	defb	015H,018H,01CH,01EH	;E4 - E7
-	defb	014H,098H,014H,00FH	;E8 - EB
-	defb	014H,0FFH,01CH,01EH	;EC - EF
-	defb	00AH,00DH,00AH,0FFH	;F0 - F3
-	defb	00AH,00DH,01CH,01EH	;F4 - F7
-	defb	016H,009H,016H,0FFH	;F8 - FB
-	defb	016H,0FFH,01CH,01EH	;FC - FF
+	defb	013h,00Eh,013h,01Dh	;C0 - C3
+	defb	013h,00Eh,001h,01Eh	;C4 - C7
+	defb	011h,0FFh,011h,0FFh	;C8 - CB
+	defb	011h,01Dh,001h,01Eh	;CC - CF
+	defb	012h,00Fh,012h,09Ch	;D0 - D3
+	defb	012h,00Fh,01Ch,01Eh	;D4 - D7
+	defb	007h,0FFh,007h,001h	;D8 - DB
+	defb	007h,0FFh,001h,01Eh	;DC - DF
+	defb	015h,018h,015h,089h	;E0 - E3
+	defb	015h,018h,01Ch,01Eh	;E4 - E7
+	defb	014h,098h,014h,00Fh	;E8 - EB
+	defb	014h,0FFh,01Ch,01Eh	;EC - EF
+	defb	00Ah,00Dh,00Ah,0FFh	;F0 - F3
+	defb	00Ah,00Dh,01Ch,01Eh	;F4 - F7
+	defb	016h,009h,016h,0FFh	;F8 - FB
+	defb	016h,0FFh,01Ch,01Eh	;FC - FF
 
-	defb	001H,001H,019H,001H	;8 bit logic and arithmetic
-	defb	019H,019H,019H,019H	;
+	defb	001h,001h,019h,001h	;8 bit logic and arithmetic
+	defb	019h,019h,019h,019h	;
 
-	defb	019H,019H,019H,019H	;Shift and rotate
-	defb	019H,019H,019H,019H	;
-	defb	0FFH,01FH,01FH,01FH	;Bit - res - set
+	defb	019h,019h,019h,019h	;Shift and rotate
+	defb	019h,019h,019h,019h	;
+	defb	0FFh,01Fh,01Fh,01Fh	;Bit - res - set
 
-	defb	0FFH,0FFH,0FFH,0FFH	;Filler
+	defb	0FFh,0FFh,0FFh,0FFh	;Filler
 
-	defb	01AH,01AH,01AH,01AH	;8 bit load
-	defb	01AH,01AH,01AH,01AH	;
+	defb	01Ah,01Ah,01Ah,01Ah	;8 bit load
+	defb	01Ah,01Ah,01Ah,01Ah	;
 
 
 
@@ -8070,77 +8070,77 @@ zopnd1:
 ;***********************************************************************
 
 zopnd2:
-	defb	0FFH,01DH,001H,0FFH	;00 - 03
-	defb	0FFH,0FFH,01CH,0FFH	;04 - 07
-	defb	00DH,00EH,08EH,0FFH	;08 - 0B
-	defb	0FFH,0FFH,01CH,0FFH	;0C - 0F
-	defb	0FFH,01DH,001H,0FFH	;10 - 13
-	defb	0FFH,0FFH,01CH,0FFH	;14 - 17
-	defb	0FFH,00FH,08FH,0FFH	;18 - 1B
-	defb	0FFH,0FFH,01CH,0FFH	;1C - 1F
-	defb	01BH,01DH,018H,0FFH	;20 - 23
-	defb	0FFH,0FFH,01CH,0FFH	;24 - 27
-	defb	01BH,018H,09DH,0FFH	;28 - 2B
-	defb	0FFH,0FFH,01CH,0FFH	;2C - 2F
-	defb	01BH,01DH,001H,0FFH	;30 - 33
-	defb	0FFH,0FFH,01CH,0FFH	;34 - 37
-	defb	01BH,009H,09DH,0FFH	;38 - 3B
-	defb	0FFH,0FFH,01CH,0FFH	;3C - 3F
+	defb	0FFh,01Dh,001h,0FFh	;00 - 03
+	defb	0FFh,0FFh,01Ch,0FFh	;04 - 07
+	defb	00Dh,00Eh,08Eh,0FFh	;08 - 0B
+	defb	0FFh,0FFh,01Ch,0FFh	;0C - 0F
+	defb	0FFh,01Dh,001h,0FFh	;10 - 13
+	defb	0FFh,0FFh,01Ch,0FFh	;14 - 17
+	defb	0FFh,00Fh,08Fh,0FFh	;18 - 1B
+	defb	0FFh,0FFh,01Ch,0FFh	;1C - 1F
+	defb	01Bh,01Dh,018h,0FFh	;20 - 23
+	defb	0FFh,0FFh,01Ch,0FFh	;24 - 27
+	defb	01Bh,018h,09Dh,0FFh	;28 - 2B
+	defb	0FFh,0FFh,01Ch,0FFh	;2C - 2F
+	defb	01Bh,01Dh,001h,0FFh	;30 - 33
+	defb	0FFh,0FFh,01Ch,0FFh	;34 - 37
+	defb	01Bh,009h,09Dh,0FFh	;38 - 3B
+	defb	0FFh,0FFh,01Ch,0FFh	;3C - 3F
 
-	defb	087H,006H,00EH,00EH	;40 - 43
-	defb	0FFH,0FFH,0FFH,001H	;44 - 47
-	defb	087H,007H,00EH,09DH	;48 - 4B
-	defb	0FFH,0FFH,09CH,001H	;4C - 4F
-	defb	087H,004H,00FH,00FH	;50 - 53
-	defb	006H,0FFH,0FFH,00CH	;54 - 57
-	defb	087H,005H,00FH,09DH	;58 - 5B
-	defb	0FFH,09CH,0FFH,00BH	;5C - 5F
-	defb	087H,002H,000H,007H	;60 - 63
-	defb	0FFH,0FFH,0FFH,0FFH	;64 - 67
-	defb	087H,003H,000H,0FFH	;68 - 6B
-	defb	0FFH,09CH,0FFH,0FFH	;6C - 6F
-	defb	0FFH,0FFH,009H,009H	;70 - 73
-	defb	0FFH,004H,0FFH,0FFH	;74 - 77
-	defb	087H,001H,009H,09DH	;78 - 7B
-	defb	0FFH,09CH,005H,0FFH	;7C - 7F
+	defb	087h,006h,00Eh,00Eh	;40 - 43
+	defb	0FFh,0FFh,0FFh,001h	;44 - 47
+	defb	087h,007h,00Eh,09Dh	;48 - 4B
+	defb	0FFh,0FFh,09Ch,001h	;4C - 4F
+	defb	087h,004h,00Fh,00Fh	;50 - 53
+	defb	006h,0FFh,0FFh,00Ch	;54 - 57
+	defb	087h,005h,00Fh,09Dh	;58 - 5B
+	defb	0FFh,09Ch,0FFh,00Bh	;5C - 5F
+	defb	087h,002h,000h,007h	;60 - 63
+	defb	0FFh,0FFh,0FFh,0FFh	;64 - 67
+	defb	087h,003h,000h,0FFh	;68 - 6B
+	defb	0FFh,09Ch,0FFh,0FFh	;6C - 6F
+	defb	0FFh,0FFh,009h,009h	;70 - 73
+	defb	0FFh,004h,0FFh,0FFh	;74 - 77
+	defb	087h,001h,009h,09Dh	;78 - 7B
+	defb	0FFh,09Ch,005h,0FFh	;7C - 7F
 
-	defb	0FFH,0FFH,0FFH,0FFH	;A0 - BF
-	defb	0FFH,09CH,002H,0FFH	;A4 - A7
-	defb	0FFH,0FFH,0FFH,0FFH	;A8 - AB
-	defb	0FFH,09CH,003H,0FFH	;AC - AF
-	defb	0FFH,0FFH,0FFH,0FFH	;B0 - B3
-	defb	0FFH,0FFH,09CH,001H	;B4 - B7
-	defb	0FFH,0FFH,0FFH,0FFH	;B8 - BB
-	defb	0FFH,0FFH,00FH,0FFH	;BC - BF
+	defb	0FFh,0FFh,0FFh,0FFh	;A0 - BF
+	defb	0FFh,09Ch,002h,0FFh	;A4 - A7
+	defb	0FFh,0FFh,0FFh,0FFh	;A8 - AB
+	defb	0FFh,09Ch,003h,0FFh	;AC - AF
+	defb	0FFh,0FFh,0FFh,0FFh	;B0 - B3
+	defb	0FFh,0FFh,09Ch,001h	;B4 - B7
+	defb	0FFh,0FFh,0FFh,0FFh	;B8 - BB
+	defb	0FFh,0FFh,00Fh,0FFh	;BC - BF
 
-	defb	0FFH,0FFH,01DH,0FFH	;C0 - C3
-	defb	01DH,0FFH,01CH,0FFH	;C4 - C7
-	defb	0FFH,0FFH,01DH,0FFH	;C8 - CB
-	defb	01DH,0FFH,01CH,0FFH	;CC - CF
-	defb	0FFH,0FFH,01DH,001H	;D0 - D3
-	defb	01DH,0FFH,0FFH,0FFH	;D4 - D7
-	defb	0FFH,0FFH,01DH,09CH	;D8 - DB
-	defb	01DH,0FFH,01CH,0FFH	;DC - DF
-	defb	0FFH,0FFH,01DH,018H	;E0 - E3
-	defb	01DH,0FFH,0FFH,0FFH	;E4 - E7
-	defb	0FFH,0FFH,01DH,000H	;E8 - EB
-	defb	01DH,0FFH,0FFH,0FFH	;EC - EF
-	defb	0FFH,0FFH,01DH,0FFH	;F0 - F3
-	defb	01DH,0FFH,0FFH,0FFH	;F4 - F7
-	defb	0FFH,018H,01DH,0FFH	;F8 - FB
-	defb	01DH,0FFH,0FFH,0FFH	;FC - FF
+	defb	0FFh,0FFh,01Dh,0FFh	;C0 - C3
+	defb	01Dh,0FFh,01Ch,0FFh	;C4 - C7
+	defb	0FFh,0FFh,01Dh,0FFh	;C8 - CB
+	defb	01Dh,0FFh,01Ch,0FFh	;CC - CF
+	defb	0FFh,0FFh,01Dh,001h	;D0 - D3
+	defb	01Dh,0FFh,0FFh,0FFh	;D4 - D7
+	defb	0FFh,0FFh,01Dh,09Ch	;D8 - DB
+	defb	01Dh,0FFh,01Ch,0FFh	;DC - DF
+	defb	0FFh,0FFh,01Dh,018h	;E0 - E3
+	defb	01Dh,0FFh,0FFh,0FFh	;E4 - E7
+	defb	0FFh,0FFh,01Dh,000h	;E8 - EB
+	defb	01Dh,0FFh,0FFh,0FFh	;EC - EF
+	defb	0FFh,0FFh,01Dh,0FFh	;F0 - F3
+	defb	01Dh,0FFh,0FFh,0FFh	;F4 - F7
+	defb	0FFh,018h,01Dh,0FFh	;F8 - FB
+	defb	01Dh,0FFh,0FFh,0FFh	;FC - FF
 
-	defb	019H,019H,0FFH,019H	;8 bit logic and arithmetic
-	defb	0FFH,0FFH,0FFH,0FFH	;
+	defb	019h,019h,0FFh,019h	;8 bit logic and arithmetic
+	defb	0FFh,0FFh,0FFh,0FFh	;
 
-	defb	0FFH,0FFH,0FFH,0FFH	;Shift and rotate
-	defb	0FFH,0FFH,0FFH,0FFH	;
+	defb	0FFh,0FFh,0FFh,0FFh	;Shift and rotate
+	defb	0FFh,0FFh,0FFh,0FFh	;
 
-	defb	0FFH,019H,019H,019H	;Bit - res - set
-	defb	0FFH,0FFH,0FFH,0FFH
+	defb	0FFh,019h,019h,019h	;Bit - res - set
+	defb	0FFh,0FFh,0FFh,0FFh
 
-	defb	019H,019H,019H,019H	;8 bit load
-	defb	019H,019H,019H,019H
+	defb	019h,019h,019h,019h	;8 bit load
+	defb	019h,019h,019h,019h
     else
 ;***********************************************************************
 ;*
@@ -8149,83 +8149,83 @@ zopnd2:
 ;***********************************************************************
 
 zopcpt:
-	defb	022h,01ch,01ch,015h	;nop	ld	ld	inc	00 - 03
-	defb	015h,00ch,01ch,031h	;inc	dec	ld	rlca	04 - 07
-	defb	010h,000h,01ch,00ch	;ex	add	ld	dec	08 - 0b
-	defb	015h,00ch,01ch,036h	;inc	dec	ld	rrca	0c - 0f
-	defb	00eh,01ch,01ch,015h	;djnz	ld	ld	inc	10 - 13
-	defb	015h,00ch,01ch,02fh	;inc	dec	ld	rla	14 - 17
-	defb	01bh,000h,01ch,00ch	;jr	add	ld	dec	18 - 1b
-	defb	015h,00ch,01ch,034h	;inc	dec	ld	rra	1c - 1f
-	defb	01bh,01ch,01ch,015h	;jr	ld	ld	inc	20 - 23
-	defb	015h,00ch,01ch,00bh	;inc	dec	ld	daa	24 - 27
-	defb	01bh,000h,01ch,00ch	;jr	add	ld	dec	28 - 2b
-	defb	015h,00ch,01ch,00ah	;inc	dec	ld	cpl	2c - 2f
-	defb	01bh,01ch,01ch,015h	;jr	ld	ld	inc	30 - 33
-	defb	015h,00ch,01ch,03ah	;inc	dec	ld	scf	34 - 37
-	defb	01bh,000h,01ch,00ch	;jr	add	ld	dec	38 - 3b
-	defb	015h,00ch,01ch,004h	;inc	dec	ld	ccf	3c - 3f
+	defb	022h,01Ch,01Ch,015h	;nop	ld	ld	inc	00 - 03
+	defb	015h,00Ch,01Ch,031h	;inc	dec	ld	rlca	04 - 07
+	defb	010h,000h,01Ch,00Ch	;ex	add	ld	dec	08 - 0B
+	defb	015h,00Ch,01Ch,036h	;inc	dec	ld	rrca	0C - 0F
+	defb	00Eh,01Ch,01Ch,015h	;djnz	ld	ld	inc	10 - 13
+	defb	015h,00Ch,01Ch,02Fh	;inc	dec	ld	rla	14 - 17
+	defb	01Bh,000h,01Ch,00Ch	;jr	add	ld	dec	18 - 1B
+	defb	015h,00Ch,01Ch,034h	;inc	dec	ld	rra	1C - 1F
+	defb	01Bh,01Ch,01Ch,015h	;jr	ld	ld	inc	20 - 23
+	defb	015h,00Ch,01Ch,00Bh	;inc	dec	ld	daa	24 - 27
+	defb	01Bh,000h,01Ch,00Ch	;jr	add	ld	dec	28 - 2B
+	defb	015h,00Ch,01Ch,00Ah	;inc	dec	ld	cpl	2C - 2F
+	defb	01Bh,01Ch,01Ch,015h	;jr	ld	ld	inc	30 - 33
+	defb	015h,00Ch,01Ch,03Ah	;inc	dec	ld	scf	34 - 37
+	defb	01Bh,000h,01Ch,00Ch	;jr	add	ld	dec	38 - 3B
+	defb	015h,00Ch,01Ch,004h	;inc	dec	ld	ccf	3C - 3F
 
 
-	defb	014h,026h,039h,01ch	;in	out	sbc	ld	ed 40
-	defb	021h,02dh,013h,01ch	;neg	retn	im	ld
-	defb	014h,026h,001h,01ch	;in	out	adc	ld
-	defb	022h,02ch,022h,01ch	;....	reti	...	ld
-	defb	014h,026h,039h,01ch	;in	out	sbc	ld
-	defb	022h,022h,013h,01ch	;...	...	im	ld
-	defb	014h,026h,001h,01ch	;in	out	adc	ld
-	defb	022h,022h,013h,01ch	;...	...	im	ld
+	defb	014h,026h,039h,01Ch	;in	out	sbc	ld	ED 40
+	defb	021h,02Dh,013h,01Ch	;neg	retn	im	ld
+	defb	014h,026h,001h,01Ch	;in	out	adc	ld
+	defb	022h,02Ch,022h,01Ch	;....	reti	...	ld
+	defb	014h,026h,039h,01Ch	;in	out	sbc	ld
+	defb	022h,022h,013h,01Ch	;...	...	im	ld
+	defb	014h,026h,001h,01Ch	;in	out	adc	ld
+	defb	022h,022h,013h,01Ch	;...	...	im	ld
 	defb	014h,026h,039h,022h	;in	out	sbc	...
 	defb	022h,022h,002h,037h	;...	...	...	rrd
 	defb	014h,026h,001h,022h	;in	out	adc	...
 	defb	045h,046h,047h,032h	;defb*	defw*	ddb*	rld
-	defb	044h,048h,039h,01ch	;org*	equ*	sbc	ld	ed 70
+	defb	044h,048h,039h,01Ch	;org*	equ*	sbc	ld	ED 70
 	defb	022h,022h,022h,022h	;...	...	...	...
-	defb	014h,026h,001h,01ch	;in	out	adc	ld
-	defb	022h,022h,022h,022h	;...	...	...	...	ed 7f
+	defb	014h,026h,001h,01Ch	;in	out	adc	ld
+	defb	022h,022h,022h,022h	;...	...	...	...	ED 7F
 
 
-	defb	01fh,008h,018h,028h	;ldi	cpi	ini	outi
+	defb	01Fh,008h,018h,028h	;ldi	cpi	ini	outi
 	defb	022h,022h,022h,022h	;...	...	...	...
-	defb	01dh,006h,016h,027h	;ldd	cpd	ind	outd
+	defb	01Dh,006h,016h,027h	;ldd	cpd	ind	outd
 	defb	022h,022h,022h,022h	;...	...	...	...
 	defb	020h,009h,019h,025h	;ldir	cpir	inir	otir
 	defb	022h,022h,022h,022h	;...	...	...	...
-	defb	01eh,007h,017h,024h	;lddr	cpdr	indr	otdr
+	defb	01Eh,007h,017h,024h	;lddr	cpdr	indr	otdr
 	defb	022h,022h,022h,045h	;...	....	....	defb*
 
 
-	defb	02bh,029h,01ah,01ah	;ret	pop	jp	jp	c0 - c3
-	defb	003h,02ah,000h,038h	;call	push	add	rst	c4 - c7
-	defb	02bh,02bh,01ah,022h	;ret	ret	jp	...	c8 - cb
-	defb	003h,003h,001h,038h	;call	call	adc	rst	cc - cf
-	defb	02bh,029h,01ah,026h	;ret	pop	jp	out	d0 - d3
-	defb	003h,02ah,03fh,038h	;call	push	sub	rst	d4 - d7
-	defb	02bh,011h,01ah,014h	;ret	exx	jp	in	d8 - db
-	defb	003h,022h,039h,038h	;call	...	sbc	rst	dc - df
-	defb	02bh,029h,01ah,010h	;ret	pop	jp	ex	e0 - e3
-	defb	003h,02ah,002h,038h	;call	push	and	rst	e4 - e7
-	defb	02bh,01ah,01ah,010h	;ret	jp	jp	ex	e8 - eb
-	defb	003h,022h,040h,038h	;call	...	xor	rst	ec - ef
-	defb	02bh,029h,01ah,00dh	;ret	pop	jp	di	f0 - f3
-	defb	003h,02ah,023h,038h	;call	push	or	rst	f4 - f7
-	defb	02bh,01ch,01ah,00fh	;ret	ld	jp	ei	f8 - fb
-	defb	003h,022h,005h,038h	;call	...	cp	rst	fc - ff
+	defb	02Bh,029h,01Ah,01Ah	;ret	pop	jp	jp	C0 - C3
+	defb	003h,02Ah,000h,038h	;call	push	add	rst	C4 - C7
+	defb	02Bh,02Bh,01Ah,022h	;ret	ret	jp	...	C8 - CB
+	defb	003h,003h,001h,038h	;call	call	adc	rst	CC - CF
+	defb	02Bh,029h,01Ah,026h	;ret	pop	jp	out	D0 - D3
+	defb	003h,02Ah,03Fh,038h	;call	push	sub	rst	D4 - D7
+	defb	02Bh,011h,01Ah,014h	;ret	exx	jp	in	D8 - DB
+	defb	003h,022h,039h,038h	;call	...	sbc	rst	DC - DF
+	defb	02Bh,029h,01Ah,010h	;ret	pop	jp	ex	E0 - E3
+	defb	003h,02Ah,002h,038h	;call	push	and	rst	E4 - E7
+	defb	02Bh,01Ah,01Ah,010h	;ret	jp	jp	ex	E8 - EB
+	defb	003h,022h,040h,038h	;call	...	xor	rst	EC - EF
+	defb	02Bh,029h,01Ah,00Dh	;ret	pop	jp	di	F0 - F3
+	defb	003h,02Ah,023h,038h	;call	push	or	rst	F4 - F7
+	defb	02Bh,01Ch,01Ah,00Fh	;ret	ld	jp	ei	F8 - FB
+	defb	003h,022h,005h,038h	;call	...	cp	rst	FC - FF
 
-	defb	000h,001h,03fh,039h	;add	adc	sub	sbc
+	defb	000h,001h,03Fh,039h	;add	adc	sub	sbc
 	defb	002h,040h,023h,005h	;and	xor	or	cp
 
 
-	defb	030h,035h,02eh,033h	;rlc	rrc	rl	rr
-	defb	03bh,03dh,03ch,03eh	;sla	sra	sll	srl
+	defb	030h,035h,02Eh,033h	;rlc	rrc	rl	rr
+	defb	03Bh,03Dh,03Ch,03Eh	;sla	sra	sll	srl
 	defb	022h,041h,042h,043h	;...	bit	res	set
 
 
 	defb	022h,022h,022h,012h	;...	...	...	halt
 
 
-	defb	01ch,01ch,01ch,01ch	;ld	ld	ld	ld
-	defb	01ch,01ch,01ch,01ch	;ld	ld	ld	ld
+	defb	01Ch,01Ch,01Ch,01Ch	;ld	ld	ld	ld
+	defb	01Ch,01Ch,01Ch,01Ch	;ld	ld	ld	ld
 
 	page
 ;****************************************************************************
@@ -8235,65 +8235,65 @@ zopcpt:
 ;****************************************************************************
 
 zopnd1:
-	defb	0ffh,00eh,08eh,00eh	;00 - 03
-	defb	006h,006h,006h,0ffh	;04 - 07
-	defb	00dh,018h,001h,00eh	;08 - 0b
-	defb	007h,007h,007h,0ffh	;0c - 0f
-	defb	01bh,00fh,08fh,00fh	;10 - 13
-	defb	004h,004h,004h,0ffh	;14 - 17
-	defb	01bh,018h,001h,00fh	;18 - 1b
-	defb	005h,005h,005h,0ffh	;1c - 1f
-	defb	013h,018h,09dh,018h	;20 - 23
-	defb	002h,002h,002h,0ffh	;24 - 27
-	defb	011h,018h,018h,018h	;28 - 2b
-	defb	003h,003h,003h,0ffh	;2c - 2f
-	defb	012h,009h,09dh,009h	;30 - 33
-	defb	098h,098h,098h,0ffh	;34 - 37
-	defb	007h,018h,001h,009h	;38 - 3b
-	defb	001h,001h,001h,0ffh	;3c - 3f
+	defb	0FFh,00Eh,08Eh,00Eh	;00 - 03
+	defb	006h,006h,006h,0FFh	;04 - 07
+	defb	00Dh,018h,001h,00Eh	;08 - 0B
+	defb	007h,007h,007h,0FFh	;0C - 0F
+	defb	01Bh,00Fh,08Fh,00Fh	;10 - 13
+	defb	004h,004h,004h,0FFh	;14 - 17
+	defb	01Bh,018h,001h,00Fh	;18 - 1B
+	defb	005h,005h,005h,0FFh	;1C - 1F
+	defb	013h,018h,09Dh,018h	;20 - 23
+	defb	002h,002h,002h,0FFh	;24 - 27
+	defb	011h,018h,018h,018h	;28 - 2B
+	defb	003h,003h,003h,0FFh	;2C - 2F
+	defb	012h,009h,09Dh,009h	;30 - 33
+	defb	098h,098h,098h,0FFh	;34 - 37
+	defb	007h,018h,001h,009h	;38 - 3B
+	defb	001h,001h,001h,0FFh	;3C - 3F
 
-	defb	006h,087h,000h,09dh	;40 - 43
-	defb	0ffh,0ffh,01fh,00ch	;44 - 47
-	defb	007h,087h,000h,00eh	;48 - 4b
-	defb	0ffh,0ffh,0ffh,00bh	;4c - 4f
-	defb	004h,087h,000h,09dh	;50 - 53
-	defb	0ffh,0ffh,01fh,001h	;54 - 57
-	defb	005h,087h,000h,00fh	;58 - 5b
-	defb	0ffh,0ffh,01fh,001h	;5c - 5f
-	defb	002h,087h,000h,0ffh	;60 - 63
-	defb	0ffh,0ffh,0ffh,0ffh	;64 - 67
-	defb	003h,087h,000h,0ffh	;68 - 6b
-	defb	01ch,01dh,01dh,0ffh	;6c - 6f	defb  defw  ddb
-	defb	01dh,01dh,000h,09dh	;70 - 73	org   equ
-	defb	0ffh,0ffh,0ffh,0ffh	;74 - 77
-	defb	001h,087h,000h,009h	;78 - 7b
-	defb	0ffh,0ffh,0ffh,0ffh	;7c - 7f
+	defb	006h,087h,000h,09Dh	;40 - 43
+	defb	0FFh,0FFh,01Fh,00Ch	;44 - 47
+	defb	007h,087h,000h,00Eh	;48 - 4B
+	defb	0FFh,0FFh,0FFh,00Bh	;4C - 4F
+	defb	004h,087h,000h,09Dh	;50 - 53
+	defb	0FFh,0FFh,01Fh,001h	;54 - 57
+	defb	005h,087h,000h,00Fh	;58 - 5B
+	defb	0FFh,0FFh,01Fh,001h	;5C - 5F
+	defb	002h,087h,000h,0FFh	;60 - 63
+	defb	0FFh,0FFh,0FFh,0FFh	;64 - 67
+	defb	003h,087h,000h,0FFh	;68 - 6B
+	defb	01Ch,01Dh,01Dh,0FFh	;6C - 6F	defb  defw  ddb
+	defb	01Dh,01Dh,000h,09Dh	;70 - 73	org   equ
+	defb	0FFh,0FFh,0FFh,0FFh	;74 - 77
+	defb	001h,087h,000h,009h	;78 - 7B
+	defb	0FFh,0FFh,0FFh,0FFh	;7C - 7F
 
-	defb	0ffh,0ffh,0ffh,0ffh	;a0 - bf
-	defb	0ffh,0ffh,0ffh,0ffh	;a4 - a7
-	defb	0ffh,0ffh,0ffh,0ffh	;a8 - ab
-	defb	0ffh,0ffh,0ffh,0ffh	;ac - af
-	defb	0ffh,0ffh,0ffh,0ffh	;b0 - b3
-	defb	0ffh,0ffh,0ffh,0ffh	;b4 - b7
-	defb	0ffh,0ffh,0ffh,0ffh	;b8 - bb
-	defb	0ffh,0ffh,00fh,0ffh	;bc - bf
+	defb	0FFh,0FFh,0FFh,0FFh	;A0 - BF
+	defb	0FFh,0FFh,0FFh,0FFh	;A4 - A7
+	defb	0FFh,0FFh,0FFh,0FFh	;A8 - AB
+	defb	0FFh,0FFh,0FFh,0FFh	;AC - AF
+	defb	0FFh,0FFh,0FFh,0FFh	;B0 - B3
+	defb	0FFh,0FFh,0FFh,0FFh	;B4 - B7
+	defb	0FFh,0FFh,0FFh,0FFh	;B8 - BB
+	defb	0FFh,0FFh,00Fh,0FFh	;BC - BF
 
-	defb	013h,00eh,013h,01dh	;c0 - c3
-	defb	013h,00eh,001h,01eh	;c4 - c7
-	defb	011h,0ffh,011h,0ffh	;c8 - cb
-	defb	011h,01dh,001h,01eh	;cc - cf
-	defb	012h,00fh,012h,09ch	;d0 - d3
-	defb	012h,00fh,01ch,01eh	;d4 - d7
-	defb	007h,0ffh,007h,001h	;d8 - db
-	defb	007h,0ffh,001h,01eh	;dc - df
-	defb	015h,018h,015h,089h	;e0 - e3
-	defb	015h,018h,01ch,01eh	;e4 - e7
-	defb	014h,098h,014h,00fh	;e8 - eb
-	defb	014h,0ffh,01ch,01eh	;ec - ef
-	defb	00ah,00dh,00ah,0ffh	;f0 - f3
-	defb	00ah,00dh,01ch,01eh	;f4 - f7
-	defb	016h,009h,016h,0ffh	;f8 - fb
-	defb	016h,0ffh,01ch,01eh	;fc - ff
+	defb	013h,00Eh,013h,01Dh	;C0 - C3
+	defb	013h,00Eh,001h,01Eh	;C4 - C7
+	defb	011h,0FFh,011h,0FFh	;C8 - CB
+	defb	011h,01Dh,001h,01Eh	;CC - CF
+	defb	012h,00Fh,012h,09Ch	;D0 - D3
+	defb	012h,00Fh,01Ch,01Eh	;D4 - D7
+	defb	007h,0FFh,007h,001h	;D8 - DB
+	defb	007h,0FFh,001h,01Eh	;DC - DF
+	defb	015h,018h,015h,089h	;E0 - E3
+	defb	015h,018h,01Ch,01Eh	;E4 - E7
+	defb	014h,098h,014h,00Fh	;E8 - EB
+	defb	014h,0FFh,01Ch,01Eh	;EC - EF
+	defb	00Ah,00Dh,00Ah,0FFh	;F0 - F3
+	defb	00Ah,00Dh,01Ch,01Eh	;F4 - F7
+	defb	016h,009h,016h,0FFh	;F8 - FB
+	defb	016h,0FFh,01Ch,01Eh	;FC - FF
 
 
 	defb	001h,001h,019h,001h	;8 bit logic and arithmetic
@@ -8302,12 +8302,12 @@ zopnd1:
 
 	defb	019h,019h,019h,019h	;shift and rotate
 	defb	019h,019h,019h,019h	;
-	defb	0ffh,01fh,01fh,01fh	;bit - res - set
+	defb	0FFh,01Fh,01Fh,01Fh	;bit - res - set
 
-	defb	0ffh,0ffh,0ffh,0ffh	;filler
+	defb	0FFh,0FFh,0FFh,0FFh	;filler
 
-	defb	01ah,01ah,01ah,01ah	;8 bit load
-	defb	01ah,01ah,01ah,01ah	;
+	defb	01Ah,01Ah,01Ah,01Ah	;8 bit load
+	defb	01Ah,01Ah,01Ah,01Ah	;
 
 	page
 ;***********************************************************************
@@ -8317,75 +8317,75 @@ zopnd1:
 ;***********************************************************************
 
 zopnd2:
-	defb	0ffh,01dh,001h,0ffh	;00 - 03
-	defb	0ffh,0ffh,01ch,0ffh	;04 - 07
-	defb	00dh,00eh,08eh,0ffh	;08 - 0b
-	defb	0ffh,0ffh,01ch,0ffh	;0c - 0f
-	defb	0ffh,01dh,001h,0ffh	;10 - 13
-	defb	0ffh,0ffh,01ch,0ffh	;14 - 17
-	defb	0ffh,00fh,08fh,0ffh	;18 - 1b
-	defb	0ffh,0ffh,01ch,0ffh	;1c - 1f
-	defb	01bh,01dh,018h,0ffh	;20 - 23
-	defb	0ffh,0ffh,01ch,0ffh	;24 - 27
-	defb	01bh,018h,09dh,0ffh	;28 - 2b
-	defb	0ffh,0ffh,01ch,0ffh	;2c - 2f
-	defb	01bh,01dh,001h,0ffh	;30 - 33
-	defb	0ffh,0ffh,01ch,0ffh	;34 - 37
-	defb	01bh,009h,09dh,0ffh	;38 - 3b
-	defb	0ffh,0ffh,01ch,0ffh	;3c - 3f
+	defb	0FFh,01Dh,001h,0FFh	;00 - 03
+	defb	0FFh,0FFh,01Ch,0FFh	;04 - 07
+	defb	00Dh,00Eh,08Eh,0FFh	;08 - 0B
+	defb	0FFh,0FFh,01Ch,0FFh	;0C - 0F
+	defb	0FFh,01Dh,001h,0FFh	;10 - 13
+	defb	0FFh,0FFh,01Ch,0FFh	;14 - 17
+	defb	0FFh,00Fh,08Fh,0FFh	;18 - 1B
+	defb	0FFh,0FFh,01Ch,0FFh	;1C - 1F
+	defb	01Bh,01Dh,018h,0FFh	;20 - 23
+	defb	0FFh,0FFh,01Ch,0FFh	;24 - 27
+	defb	01Bh,018h,09Dh,0FFh	;28 - 2B
+	defb	0FFh,0FFh,01Ch,0FFh	;2C - 2F
+	defb	01Bh,01Dh,001h,0FFh	;30 - 33
+	defb	0FFh,0FFh,01Ch,0FFh	;34 - 37
+	defb	01Bh,009h,09Dh,0FFh	;38 - 3B
+	defb	0FFh,0FFh,01Ch,0FFh	;3C - 3F
 
 
-	defb	087h,006h,00eh,00eh	;40 - 43
-	defb	0ffh,0ffh,0ffh,001h	;44 - 47
-	defb	087h,007h,00eh,09dh	;48 - 4b
-	defb	0ffh,0ffh,0ffh,001h	;4c - 4f
-	defb	087h,004h,00fh,00fh	;50 - 53
-	defb	0ffh,0ffh,0ffh,00ch	;54 - 57
-	defb	087h,005h,00fh,09dh	;58 - 5b
-	defb	0ffh,0ffh,0ffh,00bh	;5c - 5f
-	defb	087h,002h,000h,0ffh	;60 - 63
-	defb	0ffh,0ffh,0ffh,0ffh	;64 - 67
-	defb	087h,003h,000h,0ffh	;68 - 6b
-	defb	0ffh,0ffh,0ffh,0ffh	;6c - 6f
-	defb	0ffh,0ffh,009h,009h	;70 - 73
-	defb	0ffh,0ffh,0ffh,0ffh	;74 - 77
-	defb	087h,001h,009h,09dh	;78 - 7b
-	defb	0ffh,0ffh,0ffh,0ffh
+	defb	087h,006h,00Eh,00Eh	;40 - 43
+	defb	0FFh,0FFh,0FFh,001h	;44 - 47
+	defb	087h,007h,00Eh,09Dh	;48 - 4B
+	defb	0FFh,0FFh,0FFh,001h	;4C - 4F
+	defb	087h,004h,00Fh,00Fh	;50 - 53
+	defb	0FFh,0FFh,0FFh,00Ch	;54 - 57
+	defb	087h,005h,00Fh,09Dh	;58 - 5B
+	defb	0FFh,0FFh,0FFh,00Bh	;5C - 5F
+	defb	087h,002h,000h,0FFh	;60 - 63
+	defb	0FFh,0FFh,0FFh,0FFh	;64 - 67
+	defb	087h,003h,000h,0FFh	;68 - 6B
+	defb	0FFh,0FFh,0FFh,0FFh	;6C - 6F
+	defb	0FFh,0FFh,009h,009h	;70 - 73
+	defb	0FFh,0FFh,0FFh,0FFh	;74 - 77
+	defb	087h,001h,009h,09Dh	;78 - 7B
+	defb	0FFh,0FFh,0FFh,0FFh
 
-	defb	0ffh,0ffh,0ffh,0ffh	;a0 - bf
-	defb	0ffh,0ffh,0ffh,0ffh	;a4 - a7
-	defb	0ffh,0ffh,0ffh,0ffh	;a8 - ab
-	defb	0ffh,0ffh,0ffh,0ffh	;ac - af
-	defb	0ffh,0ffh,0ffh,0ffh	;b0 - b3
-	defb	0ffh,0ffh,0ffh,0ffh	;b4 - b7
-	defb	0ffh,0ffh,0ffh,0ffh	;b8 - bb
-	defb	0ffh,0ffh,00fh,0ffh	;bc - bf
+	defb	0FFh,0FFh,0FFh,0FFh	;A0 - BF
+	defb	0FFh,0FFh,0FFh,0FFh	;A4 - A7
+	defb	0FFh,0FFh,0FFh,0FFh	;A8 - AB
+	defb	0FFh,0FFh,0FFh,0FFh	;AC - AF
+	defb	0FFh,0FFh,0FFh,0FFh	;B0 - B3
+	defb	0FFh,0FFh,0FFh,0FFh	;B4 - B7
+	defb	0FFh,0FFh,0FFh,0FFh	;B8 - BB
+	defb	0FFh,0FFh,00Fh,0FFh	;BC - BF
 
-	defb	0ffh,0ffh,01dh,0ffh	;c0 - c3
-	defb	01dh,0ffh,01ch,0ffh	;c4 - c7
-	defb	0ffh,0ffh,01dh,0ffh	;c8 - cb
-	defb	01dh,0ffh,01ch,0ffh	;cc - cf
-	defb	0ffh,0ffh,01dh,001h	;d0 - d3
-	defb	01dh,0ffh,0ffh,0ffh	;d4 - d7
-	defb	0ffh,0ffh,01dh,09ch	;d8 - db
-	defb	01dh,0ffh,01ch,0ffh	;dc - df
-	defb	0ffh,0ffh,01dh,018h	;e0 - e3
-	defb	01dh,0ffh,0ffh,0ffh	;e4 - e7
-	defb	0ffh,0ffh,01dh,000h	;e8 - eb
-	defb	01dh,0ffh,0ffh,0ffh	;ec - ef
-	defb	0ffh,0ffh,01dh,0ffh	;f0 - f3
-	defb	01dh,0ffh,0ffh,0ffh	;f4 - f7
-	defb	0ffh,018h,01dh,0ffh	;f8 - fb
-	defb	01dh,0ffh,0ffh,0ffh	;fc - ff
+	defb	0FFh,0FFh,01Dh,0FFh	;C0 - C3
+	defb	01Dh,0FFh,01Ch,0FFh	;C4 - C7
+	defb	0FFh,0FFh,01Dh,0FFh	;C8 - CB
+	defb	01Dh,0FFh,01Ch,0FFh	;CC - CF
+	defb	0FFh,0FFh,01Dh,001h	;D0 - D3
+	defb	01Dh,0FFh,0FFh,0FFh	;D4 - D7
+	defb	0FFh,0FFh,01Dh,09Ch	;D8 - DB
+	defb	01Dh,0FFh,01Ch,0FFh	;DC - DF
+	defb	0FFh,0FFh,01Dh,018h	;E0 - E3
+	defb	01Dh,0FFh,0FFh,0FFh	;E4 - E7
+	defb	0FFh,0FFh,01Dh,000h	;E8 - EB
+	defb	01Dh,0FFh,0FFh,0FFh	;EC - EF
+	defb	0FFh,0FFh,01Dh,0FFh	;F0 - F3
+	defb	01Dh,0FFh,0FFh,0FFh	;F4 - F7
+	defb	0FFh,018h,01Dh,0FFh	;F8 - FB
+	defb	01Dh,0FFh,0FFh,0FFh	;FC - FF
 
-	defb	019h,019h,0ffh,019h	;8 bit logic and arithmetic
-	defb	0ffh,0ffh,0ffh,0ffh	;
+	defb	019h,019h,0FFh,019h	;8 bit logic and arithmetic
+	defb	0FFh,0FFh,0FFh,0FFh	;
 
-	defb	0ffh,0ffh,0ffh,0ffh	;shift and rotate
-	defb	0ffh,0ffh,0ffh,0ffh	;
+	defb	0FFh,0FFh,0FFh,0FFh	;shift and rotate
+	defb	0FFh,0FFh,0FFh,0FFh	;
 
-	defb	0ffh,019h,019h,019h	;bit - res - set
-	defb	0ffh,0ffh,0ffh,0ffh
+	defb	0FFh,019h,019h,019h	;bit - res - set
+	defb	0FFh,0FFh,0FFh,0FFh
 
 	defb	019h,019h,019h,019h	;8 bit load
 	defb	019h,019h,019h,019h
@@ -8415,23 +8415,23 @@ zopnd2:
 zopcnm:
 	defb	'ADD ADC AND CALL' ; 00 01 02 03
 	defb	'CCF CP  CPD CPDR' ; 04 05 06 07
-	defb	'CPI CPIRCPL DAA ' ; 08 09 0a 0b
-	defb	'DEC DI  DJNZEI  ' ; 0c 0d 0e 0f
+	defb	'CPI CPIRCPL DAA ' ; 08 09 0A 0B
+	defb	'DEC DI  DJNZEI  ' ; 0C 0D 0E 0F
 
 	defb	'EX  EXX HALTIM  ' ; 10 11 12 13
 	defb	'IN  INC IND INDR' ; 14 15 16 17
-	defb	'INI INIRJP  JR  ' ; 18 19 1a 1b
-	defb	'LD  LDD LDDRLDI ' ; 1c 1d 1e 1f
+	defb	'INI INIRJP  JR  ' ; 18 19 1A 1B
+	defb	'LD  LDD LDDRLDI ' ; 1C 1D 1E 1F
 
 	defb	'LDIRNEG NOP OR  ' ; 20 21 22 23
 	defb	'OTDROTIROUT OUTD' ; 24 25 26 27
-	defb	'OUTIPOP PUSHRET ' ; 28 29 2a 2b
-	defb	'RETIRETNRL  RLA ' ; 2c 2d 2e 2f
+	defb	'OUTIPOP PUSHRET ' ; 28 29 2A 2B
+	defb	'RETIRETNRL  RLA ' ; 2C 2D 2E 2F
 
 	defb	'RLC RLCARLD RR  ' ; 30 31 32 33
 	defb	'RRA RRC RRCARRD ' ; 34 35 36 37
-	defb	'RST SBC SCF SLA ' ; 38 39 3a 3b
-	defb	'SLL SRA SRL SUB ' ; 3c 3d 3e 3f  ; inserted SLL and renumbered zopcpt
+	defb	'RST SBC SCF SLA ' ; 38 39 3A 3B
+	defb	'SLL SRA SRL SUB ' ; 3C 3D 3E 3F  ; inserted SLL and renumbered zopcpt
 
 	defb	'XOR BIT RES SET ' ; 40 41 42 43
 cnmorg	equ	($ - zopcnm) / 4
@@ -8439,14 +8439,14 @@ cnmorg	equ	($ - zopcnm) / 4
 	defb	    'DEFBDEFWDDB ' ;    45 46 47
 	defb	'EQU '             ; 48
     if	Z180
-	defb	    'IN0 OUT0TST ' ;    49 4a 4b
-	defb	'TSIOSLP MLT OTIM' ; 4c 4d 4e 4f
+	defb	    'IN0 OUT0TST ' ;    49 4A 4B
+	defb	'TSIOSLP MLT OTIM' ; 4C 4D 4E 4F
 	defb	'OTDMOIMRODMR'     ; 50 51 52
     endif
 cnmcnt	equ	($ - zopcnm) / 4
 
 op1000:
-	defb	 0fdh,0ddh,0edh,0cbh
+	defb	 0FDh,0DDh,0EDh,0CBh
 
 pswbit:	defb	10001000b		;minus
 	defb	10000000b		;positive
@@ -8467,30 +8467,30 @@ regmap:
 	defb	19h,81h,83h,85h,97h
 
 regptr:
-	defb	0dh,0eh,0fh,00h
-	defb	8dh,8eh,8fh,80h
-	defb	0ah,09h,08h,10h
+	defb	0Dh,0Eh,0Fh,00h
+	defb	8Dh,8Eh,8Fh,80h
+	defb	0Ah,09h,08h,10h
 
-siotbl:	defb	0f5h,0f7h
+siotbl:	defb	0F5h,0F7h
 
-symflg:	defb	0ffh		;symbol table flag   00 - table present
-				;		     ff - no table
+symflg:	defb	0FFh		;symbol table flag   00h - table present
+				;		     FFh - no table
 
 ;;; =============================================================================
 
 clmsp:	dw	clmsc
-	org	($ + 15) AND 0FFF0H
+	org	($ + 15) AND 0FFF0h
 clmsc:	db	'|\-/+\-/'
 
 clmss:	db	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-clmsb:	db	'#',esc,'8',esc,'[?25h', 00H		; spin cursor at '#' location
+clmsb:	db	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
 
 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
 clmbh:	db	esc,'[0'	; position cursor starts at [zero based](3,62)
 clmbr:	db	'3'-1		; rows [1]03-09 (we subtract 1 because code adds 1 before use)
 	db	';63H'		; column [1]63
 clmbn:	db	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
-clmba:	db	'76543210',00H	; ASCII bits and terminator
+clmba:	db	'76543210',00h	; ASCII bits and terminator
 
 clmbd:	db	afreg-afreg+1
 	db	hlreg-afreg+1, hlreg-afreg+0
@@ -8501,16 +8501,16 @@ clmbc	equ	($ - clmbd)	; count of registers to display
 ;;; =============================================================================
 
 bsiz:				;dump block size storage
-bsizlo:	defb	0		;     lo order
-bsizhi:	defb	1		;     hi order
-blkptr:	defw	100h		;dump block address
+bsizlo:	defb	0		;     low  order
+bsizhi:	defb	1		;     high order
+blkptr:	defw	0100h		;dump block address
 
-loadb:	defw    100h		;z8e load bias for lldr command
+loadb:	defw    0100h		;z8e load bias for lldr command
 loadn:	defw	00		;end of load address
 
 asmbpc:				;next pc location for assembly
-zasmpc:	defw	100h		;next pc location for disassemble
-				;default at load time: start of tpa
+zasmpc:	defw	0100h		;next pc location for disassemble
+				;default at load time: start of TPA
 zasmfl:	defw	00		;first disassembled address on jdbg screen
 
 
@@ -8529,11 +8529,11 @@ biashi:
 oprn02:	defb	0
 oprx02:
 zasmwt:	defw	0		;disassembly count - working tally
-opnflg:	defb	0		;00 - operand 1   ff - operand 2   zasm
+opnflg:	defb	0		;00 - operand 1   FFh - operand 2   zasm
 				;and input character storage for interactive
 				;disassembly
 quoflg:	defb	0
-wflag:	defb	0ffh		;trace subroutine flag: nz - trace subs
+wflag:	defb	0FFh		;trace subroutine flag: nz - trace subs
 				;			 z - no trace
 
 nstep:
@@ -8585,10 +8585,10 @@ fwndow:	defb	00
 nlmask:	defb	00
 
 case:
-	defb	0ffh		;flag to indicate case of output
+	defb	0FFh		;flag to indicate case of output
 				;nz - lower   z - upper
 
-jstepf:	defb	0ffh		;00 -   screen is intact, if user wants j
+jstepf:	defb	0FFh		;00 -   screen is intact, if user wants j
 				;       single step no need to repaint screen,
 				;       just move arrow.
 				;01   - user wants single-step j command
@@ -8689,8 +8689,8 @@ zasmbf	equ	nzasm-128	;start of disassembly buffer
 
 	defs	40
 stack:
-nmem	equ	((($+255) and 0ff00h)-z8eorg) and 0ff00h
-;;	was	(256*(($+255)/256)-z8eorg) and 0ff00h
+nmem	equ	((($+255) and 0FF00h)-z8eorg) and 0FF00h
+;;	was	(256*(($+255)/256)-z8eorg) and 0FF00h
 
 	if M80 or SLR
 	.list			;enable printer output for symbol table
