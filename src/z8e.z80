@@ -29,7 +29,7 @@
 ;                       Revision history
 ; 21 Mar 2025 clm v4.2clm33
 ;			Modified code for "K" (kdmp) to allow actually dumping
-;			a maximum of 256 bytes (if your screen size allows it).	
+;			a maximum of 256 bytes (if your screen size allows it).
 ;			And all the other places that reference "wnwsiz".
 ;			Byte counts are now BASE ZERO (count starting at zero).
 ;
@@ -400,9 +400,9 @@ lf	equ	0Ah		;	line feed
 formf	equ	0Ch		;	form feed
 cr	equ	0Dh		;	carriage return
 esc	equ	1Bh		;       escape
-ctlx	equ	'X' and	1Fh	;	control	x - delete line
-ctlc	equ	'C' and	1Fh	;	control	c - warm boot
-eof	equ	'Z' and	1Fh	;	control	z - logical eof
+ctlx	equ	'X' and	1Fh	;	control x - delete line
+ctlc	equ	'C' and	1Fh	;	control c - warm boot
+eof	equ	'Z' and	1Fh	;	control z - logical eof
 quote	equ	27h		;	quote (actually, an apostrophe)
 tilde	equ	7Eh		;	tilde
 del	equ	7Fh		;	del
@@ -421,10 +421,10 @@ getSCB	equ	49
 	page
 ;******************************************************************************
 ;*
-;*	nint:	  Initialization - relocating loader - symbol loader
+;*	nint:   Initialization - relocating loader - symbol loader
 ;*
 ;*	Initialization:
-;*	- Save system I	register
+;*	- Save system I register
 ;*	- Determine max symbol length before loading symbol table
 ;*        permissible values are 6 and 14 which are converted to bit
 ;*	  masks by bumping by one
@@ -436,18 +436,18 @@ getSCB	equ	49
 ;*	  (or symbol loading if required) this file name will be loaded
 ;*	  into the keyboard input buffer and the file will be loaded
 ;*	  just as if the user had entered the info as a Z8E command.
-;*	- Move all subsequent file names in the	command	line buffer to
+;*	- Move all subsequent file names in the command line buffer to
 ;*	  local input buffer (inbf) in low memory, where they can
-;*	  be found by the parse	routine (prsr).
+;*	  be found by the parse routine (prsr).
 ;*
 ;*	Relocating loader:
-;*	- Move absolute	memory image of	Z8E to top of TPA
+;*	- Move absolute memory image of Z8E to top of TPA
 ;*	- Adjust all addresses in relocated monitor to reflect new
 ;*	  execution area.  This is accomplished by repeated calls to
-;*	  zlen to calculate instruction	lengths.
-;*	- All addresses	< the absolute value of	z8eorg are considered
-;*	  to be	absolute values	and are	not modified.
-;*	- Relocate all address pointers	in command and operand jump
+;*	  zlen to calculate instruction lengths.
+;*	- All addresses < the absolute value of z8eorg are considered
+;*	  to be absolute values and are not modified.
+;*	- Relocate all address pointers in command and operand jump
 ;*	  tables.
 ;*
 ;******************************************************************************
@@ -685,35 +685,35 @@ nint25:	ld	de,zbuf		;Local buffer
 	ld	a,(hl)
 	and	a		;Test for no input
 	jr	z,nint55	;No input - clear symbol table
-	ld	c,a		;BC - number of	chars in command line buffer
+	ld	c,a		;BC - number of chars in command line buffer
 	ld	(hl),b		;Clear byte count
 	add	hl,bc		;Point to last char in buffer
 	inc	hl
 	ld	(hl),b		;Set end of line null after last char
 	ld	hl,0081h
-nint30:	ld	a,(hl)		;Look for start	of first file name
+nint30:	ld	a,(hl)		;Look for start of first file name
 	and	a		;Found the end of line?
-	jr	z,nint55	;Z - no	files to load
+	jr	z,nint55	;Z - no files to load
 	cp	' '		;Leading space?
 	jr	nz,nint35	;Not space - found start of file name
 	inc	hl
-	dec	c		;Decrement command line	byte count
-	jr	nint30		;Keep looking for start	of file	name
-nint35:	ld	de,znmbuf	;Save name here	for later display
+	dec	c		;Decrement command line byte count
+	jr	nint30		;Keep looking for start of file name
+nint35:	ld	de,znmbuf	;Save name here for later display
 	ld	(de),a
 	inc	de
 nint40:	inc	hl		;Find first trailing space
 	ld	a,(hl)
 	cp	' '
 	jr	z,nint45	;Found space - move remainder of buffer
-	ld	(de),a		;Save file name	character for display
+	ld	(de),a		;Save file name character for display
 	inc	de
-	and	a		;End of	line?
+	and	a		;End of line?
 	jr	z,nint55	;z - only one file specified
 	dec	c
 	jr	nint40
 nint45:	ld	a,c		;Check byte count
-	cp	inbfsz		;versus	size of	our local input	buffer
+	cp	inbfsz		;versus size of our local input buffer
 	jr	c,nint50	;carry - size is ok
 	ld	c,inbfsz	;Only move as much as will fit
 nint50:	ld	de,inbf
@@ -721,7 +721,7 @@ nint50:	ld	de,inbf
 	xor	a
 
 nint55:	ld	hl,z8eorg	;clear local symbol table to nulls
-	ld	b,z8e-z8eorg	;symbol	table size
+	ld	b,z8e-z8eorg	;symbol table size
 nint60:	ld	(hl),a		;nulls to entire local symbol table
 	inc	hl
 	djnz	nint60
@@ -730,10 +730,10 @@ nint60:	ld	(hl),a		;nulls to entire local symbol table
 	ld	bc,nmem		;monitor size
 	and	a
 	sbc	hl,bc		;hl - starting address of Z8E in upper memory
-	ld	(z8eb),hl	;monitor bias -	for relocation work
+	ld	(z8eb),hl	;monitor bias - for relocation work
 	ld	de,(usymbl)
 	sbc	hl,de
-	ld	(ntpa),hl	;end of	tpa - for symbol loading
+	ld	(ntpa),hl	;end of tpa - for symbol loading
 	ld	a,d		;check for no user symbol table
 	or	e
 	jr	z,nint75	;no table - no clearing required
@@ -745,7 +745,7 @@ nint70:	ld	(hl),0		;fill user symbol table with nulls
 	jr	nz,nint70
 nint75:	ex	de,hl		;hl - start of z8e in hi memory
 
-	ld	hl,bphn-z8eorg	;entry point to	breakpoint handler
+	ld	hl,bphn-z8eorg	;entry point to breakpoint handler
 	add	hl,de
 
 ; The next instruction will be PATCHED by the time it is executed.
@@ -765,7 +765,7 @@ nint80:	call	zlen00		;calculate instruction length
 	ex	de,hl		;de - next address to relocate
 	ld	a,c		;test length
 	sub	3
-	jr	c,nint90	;one or	two byters are non-relocatable
+	jr	c,nint90	;one or two byters are non-relocatable
 	ld	c,a
 	add	hl,bc		;bump if four byter
 	ld	a,(hl)
@@ -784,21 +784,21 @@ nint80:	call	zlen00		;calculate instruction length
 	ld	(hl),a		;set relocated address
 nint85:	inc	hl
 	ex	de,hl		;de - next address to test
-nint90:	ld	bc,nrel-z8eorg	;end of	relocatable portion of monitor
+nint90:	ld	bc,nrel-z8eorg	;end of relocatable portion of monitor
 	ld	hl,(z8eb)
-	add	hl,bc		;hl - absolute end of relocated	monitor
+	add	hl,bc		;hl - absolute end of relocated monitor
 	and	a
 	sbc	hl,de		;reached end?
 	jr	nc,nint80	;nc - more
-	ld	de,ncmd+zopjtl	;size -	command	and operand jump tables
+	ld	de,ncmd+zopjtl	;size - command and operand jump tables
 	ld	hl,(z8eb)	;base of relocated monitor
 	ld	a,-(high z8eorg); [was:  ld a,-(z8eorg/256)]
-	add	a,h		;relocation bias byte to add to	ptrs
+	add	a,h		;relocation bias byte to add to ptrs
 	ld	d,a		;d - bias to add  e - count of pointers
 				;		      requiring relocation
-	add	hl,bc		;first point to	operand	names
+	add	hl,bc		;first point to operand names
 	ld	bc,zopjtb	;add length of operand name table
-	add	hl,bc		;point to first	entry in jump table
+	add	hl,bc		;point to first entry in jump table
 nint95:	inc	hl
 	ld	a,(hl)		;hi byte jump table entry
 	add	a,d		;plus bias
@@ -810,7 +810,7 @@ nint95:	inc	hl
 
 ;******************************************************************************
 ;*
-;*	ZSYM:	Symbol table build from	.SYM and .PRN files
+;*	ZSYM:	Symbol table build from .SYM and .PRN files
 ;*
 ;*	LFCB called to parse the input buffer (inbf) in low memory.
 ;*	INBF contains the command line tail which bdos passed to us at
@@ -819,11 +819,11 @@ nint95:	inc	hl
 ;*
 ;*	All valid file names are opened for input.
 ;*
-;*	If the file name terminates with a comma then we assume	the
-;*	user is	specifying a bias which	is to be added to every	symbol
-;*	loaded from the	file.
+;*	If the file name terminates with a comma then we assume the
+;*	user is specifying a bias which is to be added to every symbol
+;*	loaded from the file.
 ;*
-;*	zsym	general	file handiling
+;*	zsym	general file handiling
 ;*	.sym	load L80 .sym file or load SLR .lst file
 ;*	.prn	load M80 .prn file or load SLR .prn file
 ;*
@@ -835,23 +835,23 @@ nint95:	inc	hl
 zsym:	call	lfcb		;Initialize fcb
 	jp	nz,zstx		;nz - error
 	ld	de,mldg		;Display loading message
-	call	nprint		;Output	crlf - then print
+	call	nprint		;Output crlf - then print
 	ld	de,prsbf
 	call	print		;Display file name
 	ld	a,c		;lfcb returns delimiter in c reg
 	ld	(delim),a	;Temp save delimiter so we know if a bias has
 				;been specified
 	call	crlf
-	call	lopn		;Try to	open symbol table file
+	call	lopn		;Try to open symbol table file
 	dec	a		;
 	jp	m,zfnf		;m - file not found
 	ld	a,(delim)	;Check delimiter
 	cp	','
 	ld	hl,00
-	jr	nz,zsym10	;nz - no comma means no	symbol bias
+	jr	nz,zsym10	;nz - no comma means no symbol bias
 	call	prsr		;Let prsr extract symbol bias
-	jp	nz,zoff		;Parse error - use bias	of 0000
-	ld	(delim),a	;Save delimiter	which followed bias
+	jp	nz,zoff		;Parse error - use bias of 0000
+	ld	(delim),a	;Save delimiter which followed bias
 	ld	de,prsbf
 	ld	hl,00
 	call	xval		;Evaluate bias
@@ -859,7 +859,7 @@ zsym:	call	lfcb		;Initialize fcb
 
 				;User has specified a bias in the form
 				; of a symbol name
-	ld	hl,(ntpa)	;Check bias specified by symbol	name
+	ld	hl,(ntpa)	;Check bias specified by symbol name
 	ld	a,(maxlen)
 	cpl
 	ld	e,a
@@ -879,21 +879,21 @@ zsym00:	ld	a,(de)
 	inc	de		;Store converted character
 	jp	zsym00
 zsym05:	ld	de,prsbf
-	call	fsym00		;Search	symbol table
+	call	fsym00		;Search symbol table
 	jp	nz,zoff		;nz - not found
 	ld	a,(maxlen)
 	or	l
 	ld	l,a
-	ld	a,(hl)		;Fetch hi order	address	associated
+	ld	a,(hl)		;Fetch hi order address associated
 				; with symbol
 	dec	hl
 	ld	l,(hl)
 	ld	h,a		;HL - symbol value
-zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
+zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	ld	hl,00
 	ld	a,(fcbtyp)
 	ld	bc,(ntpa)	;Current end of TPA
-	cp	'S'		;Is this a .SYM	file?
+	cp	'S'		;Is this a .SYM file?
 	jp	z,.sym		;.SYM file loaded differently from .PRN
 	cp	'L'
 	jp	nz,.prn		;If not .LST then must be .PRN
@@ -915,10 +915,10 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	dec	b
 .sym00:
 	ex	de,hl
-	ld	hl,stack+8	;Check for monster symbol table	ready to eat us
+	ld	hl,stack+8	;Check for monster symbol table ready to eat us
 	and	a
 	sbc	hl,bc
-	jp	nc,zmem		;End symbol load before	stack is clobbered
+	jp	nc,zmem		;End symbol load before stack is clobbered
 	ex	de,hl
 	ld	a,(maxlen)	;Load symbol length mask (7 or 15)
 	dec	a		;
@@ -993,16 +993,16 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	cp	' '
 	jp	z,.sym45
 	ld	(bc),a
-	ld	a,(case)        ;Check user requested case
+	ld	a,(case)	;Check user requested case
 	and	a
-	jr	z,.sym35	;z - upper case	requested by user
+	jr	z,.sym35	;z - upper case requested by user
 	ld	a,(bc)		;Recover char
 	cp	'A'
 	jr	c,.sym35	;c - must be number
 	cp	'Z'+1
 	jp	nc,.sym35
 	or	20h
-	ld	(bc),a          ;Restore symbol name char as lower case
+	ld	(bc),a		;Restore symbol name char as lower case
 .sym35:	inc	bc
 	ld	a,(bytes)
 	dec	a
@@ -1072,13 +1072,13 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	cp	eof
 	jp	nz,.prn00
 .prnCC:
-	ld	de,msymnf       ;display symbol table not found message
+	ld	de,msymnf	;display symbol table not found message
 	call	print
-	jp	.eof50          ;check for more symbol files to load
+	jp	.eof50		;check for more symbol files to load
 
 .prn00:
-	ld	bc,(ntpa)       ;bc - current end of the tpa
-	dec	bc              ;this points us into the next lower
+	ld	bc,(ntpa)	;bc - current end of the tpa
+	dec	bc		;this points us into the next lower
 				;symbol table block
 				;this is first char of symbol table
 	xor	a
@@ -1101,34 +1101,34 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 
 .pr325:	ld	a,(maxlen)
 	cpl
-	and	c               ;now rewind within 8 or 16 byte block
+	and	c		;now rewind within 8 or 16 byte block
 				;(depending on maxlen) in order to point
 				;to first byte
 	ld	c,a
 
-	ex	de,hl           ;de - save file buffer pointer
-	ld	hl,stack + 16   ;check for encroaching symbol table
-	sbc	hl,bc           ;versus current symbol table address
-	jp	nc,zmem         ;nc - out of memory
-	ex	de,hl           ;return file buffer pointer
+	ex	de,hl		;de - save file buffer pointer
+	ld	hl,stack + 16	;check for encroaching symbol table
+	sbc	hl,bc		;versus current symbol table address
+	jp	nc,zmem		;nc - out of memory
+	ex	de,hl		;return file buffer pointer
 	ld	a,(maxlen)
 	ld	d,a
 	dec	d		;d - symbol name length
 	xor	a
 	ld	e,a
-.pr330:	ld	(bc),a          ;pre-clear name portion of symbol table to
+.pr330:	ld	(bc),a		;pre-clear name portion of symbol table to
 				;nulls
 	inc	bc
-	dec	d               ;now any name less than maxlen chars in length
-	jp	nz,.pr330       ;is terminated with a null
+	dec	d		;now any name less than maxlen chars in length
+	jp	nz,.pr330	;is terminated with a null
 	ld	a,(maxlen)
 	cpl
 	and	c
 	ld	c,a
-.pr335:	call	nchr            ;next char from file buffer
+.pr335:	call	nchr		;next char from file buffer
 	cp	21h
 	jp	nc,.pr351	;nc - this is first character of symbol name
-	cp	eof		;end of	file?
+	cp	eof		;end of file?
 	jp	z,.eof
 	cp	lf		;line feed?
 	jp	nz,.pr335
@@ -1137,7 +1137,7 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	jp	z,.pr342
 	cp	formf		;form feed?
 	jp	nz,.pr351
-.pr342:	ld	e,3		;symbols resume	three lines hence following
+.pr342:	ld	e,3		;symbols resume three lines hence following
 				;a form feed character - so count linefeeds
 	cp	cr		;did we find cr or a formf?
 	jp	nz,.pr345	;nz - formf
@@ -1159,22 +1159,22 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	cp	cr		;four crlf's is eof
 	jp	z,.eof
 
-.pr350:	call	nchr            ;next char from file
+.pr350:	call	nchr		;next char from file
 	cp	eof
 	jp	z,.eof
 	cp	tab
 	jp	z,.pr355
-.pr351:	ld	(bc),a		;move character	of symbol name
-	ld	a,(case)        ;check user requested case
+.pr351:	ld	(bc),a		;move character of symbol name
+	ld	a,(case)	;check user requested case
 	and	a
-	jr	z,.pr352        ;z - user wants upper case
-	ld	a,(bc)          ;get char back from symbol table
+	jr	z,.pr352	;z - user wants upper case
+	ld	a,(bc)		;get char back from symbol table
 	cp	'A'
-	jr	c,.pr352        ;must be numeric - no case here
+	jr	c,.pr352	;must be numeric - no case here
 	cp	'Z'+1
 	jr	nc,.pr352
 	add	a,20h
-	ld	(bc),a          ;replace char with lower case equivalent
+	ld	(bc),a		;replace char with lower case equivalent
 .pr352:	inc	bc
 	jp	.pr350
 
@@ -1184,16 +1184,16 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	cp	' '
 	jp	z,.pr357
 
-	call	hex00           ;now read the next four characters from the
+	call	hex00		;now read the next four characters from the
 				;file and convert them to a hex address -
 				;store in symbol table entry
 
 
-	ld	a,(relchr)      ;recover char which followed address
+	ld	a,(relchr)	;recover char which followed address
 
-	cp	' '             ;this char followed address
-	jr	z,.pr370        ;microsoft absolute address
-	cp	quote           ;relocatable address?
+	cp	' '		;this char followed address
+	jr	z,.pr370	;microsoft absolute address
+	cp	quote		;relocatable address?
 	jp	nz,.pr325
 				;by not rewinding the symbol table pointer
 				;the next symbol will overlay this one.
@@ -1215,7 +1215,7 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	ld	hl,stack+8	;check for monster symbol table
 	and	a
 	sbc	hl,bc
-	jp	nc,zmem		;end symbol load before	stack is clobbered
+	jp	nc,zmem		;end symbol load before stack is clobbered
 	ex	de,hl
 	ld	a,(maxlen)
 	dec	a		;pre-clear symbol table entry with nulls
@@ -1270,17 +1270,17 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	cp	21h
 	jp	c,.pr440	;found separator
 	ld	(bc),a
-	ld	a,(case)        ;check user requested case
+	ld	a,(case)	;check user requested case
 	and	a
-	jr	z,.pr435	;c - upper case	requested by user
+	jr	z,.pr435	;c - upper case requested by user
 	ld	a,(bc)		;recover char
 	cp	'A'
 	jr	c,.pr435	;c - must be number
 	cp	'Z'+1
 	jr	nc,.pr435
 	or	20h
-	ld	(bc),a          ;restore symbol name char as lower case
-.pr435:	inc	bc              ;bump symbol table pointer
+	ld	(bc),a		;restore symbol name char as lower case
+.pr435:	inc	bc		;bump symbol table pointer
 	ld	a,(bytes)	;character counter
 	dec	a
 	ld	(bytes),a
@@ -1299,10 +1299,10 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	and	c
 	ld	c,a
 
-	ld	a,(relchr)      ;recover char which followed address
-	cp	' '             ;this char followed address
-	jr	z,.pr450        ;microsoft absolute address
-	cp	quote           ;relocatable address?
+	ld	a,(relchr)	;recover char which followed address
+	cp	' '		;this char followed address
+	jr	z,.pr450	;microsoft absolute address
+	cp	quote		;relocatable address?
 	jp	nz,.pr4		;nz - must be  external symbol. we don't
 				;actually load them or count them in total.
 				;by not rewinding the symbol table pointer
@@ -1320,12 +1320,12 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	call	fstrng		;to load the symbols.
 	cp	eof
 	jp	nz,.sym
-	ld	de,msymnf       ;display symbol table not found message
+	ld	de,msymnf	;display symbol table not found message
 	call	print
-	jp	.eof50          ;check for more symbol files to load
+	jp	.eof50		;check for more symbol files to load
 
 
-.eof:                           ;We always pre-decrement the symbol table
+.eof:				;We always pre-decrement the symbol table
 				;pointer in anticipation of storing the next
 				;symbol.  Now that we hit the end of a symbol
 				;table we must adjust the pointer in
@@ -1335,39 +1335,39 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	ld	l,a
 	ld	h,0
 	inc	l
-	add	hl,bc           ;point to last loaded symbol
+	add	hl,bc		;point to last loaded symbol
 	ld	b,h
-	ld	c,l             ;bc - spare copy
+	ld	c,l		;bc - spare copy
 	cpl
 	and	c
 	ld	c,a
-	ld	(ntpa),bc       ;save current end of tpa address
-	ld	a,(nsymhi)      ;hi order number of symbols loaded (bcd)
-	call	hexc            ;convert to ascii
-	ld	h,a             ;returned in a - move to h (other digit in l)
-	ld	(mhex),hl       ;store in message
+	ld	(ntpa),bc	;save current end of tpa address
+	ld	a,(nsymhi)	;hi order number of symbols loaded (bcd)
+	call	hexc		;convert to ascii
+	ld	h,a		;returned in a - move to h (other digit in l)
+	ld	(mhex),hl	;store in message
 	ld	a,(nsymlo)
-	call	hexc            ;convert lo order
+	call	hexc		;convert lo order
 	ld	h,a
 	ld	(mhex+2),hl
-	ld	de,msym..       ;display number of symbols loaded message
+	ld	de,msym..	;display number of symbols loaded message
 	ld	c,9
 	call	bdos
-	ld	de,mhex         ;now look thru ascii number of symbols to
+	ld	de,mhex		;now look thru ascii number of symbols to
 				;strip leading zeros
 	ld	b,3
 .eof10:	ld	a,(de)
 	cp	'0'
-	jr	nz,.eof20       ;nz - found first non-zero
+	jr	nz,.eof20	;nz - found first non-zero
 	inc	de
-	djnz	.eof10          ;if first three chars zero - fall thru and
+	djnz	.eof10		;if first three chars zero - fall thru and
 				;print the fourth regardless
-.eof20: ld      c,09
-	call	bdos            ;print the number as string ending with $
+.eof20: ld	c,09
+	call	bdos		;print the number as string ending with $
 	call	crlf
-	ld	hl,(tsym)       ;now add in bcd total for this file to bcd
+	ld	hl,(tsym)	;now add in bcd total for this file to bcd
 				;total for all files
-	ld	de,(nsym)       ;tsym - total for all files
+	ld	de,(nsym)	;tsym - total for all files
 				;nsym - total for this file
 	ld	a,h
 	add	a,d
@@ -1378,36 +1378,36 @@ zsym10:	ld	(bias),hl	;Bias to add to	each symbol address
 	daa
 	ld	l,a
 	ld	(tsym),hl
-	ld      hl,00           ;clear out total for next file
+	ld	hl,00		;clear out total for next file
 	ld	(nsym),hl
 	ld	hl,(z8eb)
 	ld	de,symflg-z8eorg
-	add	hl,de           ;hl - pointer to symbol flag in hi memory
+	add	hl,de		;hl - pointer to symbol flag in hi memory
 	xor	a
-	ld	(hl),a		;zero -	symbol table present
-	ld	(symflg),a      ;also set flag in lo memory where we are
+	ld	(hl),a		;zero - symbol table present
+	ld	(symflg),a	;also set flag in lo memory where we are
 				;currently so that fsym knows theres a symbol
 				;table to search thru if the user specified a
 				;symbol name bias as part of the command line
 
-.eof50:	ld	a,(delim)       ;check command line delimiter
-	and	a               ;test for end of line null
-	jp	nz,zsym         ;nz - not null means more files
+.eof50:	ld	a,(delim)	;check command line delimiter
+	and	a		;test for end of line null
+	jp	nz,zsym		;nz - not null means more files
 
 
 
 
-load:	ld	hl,(ntpa)	;current end of	memory
+load:	ld	hl,(ntpa)	;current end of memory
 	ld	a,(symflg)	;check for symbol table
 	and	a
-	jr	nz,load00	;nz - no symbol	table
+	jr	nz,load00	;nz - no symbol table
 	ld	d,a
 	ld	a,(maxlen)
 	ld	e,a		;de - length of a symbol table block
 	inc	e
-	sbc	hl,de		;compensate for	pre-increment of pointer
+	sbc	hl,de		;compensate for pre-increment of pointer
 load00:	ld	de,(06)		;de - real entry point to bdos
-	ld	(06),hl		;point to our origin in	hi memory
+	ld	(06),hl		;point to our origin in hi memory
 	ld	(hl),jp		;init jump to bdos at start of z8e
 	inc	hl
 	ld	(hl),e
@@ -1415,16 +1415,16 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	ld	(hl),d
 	ld	e,0		;de - old start of bdos address in also our
 				;ending address
-	ld	hl,(z8eb)       ;load out starting address in hi memory
-	ld	bc,z8e-z8eorg   ;fetch the number of bytes between z8e's base
+	ld	hl,(z8eb)	;load out starting address in hi memory
+	ld	bc,z8e-z8eorg	;fetch the number of bytes between z8e's base
 				;address and the entry point of the command
 				;processor  - internal symbol table size
 
 	add	hl,bc
 	ld	b,h
-	ld	c,l		;BC - relocated	z8e address
-	ex	de,hl           ;DE - entry point z8e   HL - old start of bdos
-	dec	hl              ;HL - last byte in our memory
+	ld	c,l		;BC - relocated z8e address
+	ex	de,hl		;DE - entry point z8e HL - old start of bdos
+	dec	hl		;HL - last byte in our memory
 
 	; Adjust the execution environment so that it is possible to exit to
 	; the CCP with a simple RET.
@@ -1432,14 +1432,14 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	ld	(hl),b
 	dec	hl
 	ld	(hl),c		;z8e (monitor entry point) on stack
-	ld	sp,hl           ;now set current stack to just below our
+	ld	sp,hl		;now set current stack to just below our
 				;return address
-	ex	de,hl           ;hl - relocated address z8e
+	ex	de,hl		;hl - relocated address z8e
 	inc	hl
-	inc	hl              ;hl - points to ld  sp,0000 instruction at the
+	inc	hl		;hl - points to ld  sp,0000 instruction at the
 				;start of the command processor. replace 0000
 				;with the address bdos-1
-	ld	(hl),e          ;set real stack address
+	ld	(hl),e		;set real stack address
 	inc	hl
 	ld	(hl),d
 	ld	hl,(z8eb)	;base of relocated code
@@ -1450,63 +1450,63 @@ load00:	ld	de,(06)		;de - real entry point to bdos
 	ld	hl,zbuf		;
 	ld	bc,16
 	ldir			;init fcb with saved file name
-	ld	de,mz8eld	;print memory space occupied by	z8e
+	ld	de,mz8eld	;print memory space occupied by z8e
 	call	print
-	ld	hl,(z8eb)       ;display our base address in upper memory
+	ld	hl,(z8eb)	;display our base address in upper memory
 	call	outadr
 	ld	a,'-'
 	call	ttyo
 	call	space
 	call	space
-	ld	hl,(06)         ;this points to the new jump to bdos
+	ld	hl,(06)		;this points to the new jump to bdos
 	inc	hl
-	ld	e,(hl)          ;de - old start of bdos address
+	ld	e,(hl)		;de - old start of bdos address
 	inc	hl
 	ld	d,(hl)
 	ex	de,hl
-	ld	l,0             ;256 byte boundary to bypass cp/m serial no.
+	ld	l,0		;256 byte boundary to bypass cp/m serial no.
 	call	outadr
 
-	ld	a,(symflg)      ;test for presence of symbol table
+	ld	a,(symflg)	;test for presence of symbol table
 	and	a
-	jr	nz,load40       ;nz - no table
-	ld	de,msymld       ;display start address of symbol table message
+	jr	nz,load40	;nz - no table
+	ld	de,msymld	;display start address of symbol table message
 	call	print
-	ld	hl,(06)         ;vector to bdos is start of symbol table
+	ld	hl,(06)		;vector to bdos is start of symbol table
 	call	outadr
 	ld	a,'-'
 	call	ttyo
 	call	space
 	call	space
-	ld	hl,(z8eb)       ;start of internal symbol table is end of
+	ld	hl,(z8eb)	;start of internal symbol table is end of
 				;symbol table built from files
 	dec	hl
 	call	outadr
 
-	ld	a,(tsymhi)      ;total number of symbols from all files (bcd)
-	call	hexc            ;convert to ascii
-	ld	h,a             ;move hi order ascii digit to h
-	ld	(mhex),hl       ;store double ascii digit
+	ld	a,(tsymhi)	;total number of symbols from all files (bcd)
+	call	hexc		;convert to ascii
+	ld	h,a		;move hi order ascii digit to h
+	ld	(mhex),hl	;store double ascii digit
 	ld	a,(tsymlo)
-	call	hexc            ;convert lo order
+	call	hexc		;convert lo order
 	ld	h,a
-	ld	(mhex+2),hl     ;save in string
-	ld	de,tsym..       ;total symbols message
+	ld	(mhex+2),hl	;save in string
+	ld	de,tsym..	;total symbols message
 	ld	c,9
 	call	bdos
-	ld	de,mhex         ;address of ascii digits
-	ld	b,3             ;check for leading zeros
+	ld	de,mhex		;address of ascii digits
+	ld	b,3		;check for leading zeros
 load20:	ld	a,(de)
 	cp	'0'
-	jr	nz,load30       ;nz - found first nz in string
+	jr	nz,load30	;nz - found first nz in string
 	inc	de
-	djnz	load20          ;check first three digits then fall thru and
+	djnz	load20		;check first three digits then fall thru and
 				;print fourth regardless
 load30:	ld	c,09
 	call	bdos
 
 load40:	ld	hl,(06)
-	dec	hl              ;hl - address of new tpa
+	dec	hl		;hl - address of new tpa
 	ld	de,mnvmem       ;display address as memory available
 	call	print
 	call	outadr
@@ -1518,19 +1518,19 @@ load40:	ld	hl,(06)
 				;cp/m.
 	dec	hl
 	ld	(hl),0
-	ld	bc,(z8eb)       ;our relocated address in hi memory
-	ex	de,hl           ;de - last available location in tpa
+	ld	bc,(z8eb)	;our relocated address in hi memory
+	ex	de,hl		;de - last available location in tpa
 	ld	hl,spreg-z8eorg ;address (relative to the start of z8e) where
 				;we store the user stack pointer address
-	add	hl,bc           ;hl - pointer to
-	ld	(hl),e          ;save user stack in spreg in hi memory
+	add	hl,bc		;hl - pointer to
+	ld	(hl),e		;save user stack in spreg in hi memory
 	inc	hl
 	ld	(hl),d
 	ld	hl,z8e-z8eorg
 	ld	a,(zbufnm)	;first char of file name
-	cp	' '             ;do we have a file to load?
-	jr	z,load50        ;z - no
-	ld	de,mldg         ;display loading message and target file name
+	cp	' '		;do we have a file to load?
+	jr	z,load50	;z - no
+	ld	de,mldg		;display loading message and target file name
 	call	nprint
 	ld	de,znmbuf
 	call	print
@@ -1539,19 +1539,19 @@ load40:	ld	hl,(06)
 
 	ld	hl,lldr10-z8eorg
 	ld	bc,(z8eb)
-load50:	add	hl,bc           ;hl - actual address of lldr10 in hi memory
-	ex	de,hl           ;now clear out the buffer at 0080h so the user
+load50:	add	hl,bc		;hl - actual address of lldr10 in hi memory
+	ex	de,hl		;now clear out the buffer at 0080h so the user
 				;program doesn't mistakenly think that our
 				;command line tail is really his.
 	ld	hl,iobuf
-	ld	(hl),00          ;set number of chars zero (0080h)
+	ld	(hl),00		;set number of chars zero (0080h)
 	inc	hl
-	ld	b,127           ;clear until start of tpa
+	ld	b,127		;clear until start of tpa
 load60:	ld	(hl),' '
 	inc	hl
 	djnz	load60
-	ex	de,hl           ;lldr10 address back to HL
-	jp	(hl)            ;Hi-ho, hi-ho to the loader we must go
+	ex	de,hl		;lldr10 address back to HL
+	jp	(hl)		;Hi-ho, hi-ho to the loader we must go
 
 
 
@@ -1570,13 +1570,13 @@ nchr:	xor	a
 read:	push	bc
 	push	de
 	ld	de,fcb
-	ld	c,20            ;sequential file read
+	ld	c,20		;sequential file read
 	call	bdos
-	and	a               ;test for error
-	ld	hl,iobuf        ;assume ok - init i/o buffer address
+	and	a		;test for error
+	ld	hl,iobuf	;assume ok - init i/o buffer address
 	pop	de
 	pop	bc
-	ret	z               ;z - no errors
+	ret	z		;z - no errors
 	ld	a,eof
 	ld	(hl),a
 	cp	a
@@ -1659,12 +1659,12 @@ hex30:	ld	a,(maxlen)      ;now point to last byte of symbol table
 	ld	c,a
 	ld	a,(maxlen)
 	or	c
-	ld	c,a             ;never worry about carry - we always start
+	ld	c,a		;never worry about carry - we always start
 				;with 256 boundary
-	ld	a,d             ;store lo order symbol address
+	ld	a,d		;store lo order symbol address
 	ld	(bc),a
 	dec	bc		;point to penultimate byte in block
-	ld	a,e             ;hi order byte of address into symbol table
+	ld	a,e		;hi order byte of address into symbol table
 	ld	(bc),a
 	ld	a,(maxlen)	;mask to rewind symbol table pointer to the
 				;start of this block
@@ -1674,13 +1674,13 @@ hex30:	ld	a,(maxlen)      ;now point to last byte of symbol table
 	ret
 
 
-totsym:	ld	de,nsymlo       ;nsym - bcd running count of the number of
+totsym:	ld	de,nsymlo	;nsym - bcd running count of the number of
 	ld	a,(de)		;       symbols loaded so far
 	add	a,1		;bump by one symbol
-	daa                     ;keep bcd format
+	daa			;keep bcd format
 	ld	(de),a
 	ret	nc
-	dec	de              ;account for carry by bumping hi order byte
+	dec	de		;account for carry by bumping hi order byte
 	ld	a,(de)
 	add	a,1
 	daa
@@ -1699,7 +1699,7 @@ totsym:	ld	de,nsymlo       ;nsym - bcd running count of the number of
 ; end of input - else, lfcb found real syntax error.
 
 zstx:	ld	a,(prsbf)
-	and	a		;real syntax error - or	end of input?
+	and	a		;real syntax error - or end of input?
 	jp	z,load          ;z - more files
 	ld	de,mldg		;display loading message and symbol name
 				;to preserve the syntax used on good loads
@@ -1849,7 +1849,7 @@ znmbuf:
 ;*	z8e:	Entry point to monitor
 ;*
 ;*		Each command begins with the output of the '*' prompt.
-;*		Command	character is validated by checking the cmd table,
+;*		Command character is validated by checking the cmd table,
 ;*
 ;*		Relative position of command letter in cmd table also used
 ;*		as index into command jump table jtcmd.
@@ -1867,12 +1867,12 @@ z8eorg:
 				;
 				;This is the internal symbol table
 
-z8e:	and	a		;Any do-nothing	instruction with the sign
+z8e:	and	a		;Any do-nothing instruction with the sign
 				;bit set to indicate end of internal symbol
 				;table
 
 	defb	31h		;LD SP,nnnn - Load monitor stack pointer
-z8esp:	defw	8000h		;Actual	address	filled in by nint at load
+z8esp:	defw	8000h		;Actual addres filled in by nint at load
 				;time when we figure out where bdos is
 
 z8ecmd:	ld	hl,z8e
@@ -1917,7 +1917,7 @@ z8e16:				;+
 
 
 z8e20:	ld	bc,ncmd		;total number of commands
-	ld	hl,cmd		;table of ascii	command	characters
+	ld	hl,cmd		;table of ascii command characters
 	cpir
 	jp	nz,e???		;command letter not found in table
 	ld	hl,jtcmd	;command jump table
@@ -1935,22 +1935,22 @@ z8e20:	ld	bc,ncmd		;total number of commands
 ;*
 ;*	bphn:	breakpoint handler - rst38s land here
 ;*
-;*		bphn   - bphn00	  save all user	registers
-;*		bphn10 - bphn20	  check	that user pc matches entry in brktbl.
+;*		bphn   - bphn00	  save all user registers
+;*		bphn10 - bphn20	  check that user pc matches entry in brktbl.
 ;*		bphn80		  special single step processing.
 ;*
-;*	Note:	sbps is	both a flag and	the count of the number	of step	bps.
-;*		sbps is	set to 1 merely	to indicate that the single-stepping
-;*		is in effect.  then the	number of step bps is added to one.
-;*		hence, if 1 step bp was	set then  sbps = 2 and if 2 step bps
+;*	Note:	sbps is both a flag and the count of the number of step bps.
+;*		sbps is set to 1 merely to indicate that the single-stepping
+;*		is in effect.  then the number of step bps is added to one.
+;*		hence, if 1 step bp was set then  sbps = 2 and if 2 step bps
 ;*		were set (conditional jump, call, ret) sbps = 3.
 ;*
 ;******************************************************************************
 
 bphn:	ld	(hlreg),hl	;save user hl
-	pop	hl		;pop breakpoint	pc from	stack
+	pop	hl		;pop breakpoint pc from stack
 	ld	(spreg),sp	;save user sp
-	ld	sp,(z8esp)	;switch	to our stack
+	ld	sp,(z8esp)	;switch to our stack
 	dec	hl		;point to location of rst instruction
 	ld	(pcreg),hl	;save user pc
 	ld	(dereg),de	;save user de
@@ -1974,8 +1974,8 @@ bphn:	ld	(hlreg),hl	;save user hl
 	ld	(ixreg),ix	;save user ix
 	ld	(iyreg),iy	;save user iy
 	ld	a,(bps)
-	and	a		;check for zero	bp count
-	jp	z,bp???		;error - no bps	set
+	and	a		;check for zero bp count
+	jp	z,bp???		;error - no bps set
 	ld	b,a		;b - number of breakpoints
 	ld	hl,brktbl	;breakpoint storage table
 	xor	a
@@ -1984,16 +1984,16 @@ bphn10:	ld	e,(hl)
 	inc	hl
 	ld	d,(hl)		;de - breakpoint address
 	inc	hl
-	ld	a,(hl)		;saved contents	of breakpoint address
+	ld	a,(hl)		;saved contents of breakpoint address
 	inc	hl
-	ld	(de),a		;replace rst 38	with actual data
+	ld	(de),a		;replace rst 38 with actual data
 	ld	a,(pcregl)	;user pc - lo order
 	xor	e
-	ld	e,a		;versus	breakpoint address in table
+	ld	e,a		;versus breakpoint address in table
 	ld	a,(pcregh)
 	xor	d		;check hi order
 	or	e
-	jr	nz,bphn20	;no match - check next entry in	table
+	jr	nz,bphn20	;no match - check next entry in table
 	ld	c,b		;pc found in table set c reg nz
 bphn20:	djnz	bphn10		;restore all user data
 	ld	hl,sbps		;fetch number of step bps (0-2)
@@ -2001,7 +2001,7 @@ bphn20:	djnz	bphn10		;restore all user data
 	xor	a
 	ld	(hl),a		;clear regardless
 	or	c		;test bp found flag
-	jp	z,bp???		;z - bp	not in table
+	jp	z,bp???		;z - bp not in table
 	inc	hl		;point to bp count
 	ld	d,(hl)		;d - bp count
 	dec	b
@@ -2045,7 +2045,7 @@ bphn35:	ld	e,(hl)
 	dec	hl
 	ld	(hl),e		;restored updated count
 	ld	a,d
-	or	e		;did it	just go	zero?
+	or	e		;did it just go zero?
 	jr	z,bphn50	;count just expired
 	ld	a,b		;pass count not zero - go or jdbg?
 	and	a
@@ -2083,8 +2083,8 @@ bphn90:	call	xreg		;display all registers
 	dec	hl
 	ld	a,l
 	or	h
-	jp	z,z8e		;count expired - prompt	for command
-	call	ttyq		;test for abort	trace
+	jp	z,z8e		;count expired - prompt for command
+	call	ttyq		;test for abort trace
 	cp	cr
 	jp	z,z8e
 	call	crlf
@@ -2238,19 +2238,19 @@ jdbg02:	ld	a,(hl)		;check first char of input
 	ld	(hl),1		;+ Signal repaint request
 	jr	jdbg01		;+
 jdbg2a:				;+
-	ex	de,hl		;de - save input buffer	address
-	ld	hl,wflag	;wflag tells us	whether	to trace subroutines
-				;or walk around	them
+	ex	de,hl		;de - save input buffer address
+	ld	hl,wflag	;wflag tells us whether to trace subroutines
+				;or walk around them
 	ld	(hl),0ffh	;conditionally assume trace all
 	sub	'/'		;slash means don't trace any
 	jr	z,jdbg03	;
-	add	a,'/'-'*'	;check for star	- no trace of bdos subs
+	add	a,'/'-'*'	;check for star - no trace of bdos subs
 	jr	nz,jdbg05
 	inc	a		;set flag one to indicate no trace of subs
 				;at address < 0100h (bdos calls)
 jdbg03:	ld	(hl),a		;set wflag
-	xor	a		;if slash or space replace with	null in	inbf
-				;so parser will	ignore
+	xor	a		;if slash or space replace with null in inbf
+				;so parser will ignore
 	ld	(de),a
 jdbg05:	call	iarg		;now evaluate address
 	jr	z,jdbg08	;z - no error
@@ -2259,7 +2259,7 @@ jdbg05:	call	iarg		;now evaluate address
 	jr	z,jdbg00	;treat as single step
 	ld	(jstepf),a	;indicate screen corrupted
 	jp	e???		;error -
-jdbg08:	ld	(pcreg),hl	;save address at which to start	tracing
+jdbg08:	ld	(pcreg),hl	;save address at which to start tracing
 	and	a		;check delimiter
 	ld	a,10		;no delimiter use default timer value
 	jr	z,jdbg10
@@ -2416,7 +2416,7 @@ jdbg65:	ld	hl,(pcreg)
 	and	a
 	sbc	hl,de
 	jr	z,jdbg70	;found - pc exists somewhere on screen
-	call	zlen00		;compute length	of this	instruction
+	call	zlen00		;compute length of this instruction
 	ld	b,0
 	ex	de,hl		;hl - address on disassembled instruction
 	add	hl,bc		;add length to compute address of next inline
@@ -2425,19 +2425,19 @@ jdbg65:	ld	hl,(pcreg)
 	ld	hl,jlines
 	dec	(hl)		;dec screen line count
 	jr	nz,jdbg65
-	ld	hl,(pcreg)	;pc not	on screen - so current pc will be new
+	ld	hl,(pcreg)	;pc not on screen - so current pc will be new
 				;first pc on screen
 	ld	(zasmfl),hl
-	ld	b,3		;cursor	row 4 -	col 1
+	ld	b,3		;cursor row 4 - col 1
 	ld	c,0
 	call	xycp
 	call	zwnw		;instruction not on screen so paint a new
-				;screen	starting at current pc
+				;screen starting at current pc
 	ld	a,3		;disassembled instructions start on line 4
 	jr	jdbg75
 jdbg70:	ld	a,(jlines)
 	neg
-	add	a,21+0-0	;a - screen row	on which to position cursor
+	add	a,21+0-0	;a - screen row on which to position cursor
 
 ht05	equ	$-1		;[Patch to screen height - 3]
 
@@ -2670,18 +2670,18 @@ clmsp7:	ld	(clmsp),de
 	page
 ;******************************************************************************
 ;*
-;*	exam:	examine	memory and display in hex and ascii.  user is allowed
-;*		to modify memory after every byte is displayed.	ilin called
+;*	exam:	examine memory and display in hex and ascii.  user is allowed
+;*		to modify memory after every byte is displayed.  ilin called
 ;*		to parse input buffer into a single string of bytes which is
 ;*		returned in argbuf.  the byte count of the string is returned
 ;*		in argbc, and this number of bytes is transferred to the
-;*		current	memory address.
+;*		current memory address.
 ;*
-;*		user may optionally scan memory	by entering cr.	 command
-;*		terminates when	a single space is entered.
+;*		user may optionally scan memory by entering cr.  command
+;*		terminates when a single space is entered.
 ;*
-;*		enter:	b - 0
-;*		       de - address at which to	display	first byte
+;*		enter:  b - 0
+;*		       de - address at which to display first byte
 ;*
 ;******************************************************************************
 
@@ -2735,7 +2735,7 @@ hsym:	call	ilin		;Read in line of data
 	jr	nz,hsym10	;NZ - no input means display entire table
 	ld	de,prsbf
 	call	fsym		;Attempt to find this symbol name in table
-	jp	nz,e???		;Error - symbol	not found in symbol table
+	jp	nz,e???		;Error - symbol not found in symbol table
 	ld	a,(maxlen)
 	or	l		;Point to next symbol table entry (next block)
 	ld	l,a		;HL - ptr to last byte in this entry
@@ -2896,10 +2896,10 @@ putc00:	ld	de,symbuf	;hit end of buffer - reinit pointer to start
 ;
 ;	dump:  Dump memory in hex and ASCII
 ;
-;	Memory is dumped in hex	and ASCII in user-specified block size.
-;	If the D command is given without arguments then memory	is dumped
+;	Memory is dumped in hex and ASCII in user-specified block size.
+;	If the D command is given without arguments then memory is dumped
 ;	beginning at the address where we left off as store in blkptr.
-;	User is	queried	after each block is dumped:
+;	User is queried after each block is dumped:
 ;
 ;		cr - Dump next block		\  v 4.1
 ;	    Not	cr - End command		/  jrs 20 Feb 15
@@ -2908,18 +2908,18 @@ putc00:	ld	de,symbuf	;hit end of buffer - reinit pointer to start
 
 dump:	call	iedtbc		;Solicit input
 	jp	p,dump00	;p - input present
-	ld	de,(bsiz)	;No input means	use previous block size
-	ld	hl,(blkptr)	;   ...	and address
+	ld	de,(bsiz)	;No input means use previous block size
+	ld	hl,(blkptr)	;   ... and address
 	jr	dump30
 dump00:	call	iarg		;Read in next arg (starting address)
 	jp	nz,e???		;Invalid starting address
 	ex	de,hl		;DE - starting address to dump
 	call	iarg		;Next arg (block size)
-	jr	z,dump15	;Z - no	errors
+	jr	z,dump15	;Z - no errors
 	ld	hl,000		;Default to block size of 256
 	jr	dump20
 dump15:	xor	a
-	or	h		;Test for block	size or	ending address
+	or	h		;Test for block size or ending address
 	jr	z,dump20	;Less than 256 must be block size
 	sbc	hl,de		;Compute size
 	jp	c,e???
@@ -2928,7 +2928,7 @@ dump20:	ld	a,l
 	jr	nz,dump25
 	inc	h
 dump25:	ld	(bsiz),hl
-	ex	de,hl		;DE - block size   HL -	memory pointer
+	ex	de,hl		;DE - block size   HL - memory pointer
 dump30:	ld	b,16		;Init bytes-per-line count
 	call	ttyq
 	cp	cr
@@ -2936,19 +2936,19 @@ dump30:	ld	b,16		;Init bytes-per-line count
 	call	crlf		;Display current address on new line
 	call	outadr
 	ld	c,2
-	call	spaces		;Hex display starts two	spaces right
+	call	spaces		;Hex display starts two spaces right
 dump40:	dec	b		;Decrement column count
 	ld	a,(hl)
 	inc	hl
-	call	othxsp		;Display memory	in hex
+	call	othxsp		;Display memory in hex
 	inc	c		;Tally of hex bytes displayed
 	dec	de		;Decrement block count
 	ld	a,d
 	or	e		;Test for end of block
 	jr	z,dump50	;Z - end of block
 	xor	a
-	or	b		;End of	line?
-	jr	nz,dump40	;Not end of line - dump	more in	hex
+	or	b		;End of line?
+	jr	nz,dump40	;Not end of line - dump more in hex
 	jr	dump60
 dump50:	ld	a,(bsizhi)
 	and	a		;Block size greater than 256?
@@ -2957,7 +2957,7 @@ dump50:	ld	a,(bsizhi)
 	and	0F0h		;Block size less than 16?
 	jr	z,dump60	;Z - less
 dump55:	ld	a,(bsizlo)
-	and	0fh		;Block size multiple of	16?
+	and	0fh		;Block size multiple of 16?
 	jr	z,dump60	;Multiple of 16
 	neg
 	add	a,16
@@ -2965,10 +2965,10 @@ dump55:	ld	a,(bsizlo)
 	add	a,a
 	add	a,b
 dump60:	add	a,3		;Plus three - begin ASCII display
-	ld	b,a		;Pad line until	ASCII display area
+	ld	b,a		;Pad line until ASCII display area
 dump70:	call	space
 	djnz	dump70
-	sbc	hl,bc		;Rewind	memory point by	like amount
+	sbc	hl,bc		;Rewind memory point by like amount
 dump80:	ld	a,(hl)		;Start ASCII display
 	inc	hl
 	call	asci
@@ -2977,25 +2977,25 @@ dump80:	ld	a,(hl)		;Start ASCII display
 	call	ttyq		;CR aborts command
 	cp	cr
 	jp	z,z8e
-	ld	a,d		;Test for block	size tally expired
+	ld	a,d		;Test for block size tally expired
 	or	e
 	jr	nz,dump30
-	ld	de,(bsiz)	;Reinit	block size
-	call	ttyi		;Query user for	more
+	ld	de,(bsiz)	;Reinit block size
+	call	ttyi		;Query user for more
 	cp	cr
 	call	z,crlf
-	jr	z,dump30	;not cr	- next block (jrs 4.1 20 Feb 15)
+	jr	z,dump30	;not cr - next block (jrs 4.1 20 Feb 15)
 	ld	(blkptr),hl
 	ret			;end command
 	page
 ;******************************************************************************
 ;*
-;*	rgst:  display and optionally modify individual	registers
+;*	rgst:  display and optionally modify individual registers
 ;*
 ;*	call iedt:   read edited input into inbf
 ;*	call prsr:   parse input
-;*	call mreg:   validate register name and	map into reg storage
-;*	call iarg:   query user	for replacement
+;*	call mreg:   validate register name and map into reg storage
+;*	call iarg:   query user for replacement
 ;*
 ;******************************************************************************
 
@@ -3017,19 +3017,19 @@ rgst:	ld	c,' '		;get edited input
 	sub	quote
 	jr	nz,rgst25
 	ld	(hl),a
-rgst00:	ld	a,(inbfnc)	;number	of characters in buffer
+rgst00:	ld	a,(inbfnc)	;number of characters in buffer
 	cp	4
 	jr	nc,rgst25	;error - too many chars
 	neg
 	add	a,4		;calculate space padding
 	ld	c,a
-	cp	3		;was it	one?
+	cp	3		;was it one?
 	jr	nz,rgst10
 	ld	a,(de)
 	call	ixlt
 	cp	'P'
 	jr	nz,rgst10
-	ld	(inbfnc),a	;any number > 2	indicates 16 bit register
+	ld	(inbfnc),a	;any number > 2 indicates 16 bit register
 rgst10:	call	spaces
 	ld	a,(hl)		;check last char in parse buffer
 	sub	quote
@@ -3037,12 +3037,12 @@ rgst10:	call	spaces
 	ld	(hl),a		;replace with null
 rgst15:	call	mreg		;validate register name
 	jr	nz,rgst25	;error
-	ld	a,(regtrm)	;mreg stored char following reg	name
+	ld	a,(regtrm)	;mreg stored char following reg name
 	and	a
 	jr	nz,rgst25	;error - no operators allowed
 	ld	a,(inbfnc)	;now check number of chars in buffer
-	ld	b,a		;save in b reg for 8 or	16 bit reg test
-	dec	a		;test for one -	8 bit reg
+	ld	b,a		;save in b reg for 8 or 16 bit reg test
+	dec	a		;test for one - 8 bit reg
 	ld	c,3
 	jr	z,rgst20
 	ld	a,(hl)
@@ -3051,19 +3051,19 @@ rgst15:	call	mreg		;validate register name
 	ld	c,1
 rgst20:	ld	a,(hl)
 	call	othxsp
-	call	spaces		;reg c - number	of spaces to print
-	ex	de,hl		;de - save reg contents	pointer
-rgst22:	call	istr		;query user for	reg value replacement
-	ld	a,(inbfnc)	;test number of	chars in input buffer
+	call	spaces		;reg c - number of spaces to print
+	ex	de,hl		;de - save reg contents pointer
+rgst22:	call	istr		;query user for reg value replacement
+	ld	a,(inbfnc)	;test number of chars in input buffer
 	dec	a		;
-	jp	m,rgst40	;none -	prompt for next	reg name
+	jp	m,rgst40	;none - prompt for next reg name
 	call	irsm
 	jr	z,rgst30
 	ld	a,(inbfnc)
 	and	a
 	jr	z,rgst22
 rgst25:	call	e???
-	jr	rgst40		;accept	new reg	name
+	jr	rgst40		;accept new reg name
 rgst30:	ex	de,hl
 	ld	(hl),e
 	dec	b		;test for 16 bit reg
@@ -3076,15 +3076,15 @@ rgst40:	call	crlf
 
 
 
-mreg:	ld	c,23		;number	of reserved operands
-	call	oprn00		;check validity	of register name
+mreg:	ld	c,23		;number of reserved operands
+	call	oprn00		;check validity of register name
 	ld	a,(de)		;last char examined by operand routine
 	call	oprtor
 	ret	nz		;error - not null or valid operator
 	ld	(regtrm),a	;save terminator character for rgst
 	ld	a,c
 	cp	17		;valid reg names are less than 17
-	jr	c,mreg00	;so far	so good
+	jr	c,mreg00	;so far so good
 	sub	23		;last chance - may be pc
 	ret	nz		;error - invalid reg name
 	ld	a,10		;make pc look like p for mapping
@@ -3093,11 +3093,11 @@ mreg00:	ld	hl,regmap	;ptrs to register contents storage
 	ld	l,a
 	jr	nc,mreg05
 	inc	h
-mreg05:	ld	a,b		;b reg set m by	prsr if	trailing quote
+mreg05:	ld	a,b		;b reg set m by prsr if trailing quote
 	and	a
-	ld	a,0		;assume	no quote - not prime reg
+	ld	a,0		;assume no quote - not prime reg
 	jp	p,mreg10	;p - correct assumption
-	ld	a,8		;bias pointer for prime	reg contents
+	ld	a,8		;bias pointer for prime reg contents
 mreg10:	add	a,(hl)
 	ld	c,a		;save mapping byte
 	and	7fh		;strip sign
@@ -3113,20 +3113,20 @@ mreg50:	xor	a		;hl - pointer to register contents
 	page
 ;******************************************************************************
 ;*
-;*	qprt:	read and display / write to i/o	ports
+;*	qprt:	read and display / write to i/o ports
 ;*
-;*		contents of ports are displayed	and the	user is	queried
-;*		input character	effects	the current port address:
+;*		contents of ports are displayed and the user is queried
+;*		input character effects the current port address:
 ;*
-;*		space -	display	next sequential	port on	same line
-;*		lf    -	display	next sequential	port on	new line
-;*		cr    -	end command
-;*		slash -	display	same port on same line
-;*		^     -	display	previous port on new line
+;*		space - display next sequential port on same line
+;*		lf    - display next sequential port on new line
+;*		cr    - end command
+;*		slash - display same port on same line
+;*		^     - display previous port on new line
 ;*
-;*		any other input	is treated as a	replacement byte and
-;*		is output to the current port address.	any of the
-;*		above characters may be	used to	continue the display.
+;*		any other input is treated as a replacement byte and
+;*		is output to the current port address.  any of the
+;*		above characters may be used to continue the display.
 ;*
 ;*		enter: e  - port at which to begin display
 ;*
@@ -3231,10 +3231,10 @@ qprt60:	cp	' '
 	page
 ;******************************************************************************
 ;*
-;*	break:	set breakpoint routine
+;*	break:  set breakpoint routine
 ;*
 ;*	breakpoint address storage table (brktbl) is examined and user
-;*	specified breakpoint is	considered valid unless:
+;*	specified breakpoint is considered valid unless:
 ;*
 ;*		     - table full
 ;*		     - address already exists in table
@@ -3244,7 +3244,7 @@ qprt60:	cp	' '
 ;*
 ;*	entry point brk30:
 ;*	      entered from single step command to set breakpoint.  two table
-;*	      slots are	permanently available for step breakpoints. step
+;*	      slots are permanently available for step breakpoints. step
 ;*	      routine calls with c pos to tell us not to look for more args
 ;*	      in the input buffer.
 ;*
@@ -3255,7 +3255,7 @@ break:	call	iedtbc
 	ld	c,0ffh		;set neg - distinguish ourselves from step
 brk10:	ld	a,(bps)		;fetch current bp count
 	cp	maxbp		;table full
-	jp	nc,e???		;full -	abort command
+	jp	nc,e???		;full - abort command
 	ld	b,a		;save current count
 	call	iarg
 	jp	nz,e???
@@ -3263,9 +3263,9 @@ brk10:	ld	a,(bps)		;fetch current bp count
 brk30:	ld	hl,brktbl
 	xor	a
 	or	b		;check for no breakpoints in effect
-	jr	z,brk60		;none -	bypass check for duplicate
+	jr	z,brk60		;none - bypass check for duplicate
 brk40:	ld	a,e
-	cp	(hl)		;check lo order	address	match
+	cp	(hl)		;check lo order address match
 	inc	hl
 	jr	nz,brk50	;no match - check next
 	ld	a,d
@@ -3275,12 +3275,12 @@ brk40:	ld	a,e
 	ret	p
 	ld	hl,bps		;pointer to bp count
 	ld	a,(hl)
-	sub	b		;create	index into psctbl
+	sub	b		;create index into psctbl
 	jr	brk70
 brk50:	inc	hl
 	inc	hl		;bump past contents storage byte
 	djnz	brk40
-brk60:	ld	(hl),e		;set in	table
+brk60:	ld	(hl),e		;set in table
 	inc	hl
 	ld	(hl),d
 	ld	hl,bps		;breakpoint count
@@ -3293,16 +3293,16 @@ brk70:	ld	de,psctbl	;base of pass count table
 	jr	nc,brk80
 	inc	d
 brk80:	xor	a
-	ld	(de),a		;pre-clear pass	count table entry
+	ld	(de),a		;pre-clear pass count table entry
 	inc	de
 	ld	(de),a
 	or	c		;test if this was step calling
 	ret	p		;i'm positive it was
-	ld	a,(delim)	;check delimiter which followed	bp address
+	ld	a,(delim)	;check delimiter which followed bp address
 	and	a
-	ret	z		;end of	line null - terminate command
-	cp	','		;check for pass	count delimiter
-	jp	nz,brk10	;not comma means treatt	this as	new bp
+	ret	z		;end of line null - terminate command
+	cp	','		;check for pass count delimiter
+	jp	nz,brk10	;not comma means treatt this as new bp
 	call	iarg		;get next arg
 	jp	nz,e???		;nz - evaluation error
 	ex	de,hl		;de - pass count as entered by user
@@ -3311,23 +3311,23 @@ brk80:	xor	a
 	ld	(hl),e
 	and	a		;check delimiter
 	jp	nz,brk10	;nz - more arguments follow
-	ret			;end of	line null - terminate command
+	ret			;end of line null - terminate command
 	page
 
 ;******************************************************************************
 ;*
-;*	cbreak:	clear breakpoint
+;*	cbreak:  clear breakpoint
 ;*
 ;*	breakpoint address storage table (brktbl) is examined and breakpoint
-;*	is removed if found. breakpoint	is removed by bubbling up all bp
-;*	addresses which	follow,	ditto for pass counts.
+;*	is removed if found. breakpoint is removed by bubbling up all bp
+;*	addresses which follow, ditto for pass counts.
 ;*
 ;******************************************************************************
 
 cbreak:	call	iedtbc
 	ret	m		;no input ends command
 	ld	a,(bps)		;fetch breakpoint count
-	or	a		;any if	effect
+	or	a		;any if effect
 	ret	z		;no
 	ld	b,a		;temp save count
 	call	iarg		;extract address to clear from input buffer
@@ -3347,24 +3347,24 @@ cbrk10:	ld	a,(de)		;test lo order address for match
 	inc	de
 	jr	nz,cbrk20	;no match - examine next entry
 	ld	a,(de)
-	cp	h		;versus	hi order bp address
+	cp	h		;versus hi order bp address
 cbrk20:	inc	de
 	inc	de		;bump past contents save location
-	jr	z,cbrk30	;zero -	found bp in table
+	jr	z,cbrk30	;zero - found bp in table
 	djnz	cbrk10
-	jp	e???		;error - breakpoint not	found
-cbrk30:	ld	h,0ffh		;rewind	to point to bp address
+	jp	e???		;error - breakpoint not found
+cbrk30:	ld	h,0ffh		;rewind to point to bp address
 	ld	l,-3
 	add	hl,de
-	ex	de,hl		;de - ptr to bp	  hl - ptr to next bp
-	ld	a,b		;multiply number of bps	remaining in table
+	ex	de,hl		;de - ptr to bp,  hl - ptr to next bp
+	ld	a,b		;multiply number of bps remaining in table
 				;times three bytes per entry
 	add	a,a
 	add	a,b
-	ld	c,a		;init c	for ldir
-	ld	a,b		;save number of	bps remaining
+	ld	c,a		;init c for ldir
+	ld	a,b		;save number of bps remaining
 	ld	b,0
-	ldir			;bubble	up all remaining entries in table
+	ldir			;bubble up all remaining entries in table
 	ld	c,a		;
 	ld	hl,bps		;address of bp count
 	ld	a,(hl)		;
@@ -3378,8 +3378,8 @@ cbrk30:	ld	h,0ffh		;rewind	to point to bp address
 	add	hl,de		;index into pass count table
 	ex	de,hl
 	ld	hl,02
-	add	hl,de		;de - ptr to pass count	 hl - next in table
-	sla	c		;number	of pass	counts to move
+	add	hl,de		;de - ptr to pass count,  hl - next in table
+	sla	c		;number of pass counts to move
 	ldir
 	ld	a,(delim)	;recheck delimiter
 	and	a
@@ -3389,7 +3389,7 @@ cbrk30:	ld	h,0ffh		;rewind	to point to bp address
 ;***********************************************************************
 ;*
 ;*     obreak:	output all breakpoints and associated pass counts to
-;*		console.  search symbol	table for match, if symbol name
+;*		console.  search symbol table for match, if symbol name
 ;*		found display it along with address.
 ;*
 ;*     wbreak:	wipe out (clear) all breakpoints currently in effect
@@ -3403,23 +3403,23 @@ obreak:	ld	a,(bps)		;fetch bp count
 	ret	m		;m - none
 	ld	b,a		;save count
 obrk00:	ld	hl,brktbl	;base of breakpoint storage table
-	ld	e,b		;use current breakpoint	count as index
+	ld	e,b		;use current breakpoint count as index
 	ld	d,0		;clear
 	add	hl,de		;this is a three byte table
 	add	hl,de
 	add	hl,de
-	ld	e,(hl)		;fetch lo order	bp address
+	ld	e,(hl)		;fetch lo order bp address
 	inc	hl
 	ld	d,(hl)		;upper address
 	ex	de,hl
 	call	outadr		;display address
 	ex	de,hl		;hl - breakpoint table
-	call	fadr		;check symbol table for	name match
+	call	fadr		;check symbol table for name match
 				;   symbol table pointer returned in de
 				;   zero flag set if found
 	ld	a,(maxlen)
 	ld	c,a
-	dec	bc		;max number of chars in	a symbol name
+	dec	bc		;max number of chars in a symbol name
 	ex	de,hl		;hl - symbol table address if
 	call	z,printb	;display name if found in symbol table
 	ld	a,b
@@ -3434,7 +3434,7 @@ obrk10:	ld	e,(hl)		;lo order pass count
 	ld	d,(hl)		;upper byte
 	ld	a,d		;test if pass count in effect
 	or	e
-	jr	z,obrk20	;z - no	pass count for this bp
+	jr	z,obrk20	;z - no pass count for this bp
 	inc	c
 	call	spaces
 	ex	de,hl
@@ -3442,7 +3442,7 @@ obrk10:	ld	e,(hl)		;lo order pass count
 obrk20:	call	crlf
 	ld	c,5
 	call	spaces
-	dec	b		;dec bp	count
+	dec	b		;dec bp count
 	jp	p,obrk00
 	ret
 
@@ -3450,11 +3450,11 @@ obrk20:	call	crlf
 ;*
 ;*	kdmp:	Set Memory Window (display memory during 'J' command)
 ;*
-;*	address	entered:  start of memory to display
+;*	address entered:  start of memory to display
 ;*
 ;*	size:		  number of bytes to display (MAX = 256)
 ;*
-;*	wnwsiz	  count of bytes (base zero) 00->255, total of 256 bytes
+;*	wnwsiz    count of bytes (base zero) 00->255, total of 256 bytes
 ;*	wnwsiz+1  flag, ==0 no display, <>0 display memory
 ;*
 ;*	All this horrid code below is because the DOCS said the maximum
@@ -3524,20 +3524,20 @@ kdmp21:	ld	(wnwtab),de
 ;*
 ;*		     begin/resume execution of user program
 ;*
-;*	address	entered:     execution begins at entered address
+;*	address entered:     execution begins at entered address
 ;*	no address entered:  execution resumed at specified by saved pc
 ;*
 ;*	breakpoint table examined:
-;*	      -	memory contents	from each address is removed from user
-;*		program	and saved in breakpoint	table
-;*	      -	rst 38 instruction is placed at	each breakpoint	address
-;*		in user	program
+;*	      -	memory contents from each address is removed from user
+;*		program and saved in breakpoint table
+;*	      -	rst 38 instruction is placed at each breakpoint address
+;*		in user program
 ;*
 ;*	user registers restored
 ;*
 ;***************************************************************************
 
-go:	call	iedtbc		;query user for	execution address
+go:	call	iedtbc		;query user for execution address
 
 ;;	ret	m		;- eg 3.3.3 no input - reprompt
 	jp	p,g001		;+ Skip if argument supplied, else:
@@ -3551,30 +3551,30 @@ g002:				;+
 	call	crlf
 g100:	ld	(jmplo),hl	;store execution address
 	ld	a,jp
-	ld	(jmp),a		;set jp	instruction
+	ld	(jmp),a		;set jp instruction
 	ld	(jmp2jp),a	;just in case
 	ld	a,(bps)		;check breakpoint count
 	and	a
-	jp	z,g600		;z - no	bps in effect -	no restoration needed
+	jp	z,g600		;z - no bps in effect - no restoration needed
 	ld	b,a
 	ld	hl,brktbl
 	ld	c,0ffh
 g300:	ld	e,(hl)
 	inc	hl
 	ld	d,(hl)		;de - breakpoint address removed from table
-	inc	hl		;point to contents save	byte in	table
+	inc	hl		;point to contents save byte in table
 	ld	a,(de)
 	ld	(hl),a
 	ld	a,(jmplo)
-	cp	e		;check if bp from table	matches	next pc
-	jr	nz,g400		;no match - set	breakpoint
+	cp	e		;check if bp from table matches next pc
+	jr	nz,g400		;no match - set breakpoint
 	ld	a,(jmphi)
-	cp	d		;check hi order	next pc	address
-	jr	nz,g400		;no match - set	bp
+	cp	d		;check hi order next pc address
+	jr	nz,g400		;no match - set bp
 	ld	c,b		;set flag - current pc matches breakpoint
 	jr	g500
 g400:	ld	a,rst38		;set rst38 instruction
-	ld	(de),a		;save user byte	in brktbl
+	ld	(de),a		;save user byte in brktbl
 g500:	inc	hl
 	djnz	g300		;examine all entries
 	inc	c		;current pc match breakpoint?
@@ -3616,7 +3616,7 @@ g505:	ld	(hl),nop
 				;
 	ex	de,hl		;hl - ptr to user instruction
 	ld	de,execbf
-	ld	a,(hl)		;first object byte from	user program
+	ld	a,(hl)		;first object byte from user program
 g518:	ld	(hl),rst38	;replace
 	push	bc		;b - if nz this is a pc modifying instruction
 				;c - number of bytes of object code for this
@@ -3729,9 +3729,9 @@ g555:	ld	(hl),a
 g600:	ld	iy,(iyreg)	;restore user iy
 	ld	ix,(ixreg)	;restore user ix
 	ld	a,(rreg)
-	ld	r,a		;restore user r	reg
+	ld	r,a		;restore user r reg
 	ld	a,(ireg)
-	ld	i,a		;restore user i	reg
+	ld	i,a		;restore user i reg
 	ld	bc,(bcpreg)	;restore user grade a prime regs
 	ld	de,(depreg)
 	ld	hl,(afpreg)
@@ -3753,15 +3753,15 @@ g600:	ld	iy,(iyreg)	;restore user iy
 ;*
 ;*	step:  Single step (trace) routine
 ;*
-;*	Call zlen to determine where to	set breakpoint.
+;*	Call zlen to determine where to set breakpoint.
 ;*
-;*		pass:	   de -	current	pc address
+;*		pass:	   de - current pc address
 ;*
-;*		returned:  b:  z - next	instruction will not modify pc.
+;*		returned:  b:  z - next instruction will not modify pc.
 ;*				   set bp at address specified by pc+length.
 ;*
-;*			   b: nz - next	instruction will modify	pc (jumps,
-;*				   calls, and returns) thus set	bp at address
+;*			   b: nz - next instruction will modify pc (jumps,
+;*				   calls, and returns) thus set bp at address
 ;*				   returned in hl.
 ;*
 ;*			   c:	 - number of bytes in current instruction.
@@ -3772,25 +3772,25 @@ g600:	ld	iy,(iyreg)	;restore user iy
 ;*	Call brk00 to set breakpoint.
 ;*
 ;*		pass:	   b - current number of breakpoints.
-;*			  hl - address at which	to set breakpoint.
+;*			  hl - address at which to set breakpoint.
 ;*
-;*	entry point step:    entered by	user via (s)ingle step command.
-;*	entry point step40:  entered by	breakpoint handler - step count	nz
+;*	entry point step:    entered by user via (s)ingle step command.
+;*	entry point step40:  entered by breakpoint handler - step count nz
 ;*
-;*	exit:	to go routine to resume	execution.
+;*	exit:	to go routine to resume execution.
 ;*
 ;******************************************************************************
 
 step:	ld	a,0ffh
 	ld	(wflag),a	;set trace subroutine flag on
-	call	iedtbc		;query user for	trace count
+	call	iedtbc		;query user for trace count
 	ld	hl,0001
 	jp	m,step40	;null input - step count of one
 	call	prsr
 	jp	nz,e???
 	ld	a,(de)		;first character from parse buffer
 	sub	'/'
-	ld	(wflag),a	;may be	slash -	no subroutine tracing
+	ld	(wflag),a	;may be slash - no subroutine tracing
 	ld	hl,00
 	jr	nz,step20
 	ld	(de),a
@@ -3811,26 +3811,26 @@ step40:	ld	(nstep),hl	;save step count
 	ld	de,(pcreg)	;fetch current pc
 	call	zlen00		;determine number of bytes in instruction
 	inc	b		;test where to set breakpoint
-	djnz	step50		;nz - set at address in	hl
+	djnz	step50		;nz - set at address in hl
 	ex	de,hl
 	add	hl,bc		;z - set at address pc + instruction length
 step50:	ld	a,(bps)		;get current number of bps
-	ld	b,a		;pass to set bp	routine	in b reg
+	ld	b,a		;pass to set bp routine in b reg
 	ex	de,hl		;de - bp address to set
 	call	brk30
-	ld	hl,(pcreg)	;resume	execution at next pc
+	ld	hl,(pcreg)	;resume execution at next pc
 	xor	a
 	or	b
-	jp	nz,g100		;nz - collision	with user bp
+	jp	nz,g100		;nz - collision with user bp
 	ex	de,hl
-	ld	hl,sbps		;step bp set by	brk30 -	bump count
+	ld	hl,sbps		;step bp set by brk30 - bump count
 	inc	(hl)
 	ex	de,hl
 	jp	g100
 	page
 ;******************************************************************************
 ;*
-;*	asmblr:	z80 assembler
+;*	asmblr:  z80 assembler
 ;*
 ;******************************************************************************
 
@@ -3846,7 +3846,7 @@ asm005:
 asm010:	call	crlf
 	call	outadr		;display current assembly pc
 	ld	c,22		;
-	call	spaces		;leave room for	object code
+	call	spaces		;leave room for object code
 	ld	a,3
 	ld	hl,objbuf	;zero scratch object code buffer
 asm015:	ld	(hl),c
@@ -3856,14 +3856,14 @@ asm015:	ld	(hl),c
 	ld	(oprn01),a	;init operand key values to 0ffh
 	ld	(oprn02),a
 	call	iedtbc		;get user input
-	ret	m		;m - no	input ends command
+	ret	m		;m - no input ends command
 	call	cret
 	call	prsr		;parse to obtain label
 	ld	a,(hl)		;check last character
 	cp	':'
-	jr	nz,asm040	;no colon found	- must be op code
+	jr	nz,asm040	;no colon found - must be op code
 	ld	(hl),0		;erase colon
-	ld	a,(de)		;fetch first char of label from	parse buffer
+	ld	a,(de)		;fetch first char of label from parse buffer
 	cp	'A'
 	jp	c,asm??l	;error - first character must be alpha
 	cp	'z'+1
@@ -3875,45 +3875,45 @@ asm015:	ld	(hl),c
 asm030:	ld	hl,00
 	ld	(isympt),hl	;clear pointer
 	call	isym		;attempt to insert symbol into symbol table
-	jp	nz,asm??t	;error - symbol	table full
-	ld	(isympt),hl	;save pointer to symbol	value in symbol	table
+	jp	nz,asm??t	;error - symbol table full
+	ld	(isympt),hl	;save pointer to symbol value in symbol table
 	call	prsr		;extract opcode
-	jp	m,asm005	;m - statement contains	label only
+	jp	m,asm005	;m - statement contains label only
 asm040:	ld	a,(delim)	;check delimiter
 	cp	','		;check for invalid terminator
 	jp	z,asm??o
 ;; if Z180
 ;;	ld	c,83		;Number of HD64180 opcode names
 ;; else
-;;	ld	c,67		;number	of Z80 opcodes in table as index
+;;	ld	c,67		;number of Z80 opcodes in table as index
 ;; endif
 ;;; Let assembler compute number of entries in table.  Do not need conditional test above
 
-	ld	c,cnmcnt	;number	of opcodes in table as index
+	ld	c,cnmcnt	;number of opcodes in table as index
 	;; decrementing C by one lets us start at beginning of last entry
 asm050:	dec	c
-	jp	m,asm??o	;opcode	not found
+	jp	m,asm??o	;opcode not found
 	ld	b,0
 	ld	hl,zopcnm	;table of opcode names
 	add	hl,bc
 	add	hl,bc		;index times four
 	add	hl,bc
 	add	hl,bc
-	ld	de,prsbf	;start of parse	buffer
+	ld	de,prsbf	;start of parse buffer
 	ld	b,4
-asm060:	ld	a,(de)		;character from	parse buffer
+asm060:	ld	a,(de)		;character from parse buffer
 	and	a		;null?
 	jr	nz,asm070
-	ld	a,' '		;for comparison	purposes
+	ld	a,' '		;for comparison purposes
 asm070:	call	ixlt		;force upper case for compare
 	cp	(hl)
-	jr	nz,asm050	;mismatch - next opcode	name
+	jr	nz,asm050	;mismatch - next opcode name
 	inc	de
 	inc	hl
-	djnz	asm060		;must match all	four
-	ld	a,(de)		;null following	opcode?
+	djnz	asm060		;must match all four
+	ld	a,(de)		;null following opcode?
 	and	a
-	jp	nz,asm??o	;error - opcode	more than 4 characaters
+	jp	nz,asm??o	;error - opcode more than 4 characaters
 	ld	hl,ikey		;relative position in table is key value
 	ld	(hl),c		;save opcode key value
 	call	prsr		;extract first operand
@@ -3921,11 +3921,11 @@ asm070:	call	ixlt		;force upper case for compare
 	call	oprn		;evaluate operand
 	jr	nz,asm??u	;error - bad first operand
 	ld	de,oprn01
-	call	opnv		;save operand value and	key
+	call	opnv		;save operand value and key
 	ld	a,(delim)
 	cp	','
-	jr	nz,asm085	;need comma for	two operands
-	call	prsr		;extract second	operand
+	jr	nz,asm085	;need comma for two operands
+	call	prsr		;extract second operand
 	jp	m,asm??s	;error - comma with no second operand
 	cp	','
 	jp	z,asm??s	;illegal line termination
@@ -3935,13 +3935,13 @@ asm070:	call	ixlt		;force upper case for compare
 	call	opnv		;save second operand value and key
 asm085:	xor	a
 	ld	c,a
-asm090:	ld	hl,zopcpt	;opcode	name pointer table
+asm090:	ld	hl,zopcpt	;opcode name pointer table
 	ld	b,0
 	add	hl,bc		;index into table
 	ld	a,(ikey)	;fetch opcode key value
 	cp	(hl)		;check for match
 	jr	nz,asm095	;
-	inc	h		;point to first	operand	table
+	inc	h		;point to first operand table
 	ld	de,oprn01	;address of first operand key value
 	call	opnm		;check validity
 	jr	nz,asm095	;no match - next
@@ -3958,11 +3958,11 @@ asm??u:	ld	a,'U'		;error
 
 
 
-ibld:	ld	hl,objbuf	;object	code temp buffer
+ibld:	ld	hl,objbuf	;object code temp buffer
 	ld	e,a		;save second operand key
 	ld	a,(hl)		;check first byte of object buffer
 	and	a		;null?
-	ld	a,c		;instruction key to accumulator	regardless
+	ld	a,c		;instruction key to accumulator regardless
 	ld	c,e		;save second operand modified key
 	jr	z,ibld00	;z - not ix or iy instruction
 	inc	hl		;point to byte two of object code
@@ -3975,18 +3975,18 @@ ibld00:	cp	40h
     if Z180
 	call	aed180		;HD64180 encode of ED 00 to ED BB
     else
-	cp	80h		;check which ed	instruction we have
+	cp	80h		;check which ed instruction we have
 	jr	c,ibld55	;c - this is exact object byte
 	add	a,20h		;add bias to obtain object byte
     endif
 	jr	ibld55
 ibld10:	cp	0E0h
 	jr	nc,ibld20
-	add	a,20h		;8080 type - range 0C0h	to 0FFh
-	jr	ibld55		;object	byte built
+	add	a,20h		;8080 type - range 0C0h to 0FFh
+	jr	ibld55		;object byte built
 ibld20:	cp	0E8h
 	jr	c,ibld50	;8 bit reg-reg arithmetic or logic
-	cp	0F7h		;check for halt	disguised as ld (hl),(hl)
+	cp	0F7h		;check for halt disguised as ld (hl),(hl)
 	jr	nz,ibld30
 	ld	a,76h		;halt object code
 	jr	ibld55
@@ -4013,9 +4013,9 @@ ibld50:	add	a,a		;form skeleton
 	add	a,80h
 ibld55:	ld	(hl),a		;store object byte
 	xor	a
-	or	c		;second	operand	need more processing?
+	or	c		;second operand need more processing?
 	ld	de,oprn02
-	call	nz,rslv		;resolve second	operand
+	call	nz,rslv		;resolve second operand
 	jp	nz,asm??v	;error - invalid operand size
 	ld	de,oprn01
 	ld	a,b
@@ -4023,7 +4023,7 @@ ibld55:	ld	(hl),a		;store object byte
 	call	nz,rslv		;more work to do
 	jp	nz,asm??v	;error - invalid operand size
 	ld	a,(ikey)
-;;	sub     67              ;org directive?
+;;	sub     67		;org directive?
 ;;; Tisk! Don't hard code values when you should let assembler compute it for you
 ;;; I updated the zopcnm table, so value is no longer 67.
 	sub	cnmorg		;'ORG '  directive offset
@@ -4039,8 +4039,8 @@ ibld60:	ld	de,objbuf
 	cp	5		;is ikey remnant > # of directives?
 	jr	nc,ibld70	;if so, handle HD64180 instruction.
     endif
-	ld	b,a		;number	of bytes for defb or defw or ddb
-	inc	de		;point past erroneous assembled	opcode
+	ld	b,a		;number of bytes for defb or defw or ddb
+	inc	de		;point past erroneous assembled opcode
 	inc	de
 	sub	3		;test for ddb
 	jr	c,ibld75	;c - must be defb or defw
@@ -4049,30 +4049,30 @@ ibld60:	ld	de,objbuf
 	ld	d,(hl)		;must be equ
 	dec	hl
 	ld	e,(hl)
-	ld	hl,(isympt)	;fetch pointer to entry	in symbol table
+	ld	hl,(isympt)	;fetch pointer to entry in symbol table
 	ld	a,h
 	or	l
 	jp	z,asm??u	;error - no label on equ statement
 	ld	(hl),d
 	dec	hl
-	ld	(hl),e		;store value of	symbol in symbol table
+	ld	(hl),e		;store value of symbol in symbol table
 	ld	c,6
 	call	spaces
 	ld	a,d
 	call	othxsp
 	ld	a,e
 	call	othxsp
-	jp	asm005		;ready for next	input
+	jp	asm005		;ready for next input
 ibld65:	dec	b		;set count of object bytes to 2
-	ld	c,(hl)		;exchange hi and lo order bytes	for ddb
+	ld	c,(hl)		;exchange hi and lo order bytes for ddb
 	dec	hl
 	ld	a,(hl)
 	ld	(hl),c		;new hi order
 	inc	hl
 	ld	(hl),a		;new hi order replaces old lo order
 	jr	ibld75
-ibld70:	call	zlen00		;compute length	of instruction in bytes
-	ld	b,c		;b - number of bytes of	object code
+ibld70:	call	zlen00		;compute length of instruction in bytes
+	ld	b,c		;b - number of bytes of object code
 ibld75:	ld	hl,(asmbpc)
 	call	outadr		;re-display current location counter
 ibld80:	ld	a,(de)		;move from scratch object buffer
@@ -4091,32 +4091,32 @@ opnm:	ld	a,(de)		;key value computed by operand routine
 	xor	(hl)		;compare with table operand table entry
 	ret	z		;true match of operand key values
 	xor	(hl)		;restore
-	add	a,a		;86 all	no operand key values (0ffh)
+	add	a,a		;86 all no operand key values (0ffh)
 	ret	m
 	ld	a,(hl)		;fetch table entry
-	and	7fh		;sans paren flag for comparison	purposes
+	and	7fh		;sans paren flag for comparison purposes
 	cp	1bh		;check table entry 8 bit - 16 bit - $ rel ?
 	jr	c,opnm00	;c - none of the above
-	ld	a,(de)		;fetch computed	key
+	ld	a,(de)		;fetch computed key
 	xor	(hl)		;compare with paren flags
 	ret	m		;error - paren mismatch
-	ld	a,(de)		;fetch key once	more
-	and	7fh		;remove	paren flag
-	cp	17h		;computed as 8 bit - 16	bit - $	rel?
-	jr	z,opnm40	;so far	so good
+	ld	a,(de)		;fetch key once more
+	and	7fh		;remove paren flag
+	cp	17h		;computed as 8 bit - 16 bit - $ rel?
+	jr	z,opnm40	;so far so good
 	ret			;
 opnm00:	cp	19h		;check for 8 bit reg
-	jr	nc,opnm20	;8 bit register	match
+	jr	nc,opnm20	;8 bit register match
 	cp	18h		;table says must be hl - ix - iy
 	ret	nz		;computed key disagrees
-	ld	a,(de)		;fetch computed	key
-	and	7		;computed as hl	- ix - iy ?
+	ld	a,(de)		;fetch computed key
+	and	7		;computed as hl - ix - iy ?
 	ret	nz		;no
-opnm10:	ld	a,(de)		;fetch computed	key
+opnm10:	ld	a,(de)		;fetch computed key
 	xor	(hl)
-	ret	m		;error - paren mismatch	on hl -	ix - iy
+	ret	m		;error - paren mismatch on hl - ix - iy
 	jr	opnm40
-opnm20:	ld	a,(de)		;fetch computed	key of 8 bit reg
+opnm20:	ld	a,(de)		;fetch computed key of 8 bit reg
 	and	a		;
 	jr	nz,opnm30	;nz - not (hl)
 	dec	a		;error - 8 bit (hl) missing parens
@@ -4125,25 +4125,25 @@ opnm30:	cp	8		;test user entered valid 8 bit reg
 	jr	c,opnm40	;c - ok
 	and	a		;test if no carry caused by paren flag
 	ret	p		;error - this is not 8 bit reg with parens
-	and	7		;psuedo	8 bit reg: (hl)	(ix) (iy)?
+	and	7		;psuedo 8 bit reg: (hl) (ix) (iy)?
 	ret	nz		;no
 opnm40:	ld	a,(hl)		;fetch table entry
 	and	7fh
-	sub	18h		;make values 18	thru 1f	relative zero
+	sub	18h		;make values 18 thru 1f relative zero
 	cp	a		;zero means match
 	ret
 
 rslv:	dec	a
 	jr	z,rslv00	;z - 8 bit reg (bits 0-2 of object byte)
 	dec	a
-	jr	nz,rslv20	;nz - not 8 bit	reg (bits 3-5 of object	byte)
+	jr	nz,rslv20	;nz - not 8 bit reg (bits 3-5 of object byte)
 	dec	a		;make neg to indicate shift left required
 rslv00:	ld	c,a
-	ld	a,(de)		;fetch computed	operand	key
+	ld	a,(de)		;fetch computed operand key
 	and	07		;lo three bits specify reg
-	xor	6		;create	true object code bits
+	xor	6		;create true object code bits
 	inc	c		;test if bits 0-2 or bits 3-5
-	jr	nz,rslv10	;nz - 0	thru 2
+	jr	nz,rslv10	;nz - 0 thru 2
 	add	a,a
 	add	a,a
 	add	a,a
@@ -4160,35 +4160,35 @@ rslv20:	inc	de		;point to low order of operand value
 	ld	a,(hl)
 	inc	hl
 	ld	h,(hl)
-	ld	l,a		;hl - operand value computed by	xval
+	ld	l,a		;hl - operand value computed by xval
 	ld	a,b
 	ld	bc,(asmbpc)	;current location counter
 	inc	bc
 	inc	bc
-	sbc	hl,bc		;calculate displacement	from current counter
-	ex	de,hl		;de - displacement  hl - object	code pointer
+	sbc	hl,bc		;calculate displacement from current counter
+	ex	de,hl		;de - displacement  hl - object code pointer
 	ld	b,a		;restore b reg
 	ld	a,e		;lo order displacement
 	inc	d		;test hi order
-	jr	z,rslv25	;must have been	ff (backward displacement)
+	jr	z,rslv25	;must have been ff (backward displacement)
 	dec	d
 	ret	nz		;error - hi order not zero or ff
-	cpl			;set sign bit for valid	forward	displacement
-rslv25:	xor	80h		;toggle	sign bit
+	cpl			;set sign bit for valid forward displacement
+rslv25:	xor	80h		;toggle sign bit
 	ret	m		;error - sign bit disagrees with upper byte
 	ld	(hl),e		;store displacement object byte
 	cp	a		;set zero flag - no errors
 	ret
 rslv30:	dec	a
-	jr	nz,rslv40	;nz - not 8 bit	immediate
+	jr	nz,rslv40	;nz - not 8 bit immediate
 	ld	a,36h		;test for reg indirect - (hl),nn
 	cp	c
 	jr	nz,rslv35
 	ld	a,(objbuf)	;test first object byte
 	cp	c
 	jr	z,rslv35	;z - (hl),nn
-	inc	hl		;must be (ix+index),nn	or  (iy+index),nn
-rslv35:	ld	a,(de)		;move lo order operand value to	object buffer
+	inc	hl		;must be  (ix+index),nn  or  (iy+index),nn
+rslv35:	ld	a,(de)		;move lo order operand value to object buffer
 	ld	(hl),a
 	inc	de
 	ld	a,(de)		;test hi order
@@ -4211,17 +4211,17 @@ rslv50:	dec	a		;test restart instruction or bit number
 	ld	a,(de)		;check restart value specified
 	and	0C7h		;betweed 0 and 38h?
 	ret	nz		;error
-	ld	a,(de)		;fetch lo order	operand	value
+	ld	a,(de)		;fetch lo order operand value
 	or	0C7h		;or with instruction skeleton
 	dec	hl
-	ld	(hl),a		;rewind	object code pointer
+	ld	(hl),a		;rewind object code pointer
 	inc	de
-	ld	a,(de)		;check hi order	operand	value
+	ld	a,(de)		;check hi order operand value
 	and	a		;error if not zero
 	ret
-rslv60:	dec	hl		;rewind	object code buffer pointer
+rslv60:	dec	hl		;rewind object code buffer pointer
 	ld	a,(de)
-	and	0F8h		;ensure	bit number in range 0 -	7
+	and	0F8h		;ensure bit number in range 0 - 7
 	ret	nz		;error
 	ld	a,(ikey)	;fetch opcode key value
 	sub	13h		;is this bit number of interrupt mode number?
@@ -4247,15 +4247,15 @@ rslv70:	add	a,a		;shift bit number left three
 
 
 oprn:	ld	bc,22		;count of reserved operand
-oprn00:	ld	de,prsbf	;buffer	contains operand
-	ld	a,(hl)		;last character	of operand in parse buffer
+oprn00:	ld	de,prsbf	;buffer contains operand
+	ld	a,(hl)		;last character of operand in parse buffer
 	sub	')'
 	jr	nz,oprn20	;not paren
-	ld	(hl),a		;remove	trailing paren - replace with null
-	ld	a,(de)		;check first character of parse	buffer
+	ld	(hl),a		;remove trailing paren - replace with null
+	ld	a,(de)		;check first character of parse buffer
 	sub	'('
 	ret	nz		;error - unbalanced parens
-	ld	(de),a		;remove	leading	paren -	replace	with null
+	ld	(de),a		;remove leading paren - replace with null
 	inc	de		;point to next character in parse buffer
 oprn20:	ld	hl,zopnm	;index into reserved operand name table
 	ld	a,c
@@ -4266,14 +4266,14 @@ oprn20:	ld	hl,zopnm	;index into reserved operand name table
 	inc	h
 oprn25:	ld	a,(de)		;from parse buffer
 	call	ixlt		;translate to upper case for compare
-	cp	(hl)		;versus	table entry
+	cp	(hl)		;versus table entry
 	inc	de
 	jr	nz,oprn70	;no match - check next
 	ld	a,(de)		;check second character
 	call	ixlt		;translate to upper case
-	and	a		;if null - this	is one character reg name
+	and	a		;if null - this is one character reg name
 	jr	nz,oprn30
-	ld	a,' '		;for comparison	purposes
+	ld	a,' '		;for comparison purposes
 oprn30:	inc	hl		;bump table pointer
 	sub	(hl)
 	jr	nz,oprn70	;no match - check next
@@ -4282,17 +4282,17 @@ oprn30:	inc	hl		;bump table pointer
 	ret	nz		;nz - mreg calling
 	ld	a,c		;check index value
 	and	07
-	jr	nz,oprn80	;not hl	ix iy -	check for residue
+	jr	nz,oprn80	;not hl ix iy - check for residue
 	ld	a,(de)
 	call	oprtor		;check for expression operator
 	jr	nz,oprn85	;no operator but not end of operand
 	ld	a,ix.. or iy..	;special ix iy hl processing
-	and	c		;test for index	reg
+	and	c		;test for index reg
 	jr	z,oprn35	;z - must be hl
 	and	10h		;transform index into 0ddh or ofdh
 	add	a,a
-	add	a,0ddh		;a - first byte	of index reg opcode
-oprn35:	ld	c,a		;temp save first object	byte
+	add	a,0ddh		;a - first byte of index reg opcode
+oprn35:	ld	c,a		;temp save first object byte
 	ld	hl,objbuf
 	xor	(hl)
 	jr	z,oprn40	;z - first operand matches second
@@ -4310,12 +4310,12 @@ oprn40:	ld	(hl),c		;init first byte of object code
 	and	a		;check for previously removed parens
 	ld	a,c
 	ld	c,0
-	jr	nz,oprn80	;no parens - no	indexed	displacement
+	jr	nz,oprn80	;no parens - no indexed displacement
 	and	a		;check for ix or iy indexed instruction
 	jr	z,oprn80	;z - not index reg instruction
 
 	sbc	hl,hl		;clear hl
-	ld	a,(de)		;index reg displacement	processing
+	ld	a,(de)		;index reg displacement processing
 	and	a		;test for default displacement
 	call	nz,xval		;not zero - evaluate
 	jr	nz,oprn85	;nz - displacement in error
@@ -4323,28 +4323,28 @@ oprn40:	ld	(hl),c		;init first byte of object code
 	ld	a,l
 	ld	(objbuf+2),a	;displacement always third byte
 	inc	h		;check upper byte of index value
-	jr	z,oprn50	;must have been	0ffh
+	jr	z,oprn50	;must have been 0ffh
 	dec	h
-	ret	nz		;error - index not -128	to +127
+	ret	nz		;error - index not -128 to +127
 	cpl
 oprn50:	xor	80h		;check sign bit
-	ret	m		;bit on	- index	out of range
-	cp	a		;no error - set	zero flag
+	ret	m		;bit on - index out of range
+	cp	a		;no error - set zero flag
 	ret
 oprn70:	dec	c		;decrement reserved operand table index
 	jp	m,oprn85	;m - not a reserved operand
-	dec	de		;rewind	parse buffer pointer
+	dec	de		;rewind parse buffer pointer
 	jp	oprn20		;next table entry
-oprn80:	ld	a,(de)		;check for end of parse	buffer
+oprn80:	ld	a,(de)		;check for end of parse buffer
 	and	a
 	ret	z		;found end of line null
-oprn85:	ld	de,prsbf	;rewind	to start of input
+oprn85:	ld	de,prsbf	;rewind to start of input
 	xor	a
 	or	b
 	ret	nz		;nz - this was mreg calling
 	sbc	hl,hl		;clear hl
 	call	xval		;evaluate operand
-	ld	c,17h		;assume	numeric	operand	found
+	ld	c,17h		;assume numeric operand found
 	ret
 
 
@@ -4372,7 +4372,7 @@ xval05:	ld	a,(de)		;char from parse buffer
 	jr	nc,xval25
 	xor	a		;check number entered flag (b reg sign bit)
 	or	b
-	jp	m,xval10	;m - this was not first	char
+	jp	m,xval10	;m - this was not first char
 	ld	a,(symflg)	;check if symbol table present in memory
 	and	a
 xval10:	ld	a,c		;input character back to accumulator
@@ -4385,12 +4385,12 @@ xval15:	sub	'0'		;ascii hex to hex nibble
 	add	a,a
 	add	a,a
 	ld	c,4		;loop count
-xval20:	adc	hl,hl		;hl left into carry - rotate carry into	hl
+xval20:	adc	hl,hl		;hl left into carry - rotate carry into hl
 	adc	a,a		;next bit of nibble into carry
 	dec	c
 	jr	nz,xval20
-	ld	(base10),a	;store what was	shifted	left out of hl
-	ld	a,80h		;set sign of b - number	entered	flag
+	ld	(base10),a	;store what was shifted left out of hl
+	ld	a,80h		;set sign of b - number entered flag
 	or	b
 	ld	b,a
 	jr	xval05		;next character
@@ -4408,8 +4408,8 @@ xval25:	call	oprtor		;have expression operator?
 xval30:	xor	a
 	or	b		;check number entered flag
 	ld	a,c		;restore unmodified input character to a
-	jp	nz,xval90	;nz - take care	of previous operator
-	and	a		;end of	line null?
+	jp	nz,xval90	;nz - take care of previous operator
+	and	a		;end of line null?
 	ret	z		;
 	ld	b,c		;this operator was first char of parse buffer
 	jr	xval05		;extract what follows this leading operator
@@ -4427,8 +4427,8 @@ xval35:	ld	a,c		;recover character
 	ld	hl,base10
 	ld	a,6
 	cp	(hl)		;check ten thousands digit
-	jr	c,xval40	;error - obviously greater than	65535
-	rrd			;nibble	to accumulator
+	jr	c,xval40	;error - obviously greater than 65535
+	rrd			;nibble to accumulator
 	inc	hl
 	ld	(hl),d		;store hex number in temp buffer
 	inc	hl
@@ -4441,10 +4441,10 @@ xval35:	ld	a,c		;recover character
 	jr	nz,xval40	;nz - error detected during conversion
 	inc	hl		;bump to lo byte to convert
 	call	bcdx
-	ex	de,hl		;hl - converted	value
+	ex	de,hl		;hl - converted value
 xval40:	pop	de
 	pop	bc
-	jr	z,xval65	;z - no	errors detected
+	jr	z,xval65	;z - no errors detected
 	ret
 
 
@@ -4454,27 +4454,27 @@ xval50:	cp	quote		;ascii literal processing
 	ex	de,hl		;
 	ld	e,(hl)		;fetch literal from buffer
 	inc	hl
-	cp	(hl)		;trailing quote	found?
+	cp	(hl)		;trailing quote found?
 	jr	z,xval55	;found
 	ld	d,e		;make literal just fetch hi order of operand
 	ld	e,(hl)		;fetch new literal as lo order
 	inc	hl
 	cp	(hl)		;trailing quote?
 	ret	nz		;error - more than two chars between quotes
-xval55:	ex	de,hl		;de - parse buffer ptr	 hl - operand
+xval55:	ex	de,hl		;de - parse buffer ptr,  hl - operand
 	inc	de		;bump past trailing quote
 	jr	xval65
 
 
-xval60:	dec	de		;point to start	of operand in parse buffer
+xval60:	dec	de		;point to start of operand in parse buffer
 	ld	(pass2),de
-	call	fsym		;search	symbol table
-	jp	z,xval62	;symbol	found
+	call	fsym		;search symbol table
+	jp	z,xval62	;symbol found
 	ld	a,(de)
 	inc	de
 	cp	'$'		;check for pc relative expression
 	jp	nz,xval61
-	ld	hl,(asmbpc)	;current location value	is expression value
+	ld	hl,(asmbpc)	;current location value is expression value
 	jr	xval65
 				;symbol not found - retry evaluation process
 				;with pass2 flag set.  now token must be a
@@ -4496,7 +4496,7 @@ xval62:	ld	a,(maxlen)	;point to last byte of sym table entry
 xval65:	ld	a,b		;check number entered flag
 	and	a
 	ret	m		;error - numbers entered previous to symbol
-	xor	80h		;toggle	flag
+	xor	80h		;toggle flag
 	ld	b,a
 	ld	a,(de)		;check char following symbol name in buffer
 	ld	c,a		;make it new current character
@@ -4508,10 +4508,10 @@ xval65:	ld	a,b		;check number entered flag
 
 
 xval90:	ld	c,a		;temp save operator
-	ld	a,80h		;toggle	number entered flag
+	ld	a,80h		;toggle number entered flag
 	xor	b
-	ret	m		;return	nz - consecutive operators
-	ld	b,c		;new on	deck operator
+	ret	m		;return nz - consecutive operators
+	ld	b,c		;new on deck operator
 	cp	'-'		;test last operator
 	push	de		;save buffer pointer
 	jr	nz,xval95	;nz - addition
@@ -4520,10 +4520,10 @@ xval90:	ld	c,a		;temp save operator
 	sbc	hl,de		;force current value neg by subtraction from 0
 xval95:	ex	de,hl
 	ld	hl,(mexp)	;fetch accumulated operand total
-	add	hl,de		;add in	current
-	pop	de		;restore buffer	pointer
-	ld	a,b		;check operator	that got us here
-	and	a		;end of	line null?
+	add	hl,de		;add in current
+	pop	de		;restore buffer pointer
+	ld	a,b		;check operator that got us here
+	and	a		;end of line null?
 	jp	nz,xval00	;no -
 	ret			;operand processing complete
 
@@ -4536,9 +4536,9 @@ fsym00:	ld	a,(maxlen)
 	ld	c,a
 	ld	a,b		;temp save
 	ld	b,0
-	ex	de,hl		;de - symbol table ptr	hl - parse buffer
-	sbc	hl,bc		;rewind	parse buffer to	start of symbol
-	ex	de,hl		;de - parse buffer  hl - symbol	table pointer
+	ex	de,hl		;de - symbol table ptr  hl - parse buffer
+	sbc	hl,bc		;rewind parse buffer to start of symbol
+	ex	de,hl		;de - parse buffer  hl - symbol table pointer
 	ld	b,a		;restore b reg
 	ld	a,(maxlen)
 	or	l
@@ -4546,7 +4546,7 @@ fsym00:	ld	a,(maxlen)
 	inc	hl		;next block of symbol table
 	ld	a,(hl)		;first character of symbol name
 	dec	a
-	ret	m		;end of	table
+	ret	m		;end of table
 	ld	a,(maxlen)
 	dec	a
 	ld	c,a		;chars per symbol
@@ -4554,7 +4554,7 @@ fsym10:	ld	a,(de)		;fetch char from buffer
 	call	oprtor
 	jr	nz,fsym20	;nz - not operator or end of line null
 	ld	a,(hl)
-	and	a		;null means end	of symbol name in symbol table
+	and	a		;null means end of symbol name in symbol table
 	jr	nz,fsym00
 	ld	(fndsym),hl	;set symbol found flag nz -
 	ret
@@ -4573,25 +4573,25 @@ fsym30:	ld	a,(de)
 
 
 
-isym:	call	fsym		;search	for symbol in table
+isym:	call	fsym		;search for symbol in table
 	jr	z,isym00	;z - symbol found
-	ld	a,(hl)		;test for empty	slot in	table
+	ld	a,(hl)		;test for empty slot in table
 	and	a
-	ret	nz		;symbol	table full
+	ret	nz		;symbol table full
 	ld	(symflg),a	;indicate non-empty symbol table
-isym00:	ld	a,(maxlen)	;rewind	point to start of table	entry
+isym00:	ld	a,(maxlen)	;rewind point to start of table entry
 	ld	c,a
 	cpl
 	and	l
 	ld	l,a
 	ex	de,hl		;de - pointer to start of symbol
 	ld	hl,prsbf
-	ld	b,0		;move symbol from parse	buffer to table
+	ld	b,0		;move symbol from parse buffer to table
 	dec	c
 	ldir
-	ld	hl,(asmbpc)	;fetch value of	symbol
+	ld	hl,(asmbpc)	;fetch value of symbol
 	ex	de,hl		;hl - pointer to address storage
-	ld	(hl),e		;lo order current location into	table
+	ld	(hl),e		;lo order current location into table
 	inc	hl
 	ld	(hl),d		;upper byte
 	xor	a
@@ -4599,29 +4599,29 @@ isym00:	ld	a,(maxlen)	;rewind	point to start of table	entry
 	page
 ;******************************************************************************
 ;*
-;*	prsr:	command	line parse routine
+;*	prsr:	command line parse routine
 ;*
-;*	prsr will extract one argument from the	input buffer (inbf) and
-;*	write it into the parse	buffer (prsbf).	an argument is treated
+;*	prsr will extract one argument from the input buffer (inbf) and
+;*	write it into the parse buffer (prsbf).	an argument is treated
 ;*	as starting with the first non-delimiter character encountered
 ;*	in the input buffer and ends with the next delimiter found.
-;*	all intervening	characters between the two delimiters are
-;*	treated	as the argument	and are	moved to prsbf.
+;*	all intervening characters between the two delimiters are
+;*	treated as the argument and are moved to prsbf.
 ;*
 ;*	as each character is extracted from inbf a zero is written back
 ;*	to replace it.  thus a program which needs to extract multiple args
-;*	need not save pointers in between calls	since prsr is trained
-;*	to strip leading delimiters while looking for the start	of an
+;*	need not save pointers in between calls since prsr is trained
+;*	to strip leading delimiters while looking for the start of an
 ;*	argument:
 ;*
 ;*	     delimiters: null, space, comma
 ;*
 ;*	exit:	    de - starting address of parse buffer
 ;*		     b - sign bit: set if unbalanced parens, else sign reset
-;*			 bits 6-0: number of chars in the parse	buffer
-;*		     a - actual	delimter char which caused to terminate
+;*			 bits 6-0: number of chars in the parse buffer
+;*		     a - actual delimter char which caused to terminate
 ;*		     f - zero flag set if no error
-;*		quoflg - set equal to ascii quote if at	least one quote found
+;*		quoflg - set equal to ascii quote if at least one quote found
 ;*
 ;*	error exit:  f - zero flag reset
 ;*
@@ -4630,13 +4630,13 @@ isym00:	ld	a,(maxlen)	;rewind	point to start of table	entry
 prsr:	xor	a
 	ld	(quoflg),a	;clear quote flag
 	ld	hl,prsbf	;start of parser scratch buffer
-	ld	b,prsbfz	;buffer	size
+	ld	b,prsbfz	;buffer size
 	ld	c,b
 prsr10:	ld	(hl),0		;clear parse buffer to nulls
 	inc	hl
 	djnz	prsr10
-	ld	hl,prsbf	;start of parse	buffer
-	ld	de,inbf		;start of input	buffer
+	ld	hl,prsbf	;start of parse buffer
+	ld	de,inbf		;start of input buffer
 	ld	c,inbfl		;max size of input buffer
 prsr20:	ld	a,(de)		;from input buffer
 	ex	de,hl
@@ -4651,7 +4651,7 @@ prsr20:	ld	a,(de)		;from input buffer
 	ld	c,nprsbf-prsbf	;parse buffer size
 prsr30:	ld	(hl),a
 	and	a
-	jr	z,prsr60	;end of	line null always ends parse
+	jr	z,prsr60	;end of line null always ends parse
 	cp	quote		;quote?
 	jr	nz,prsr50
 	ld	(quoflg),a
@@ -4659,8 +4659,8 @@ prsr30:	ld	(hl),a
 	xor	80h
 	ld	b,a
 prsr50:	dec	c		;decrement buffer size tally
-	ret	m		;error - end of	parse buffer reached
-	ld	a,(de)		;next char from	input buffer
+	ret	m		;error - end of parse buffer reached
+	ld	a,(de)		;next char from input buffer
 	ex	de,hl
 	ld	(hl),0		;clear as we remove
 	ex	de,hl
@@ -4670,7 +4670,7 @@ prsr50:	dec	c		;decrement buffer size tally
 	inc	hl		;bump parse buffer pointer
 	jr	nz,prsr30
 	dec	hl
-prsr60:	ld	de,prsbf	;return	pointing to start of parse buffer
+prsr60:	ld	de,prsbf	;return pointing to start of parse buffer
 	ld	(delim),a
 	ret			;zero flag set - no errors
 
@@ -4715,12 +4715,12 @@ oprtor: cp	'+'
 
 
 
-opnv:	ex	de,hl		;de - operand value  hl	- operand key storage
+opnv:	ex	de,hl		;de - operand value,  hl - operand key storage
 	ld	a,(prsbf)	;check first byte of parse buffer
 	and	a		;if null - paren was removed
 	ld	a,c		;key value to accumulator
 	jr	nz,opnv00	;nz - no paren
-	or	80h		;found null - set paren	flag
+	or	80h		;found null - set paren flag
 opnv00:	ld	(hl),a		;store key value
 	inc	hl
 	ld	(hl),e		;lo order operand value
@@ -4732,30 +4732,30 @@ opnv00:	ld	(hl),a		;store key value
 	page
 ;******************************************************************************
 ;*
-;*	zlen:  determine the number of bytes in	a z80 instruction
+;*	zlen:  determine the number of bytes in a z80 instruction
 ;*
 ;*
 ;*	entry point zlen00: used to return instruction length.
 ;*
-;*			    de:	 address of instruction
+;*			    de:  address of instruction
 ;*
-;*	return:	 b:  z - inline	instruction (next pc will be pc	plus length)
-;*		    nz - pc modifying instruction such as call,	 jump, or ret
+;*	return:	 b:  z - inline instruction (next pc will be pc plus length)
+;*		    nz - pc modifying instruction such as call, jump, or ret
 ;*			 (see hl below)
-;*		 c:	 number	of bytes in this instruction.
+;*		 c:	 number of bytes in this instruction.
 ;*		de:	 preserved
-;*		hl:	 next pc following the execution of the	instruction
+;*		hl:	 next pc following the execution of the instruction
 ;*			 pointed to by de.
 ;*
 ;******************************************************************************
 
-zlen00:	ld	a,(de)		;fetch first byte of op	code
+zlen00:	ld	a,(de)		;fetch first byte of op code
 	cp	0cbh		;test for shift/bit manipulation instruction
 	ld	bc,02
-	ret	z		;10-4 this is a	cb and length is always	2
+	ret	z		;10-4 this is a cb and length is always 2
 	cp	0edh		;test for fast eddie
 	jr	nz,zlen15	;
-	inc	de		;fetch byte two	of ed instruction
+	inc	de		;fetch byte two of ed instruction
 	ld	a,(de)
 	dec	de		;restore pointer
     if Z180
@@ -4768,52 +4768,52 @@ zlen00:	ld	a,(de)		;fetch first byte of op	code
 	ld	hl,z80ed	;ED four byter table
 	ld	c,z80edl	;length
 	cpir
-	ld	c,4		;assume	ED four	byter
+	ld	c,4		;assume ED four byter
 	ret	z		;correct assumption
-	ld	c,2		;set length for	return - if not	2 must be 4
+	ld	c,2		;set length for return - if not 2 must be 4
 	cp	45h		;test for retn
 	jr	z,zlen10
 	cp	4dh		;test for reti
-	ret	nz		;non-pc	modifying two byte ED
+	ret	nz		;non-pc modifying two byte ED
 zlen10:	ld	a,0C9h		;treat as ordinary return instruction
 	jp	zlen80
 zlen15:	cp	0ddh		;check for dd and fd index reg instructions
 	jr	z,zlen20
 	cp	0fdh
 	jr	nz,zlen40
-zlen20:	inc	de		;fetch byte two	of index reg instruction
+zlen20:	inc	de		;fetch byte two of index reg instruction
 	ld	a,(de)
 	dec	de		;restore pointer
-	cp	0E9h		;check for reg indirect	jump
+	cp	0E9h		;check for reg indirect jump
 	jr	nz,zlen30	;
 	inc	b		;reg indirect jump - set pc modified flag nz
-	ld	a,(de)		;recheck for ix	or iy
-	ld	hl,(ixreg)	;assume	ix
+	ld	a,(de)		;recheck for ix or iy
+	ld	hl,(ixreg)	;assume ix
 	cp	0DDh
 	ret	z		;correct assumption
 	ld	hl,(iyreg)
 	ret
-zlen30:	ld	hl,z80fd	;check for dd or fd two	byter
+zlen30:	ld	hl,z80fd	;check for dd or fd two byter
 	ld	c,z80fdl
 	cpir
-	ld	c,2		;assume	two
+	ld	c,2		;assume two
 	ret	z
 	ld	hl,z80f4	;not two - try four
 	ld	c,z80f4l
 	cpir
-	ld	c,4		;assume	four
+	ld	c,4		;assume four
 	ret	z		;correct assumption
 	dec	c		;must be three
 	ret
 zlen40:	and	0C7h		;check for 8 bit immediate load
 	cp	06
-	ld	c,2		;assume	so
+	ld	c,2		;assume so
 	ret	z
-	dec	c		;assume	one byte op code
+	dec	c		;assume one byte op code
 	ld	a,(de)
 	cp	3Fh
-	jr	c,zlen50	;opcodes 0 - 3f	require	further	investigation
-	cp	0C0h		;8 bit reg-reg loads and arithmetics do	not
+	jr	c,zlen50	;opcodes 0 - 3f require further investigation
+	cp	0C0h		;8 bit reg-reg loads and arithmetics do not
 	ret	c
 zlen50:	ld	hl,z803		;check for three byter
 	ld	c,z803l
@@ -4823,12 +4823,12 @@ zlen50:	ld	hl,z803		;check for three byter
 	ld	c,z803cl
 	cpir
 	ld	c,3		;set length
-	ret	nz		;nz - three byte inline	instruction
+	ret	nz		;nz - three byte inline instruction
 	ld	hl,z803s
 	ld	c,z803sl	;now weed out jumps from calls
 	cpir
 	ld	c,3
-	ld	b,c		;set pc	modified flag -	we have	call or	jump
+	ld	b,c		;set pc modified flag - we have call or jump
 	ex	de,hl
 	inc	hl
 	ld	e,(hl)
@@ -4841,10 +4841,10 @@ zlen50:	ld	hl,z803		;check for three byter
 	cp	jp		;test for unconditional jump
 	jr	nz,zlen85
 	ret
-zlen55:	ld	a,(wflag)	;test for no subroutine	trace flag
+zlen55:	ld	a,(wflag)	;test for no subroutine trace flag
 	and	a		;zero means no sub tracing
 	ld	b,a		;clear for return - if sub trace off
-	ret	z		;subroutine trace off -	return with b reg 00
+	ret	z		;subroutine trace off - return with b reg 00
 				;so bp is set at next inline instruction
 	dec	b
 	jr	nz,zlen58
@@ -4852,9 +4852,9 @@ zlen55:	ld	a,(wflag)	;test for no subroutine	trace flag
 	or	h
 	ret	z
 zlen58:	ld	a,(de)		;recover call object byte
-	ld	b,c		;set nz	- pc modifying instruction
+	ld	b,c		;set nz - pc modifying instruction
 	cp	0cdh		;unconditional call??
-	jr	nz,zlen85	;zlen85	- set secondary	breakpoint if tracing
+	jr	nz,zlen85	;zlen85 - set secondary breakpoint if tracing
 	ret
 
 zlen60:	ld	hl,z802
@@ -4864,34 +4864,34 @@ zlen60:	ld	hl,z802
 	ld	hl,z802c	;test for relative jump
 	ld	c,z802cl
 	cpir
-	ld	c,2		;in any	case length is two
+	ld	c,2		;in any case length is two
 	ret	nz		;nz - not relative jump
 	ld	h,b		;clear
-	inc	b		;set pc	modified flag nz
-	inc	de		;fetch relative	displacement
+	inc	b		;set pc modified flag nz
+	inc	de		;fetch relative displacement
 	ld	a,(de)
 	ld	l,a
 	add	a,a		;test forward or backward
 	jr	nc,zlen65	;p - forward
-	dec	h		;set hl	negative
+	dec	h		;set hl negative
 zlen65:	add	hl,de		;compute distance from instruction
-	inc	hl		;adjust	for built in bias
+	inc	hl		;adjust for built in bias
 	dec	de		;restore pointer
 	ld	a,(de)		;fetch first byte of instruction
 	cp	18h		;uncondtional jump?
-	jr	nz,zlen85	;conditional - set secondary bp	if tracing
+	jr	nz,zlen85	;conditional - set secondary bp if tracing
 	ret
 zlen70:	ld	hl,z801		;check for return instruction
 	ld	c,z801l
 	cpir
-	ld	c,1		;length	must be	1 in any case
+	ld	c,1		;length must be 1 in any case
 	ret	nz
 	cp	0E9h
 	jr	nz,zlen80	;nz - not  jp (hl)
-	inc	b		;set pc	modified flag
+	inc	b		;set pc modified flag
 	ld	hl,(hlreg)	;next pc contained in hlreg
 	ret
-zlen80:	ld	hl,(spreg)	;return	instructions hide next pc in stack
+zlen80:	ld	hl,(spreg)	;return instructions hide next pc in stack
 	ld	b,(hl)
 	inc	hl
 	ld	h,(hl)
@@ -4901,39 +4901,39 @@ zlen80:	ld	hl,(spreg)	;return	instructions hide next pc in stack
 	ret	z		;unconditional return
 zlen85:	ld	a,(sbps)	;count of special step breakpoints
 	and	a		;test for zero
-	ret	z		;zero -	monitor	is not tracing
+	ret	z		;zero - monitor is not tracing
 	ld	a,(bps)		;fetch number of bps currently in effect
-	ld	b,a		;pass to set breakpoint	routine	in b reg
+	ld	b,a		;pass to set breakpoint routine in b reg
 	ex	de,hl		;de - bp to set
 	call	brk30		;set conditional breakpoint
 	xor	a
 	or	b
 	ld	b,0
 	ld	de,(pcreg)	;for setting inline bp - condition not m
-	ret	nz		;nz - collision	with user bp
+	ret	nz		;nz - collision with user bp
 	ld	hl,sbps
 	inc	(hl)		;bump count of step bps
 	ret
 	page
 ;******************************************************************************
 ;*
-;*	pswDsp:	display	current	state of flag register
+;*	pswDsp: display current state of flag register
 ;*
-;*	pswbit:	table of bit masks with	which to test f	reg.
+;*	pswbit:	table of bit masks with which to test f reg.
 ;*		two byte entry per bit (sign, zero, carry, parity).
 ;*
 ;*	pswmap - table of offsets into operand name table featuring a
-;*		 two byte entry	for each flag bit.
+;*		 two byte entry for each flag bit.
 ;*		 bit 4 (unused by z80) from pswbit entry is on/off flag
-;*		 lo bytes are the off states (p	nz nc po).
-;*		 hi bytes are the on states  (m	 z  c pe).
+;*		 lo bytes are the off states (p nz nc po).
+;*		 hi bytes are the on states  (m  z  c pe).
 ;*
-;*	- current state	of flag	register is displayed
+;*	- current state of flag register is displayed
 ;*	- user queried for changes
-;*	- input	is parsed and tested for valid flag reg	mnemonics
+;*	- input is parsed and tested for valid flag reg mnemonics
 ;*	- if valid mnemonic found flag bit is set or reset accordingly
 ;*
-;*	exit:	to z8e for next	command
+;*	exit:	to z8e for next command
 ;*
 ;******************************************************************************
 
@@ -4949,10 +4949,10 @@ psw00:	ld	hl,pswbit		;table of bit mask for flags
 	ld	c,a
 	ld	a,(freg)		;fetch current flag of user
 	and	0F7h
-	and	(hl)			;unused	bit in flag - ensure it's off
+	and	(hl)			;unused bit in flag - ensure it's off
 	ld	hl,pswmap
-	add	hl,bc			;pointer to mnemonic is	8 bytes	away
-	jr	z,psw10			;this is an off	bit (nz	nc p po)
+	add	hl,bc			;pointer to mnemonic is 8 bytes away
+	jr	z,psw10			;this is an off bit (nz nc p po)
 	inc	hl			;on
 psw10:	ld	c,(hl)			;fetch index into operand name table
 	ld	hl,zopnm
@@ -4961,7 +4961,7 @@ psw10:	ld	c,(hl)			;fetch index into operand name table
 	ld	c,2			;print both chars of mnemonic name
 	call	printb
 	call	space
-	dec	e			;do all	four flag bits
+	dec	e			;do all four flag bits
 	jp	p,psw00
 	call	crlf
 	ld	a,(lcmd)
@@ -4976,10 +4976,10 @@ psw50:	call	iedtbc
 	ret	m			;no input
 psw55:	call	prsr
 	ret	nz			;parse error - end command
-	ld	bc,0116h			;
-	call	oprn20			;check validity	of this	token
+	ld	bc,0116h		;
+	call	oprn20			;check validity of this token
 	ld	a,c
-	ld	bc,pswcnt		;number	of flag	reg mnemonics
+	ld	bc,pswcnt		;number of flag reg mnemonics
 	ld	hl,pswmap
 	cpir				;check table
 	jp	nz,e???			;error - nmemonic not found
@@ -4987,14 +4987,14 @@ psw55:	call	prsr
 	add	hl,bc
 	ld	a,(hl)			;fetch mask
 	ex	de,hl			;
-	ld	hl,freg			;de - mask ptr	 hl - user flag	ptr
+	ld	hl,freg			;de - mask ptr  hl - user flag ptr
 	and	08			;bit says turn on or off
 	ld	a,(de)			;new copy of mask
 	jr	nz,psw60		;nz - turn on
 	cpl
 	and	(hl)			;and with current user flag
-	ld	(hl),a			;return	flag reg with bit now off
-	jr	psw55			;check for more	input
+	ld	(hl),a			;return flag reg with bit now off
+	jr	psw55			;check for more input
 psw60:	and	0F7h			;turn off on/off flag (bit 4)
 	or	(hl)
 	ld	(hl),a			;now turn on specified bit
@@ -5045,7 +5045,7 @@ movb00:	inc	hl
 ;*
 ;*	call bcde to get byte count, starting address, and fill byte
 ;*
-;*	exit:	to z8e for next	command
+;*	exit:	to z8e for next command
 ;*
 ;******************************************************************************
 
@@ -5232,7 +5232,7 @@ ibl00:	ld	(hl),' '
 ;******************************************************************************
 ;*
 ;*	lldr:	Load file
-;*	User may supply	optional load bias if file name ends with comma.
+;*	User may supply optional load bias if file name ends with comma.
 ;*
 ;*	lfcb:	Parse input buffer (inbf) and init FCB
 ;*
@@ -5265,32 +5265,32 @@ lldr:	call	iedtbc		;Get file name
 	ld	c,10		;+ 3.5.5 jrs 5/jan/89
 	jp	lbin22
 lldr00:	call	crlf
-	call	lfcb		;Init FCB with name and	drive
+	call	lfcb		;Init FCB with name and drive
 	jp	nz,esntx	;nz - syntax error
 	ld	de,mldg		;Display loading string
 	call	nprint
 	ld	de,prsbf
-	ld	a,(de)		;A - first char	of file	name
+	ld	a,(de)		;A - first char of file name
 	ld	b,a
 	call	print
 	ld	a,','
-	cp	c		;C - terminator	following file name (from lfcb)
-	ld	hl,0100h		;Assume	no bias
-	jr	nz,lldr05	;NZ - no comma means no	load bias
-	call	iarg		;Check for load	bias
+	cp	c		;C - terminator following file name (from lfcb)
+	ld	hl,0100h		;Assume no bias
+	jr	nz,lldr05	;NZ - no comma means no load bias
+	call	iarg		;Check for load bias
 	jp	nz,esntx	;Error - bad argument
 	call	imem		;Check available memory
-	jp	nc,emem??	;Out of	memory
+	jp	nc,emem??	;Out of memory
 lldr05:	ld	(loadb),hl	;Save load bias
 	ld	a,'.'		;Test if file name is period
 	sub	b
 	jr	z,lbin		;File name is period - no open needed
-lldr10:	call	lopn		;Attempt to open file -	entry from nint
+lldr10:	call	lopn		;Attempt to open file - entry from nint
 	jp	z,efilnf	;Z - file not found
 
 
 lbin:
-	ld	hl,(loadb)	;Fetch starting	load address
+	ld	hl,(loadb)	;Fetch starting load address
 lbin00:	push	hl
 	ex	de,hl
 	ld	c,26		;Set CP/M DMA address
@@ -5305,45 +5305,45 @@ lbin00:	push	hl
 	ld	c,a
 	and	a
 	jr	nz,lbin20	;NZ - end of file
-	call	imem		;Test if memory	available to load next sector
-	jr	c,lbin00	;C - not out of	memory
+	call	imem		;Test if memory available to load next sector
+	jr	c,lbin00	;C - not out of memory
 lbin20:	ex	de,hl
 	dec	hl
 	ld      (loadn),hl	;End of load address
 lbin22: ld	de,mlodm	;Print loaded message
 	call	nprint
-	ex	de,hl		;DE - ending address of	load
+	ex	de,hl		;DE - ending address of load
 	ld	hl,(loadb)
 	call	outadr		;Display starting address of load
 	ex	de,hl
-	call	outadr		;Display ending	address
+	call	outadr		;Display ending address
 	and	a
 	sbc	hl,de
 	inc	h
 	ld	de,mlodpg
 	call	nprint		;Display pages string
-	ld	l,a		;zero L	reg
+	ld	l,a		;zero L reg
 	ld	a,h		;Hi byte of ending address is number of pages
 	cp	100
 	jr	c,lbin30	;Less than 100
 	ld	l,'2'
 	sub	200
 	jr	nc,lbin25	;Greater than 200
-	dec	l		;change	to ASCII 1
+	dec	l		;change to ASCII 1
 	add	a,100		;Restore actual page count less 100
 lbin25:	ld	h,a		;Save page count
 	ld	a,l
 	call	ttyo
 lbin30:	ld	d,2fh
 	ld	a,h
-lbin35:	inc	d		;Tens and units	decimal	conversion loop
+lbin35:	inc	d		;Tens and units decimal conversion loop
 	sub	10
 	jr	nc,lbin35
 	add	a,10		;Restore remainder
 	ld	e,a		;Temp save while we print tens
 	ld	a,d
 	inc	l
-	dec	l		;Test L	reg
+	dec	l		;Test L reg
 	jr	nz,lbin40	;NZ - ASCII 1 or 2 in L
 	cp	'0'		;Suppress leading zero - less than 10 pages
 lbin40:	call	nz,ttyo		;Print tens digit
@@ -5371,7 +5371,7 @@ lbin40:	call	nz,ttyo		;Print tens digit
 z8ej:				;+
 	ld	c,26		;+ "Set DMA" function
 	ld	de,0080h	;+ Restore default DMA for user program
-	call	bdos	;+
+	call	bdos		;+
 	jp	z8e		;Next command
 
 
@@ -5380,12 +5380,12 @@ lfcb:	call	prsr		;parse input buffer to extract file name
 	ld	a,14
 	cp	b		;over 14 chars is ng file name
 	ret	c
-	ld	c,b		;b and c - byte	count of file name
-	djnz	lfcb00		;test for only one char	in name
+	ld	c,b		;b and c - byte count of file name
+	djnz	lfcb00		;test for only one char in name
 	ld	a,(prsbf)	;only one - is it period?
 	sub	'.'
 	jr	nz,lfcb00
-	ld	c,d		;return	terminator
+	ld	c,d		;return terminator
 	ld	a,(cflag)	;continuation allowed?
 	and	a		;let lldr decide
 	ret
@@ -5393,32 +5393,32 @@ lfcb00:	ld	b,0
 	ld	a,':'		;check for drive specifier in input
 	cpdr
 	ld	b,c		;b - number of chars preceding colon
-	ld	c,d		;return	terminator in c
+	ld	c,d		;return terminator in c
 	ld	de,fcb
 	ld	a,0
 	jr	nz,lfcb10	;nz - no colon
 	dec	b
-	ret	nz		;syntax	error -	more than one char
+	ret	nz		;syntax error - more than one char
 	ld	a,(hl)		;fetch drive specifier
 	call	ixlt
 	ld	(hl),a		;back to parse buffer as upper case
-	sub	40h		;make name into	number
+	sub	40h		;make name into number
 	inc	hl
 lfcb10:
 	ld	(de),a		;store drive number in fcb
 	ld	a,' '
-	ld	b,11		;clear file name in fcb	to spaces
+	ld	b,11		;clear file name in fcb to spaces
 lfcb20:	inc	de
 	ld	(de),a
 	djnz	lfcb20
 	ld	b,8		;max chars allowed in file name
 	ld	de,fcbnam
 lfcb30:	call	lfcb90
-	ret	m		;error - too many chars	in file	name
+	ret	m		;error - too many chars in file name
 	ld	b,3		;max chars allowed in file type
 	ld	de,fcbtyp
 	and	a
-	ret	z		;z - no	file type after	all
+	ret	z		;z - no file type after all
 
 
 
@@ -5427,9 +5427,9 @@ lfcb90:	inc	hl		;Bump buffer pointer
 	and	a		;Test for null at end of file name
 	ret	z		;Null found - nothing more to parse
 	call	ixlt
-	ld	(hl),a		;Translate parse buffer	to upper case
+	ld	(hl),a		;Translate parse buffer to upper case
 	cp	'.'
-	ret	z		;Period	found -	move file type into FCB
+	ret	z		;Period found - move file type into FCB
 
 ; --- Added 4 Dec 88 --- jrs
 	cp	'*'		;Expandable wildcard?
@@ -5458,8 +5458,8 @@ lopn:
 ;;	dec	hl
 ;;	ld	a,(hl)		;drive specifier
 ;;	and	a		;test for default drive
-;;	jr	z,lopn00	;z - default means no selection	required
-;;	dec	a		;select	drive
+;;	jr	z,lopn00	;z - default means no selection required
+;;	dec	a		;select drive
 ;;	ld	e,a
 ;;	ld	c,14
 ;;	call	bdos
@@ -5474,9 +5474,9 @@ lopn10:	ld	(hl),0
 	inc	a		;test open return code
 	ret			;nz - open ok
 
-imem:	ex	de,hl		;de - next load	address
+imem:	ex	de,hl		;de - next load address
 	ld	a,d
-	ld	hl,07		;ptr to	prt to start of	z8e
+	ld	hl,07		;ptr to prt to start of z8e
 	cp	(hl)
 	ex	de,hl
 	ret	c		;c - not out of memory
@@ -5490,14 +5490,14 @@ emem??:	ld	de,mmem??	;print out of memory
 	call	nprint
 	jr	eprint
 
-efilnf:	ld	de,mfilnf	;print file not	found
+efilnf:	ld	de,mfilnf	;print file not found
 
 eprint:	call	nprint
 	jp	z8e
 	page
 ;*****************************************************************************
 ;*
-;*            write memory segment to disk command
+;*	      write memory segment to disk command
 ;*
 ;*****************************************************************************
 
@@ -5547,27 +5547,27 @@ writ50:	call	bksp
 ;*
 ;*	find:	locate string in memory
 ;*
-;*		call iarg - get	starting address of seach
+;*		call iarg - get starting address of seach
 ;*
-;*		call in00 - get	match data concatenating multiple arguments
+;*		call in00 - get match data concatenating multiple arguments
 ;*			    into a single string
 ;*
 ;*		addresses at which matches found displayed 8 per line.
 ;*		search continues until end of memory reached
-;*		user may cancel	search at any time by hitting any key.
+;*		user may cancel search at any time by hitting any key.
 ;*
 ;*		exit: to z8e for next command
 ;*
 ;******************************************************************************
 
 find:	call	iedtbc
-	ret	m		;m - no	input
+	ret	m		;m - no input
 	call	iarg		;extract starting address of search
 	jp	nz,e???		;error
 	ex	de,hl		;save starting address of search in de
-find00:	call	in00		;extract search	string concatenating multiple
+find00:	call	in00		;extract search string concatenating multiple
 				;arguments
-	jp	nz,e???		;error - output	command	prompt
+	jp	nz,e???		;error - output command prompt
 	xor	a
 	ld	(lines),a	;clear crlf flag
 	ex	de,hl		;starting address of search - hl
@@ -5587,9 +5587,9 @@ find00:	call	in00		;extract search	string concatenating multiple
 	ld	(hl),a
 	ex	de,hl
 
-find40:	ld	bc,(argbc)	;number	of bytes to look for
+find40:	ld	bc,(argbc)	;number of bytes to look for
 	call	crlf
-find50:	call	srch		;do the	search
+find50:	call	srch		;do the search
 	jr	nz,find60	;not found
 	call	outadr		;display address where match found
 	ld	a,(lines)
@@ -5599,9 +5599,9 @@ find50:	call	srch		;do the	search
 	call	z,crlf
 	call	ttyq		;user requesting abort?
 	cp	cr
-	ret	z		;abort - return	to z8e
-find60:	inc	hl		;point to next address at which	to start search
-	add	hl,bc		;ensure	we won't hit end of memory by adding
+	ret	z		;abort - return to z8e
+find60:	inc	hl		;point to next address at which to start search
+	add	hl,bc		;ensure we won't hit end of memory by adding
 				;in string size
 	ret	c		;impending end of memory
 	sbc	hl,bc		;restore pointer
@@ -5624,15 +5624,15 @@ srch10:	pop	hl
 ;*
 ;*	verify:	verify two blocks of data are identical
 ;*
-;*		enter: de - starting address of	block 1
+;*		enter: de - starting address of block 1
 ;*
-;*		call bcde to get address of block 2 and	byte count
+;*		call bcde to get address of block 2 and byte count
 ;*
-;*		mismatch:   block 1 address and	byte are displayed
-;*			    block 2 address and	byte are displayed
-;*			    console intrrogated	- any input terminates verify
+;*		mismatch:   block 1 address and byte are displayed
+;*			    block 2 address and byte are displayed
+;*			    console intrrogated - any input terminates verify
 ;*
-;*		exit:	to z8e for next	command
+;*		exit:	to z8e for next command
 ;*
 ;******************************************************************************
 
@@ -5640,7 +5640,7 @@ verify:	call	bcde		;get block 2 address and byte count
 	jp	nz,e???
 	ex	de,hl
 verf00:	ld	a,(de)		;byte from block 1
-	xor	(hl)		;versus	byte from block	two
+	xor	(hl)		;versus byte from block two
 	jr	z,verf10	;match - no display
 	call	newlin
 	ld	a,(de)
@@ -5662,9 +5662,9 @@ verf10:	inc	hl		;bump block 1 pointer
 	page
 ;******************************************************************************
 ;*
-;*	xreg:	display	machine	state
+;*	xreg:	display machine state
 ;*
-;*		regptr:	table contains offsets to names	in operand name	table.
+;*		regptr:	table contains offsets to names in operand name table.
 ;*			sign bit set indicates prime register.
 ;*
 ;*		regmap:	table contains offsets to reg contents table (regcon)
@@ -5672,9 +5672,9 @@ verf10:	inc	hl		;bump block 1 pointer
 ;*
 ;*		regcon:	table of register contents.
 ;*
-;*		exit:	make current pc	current	disassembly location counter.
-;*			set bit	6 of disassembly flag byte (zasmfb)
-;*			jump to	zasm30 to disassemble current instruction.
+;*		exit:	make current pc current disassembly location counter.
+;*			set bit 6 of disassembly flag byte (zasmfb)
+;*			jump to zasm30 to disassemble current instruction.
 ;*
 ;******************************************************************************
 
@@ -5706,11 +5706,11 @@ xreg00:	call	xreg05		;display reg name and contents
 	call	zasm30		;+
 	jp	pswDsp		;+
 
-xreg05:	ld	hl,regptr	;map of	reg name pointers
+xreg05:	ld	hl,regptr	;map of reg name pointers
 	ld	d,b
 	add	hl,bc
 	ld	a,(hl)		;extract pointer
-	and	7fh		;strip sign for	name indexing
+	and	7fh		;strip sign for name indexing
 	ld	e,a
 	ld	b,(hl)		;save copy of offset - need sign later
 	ld	hl,zopnm	;register name table
@@ -5723,20 +5723,20 @@ xreg05:	ld	hl,regptr	;map of	reg name pointers
 	cp	' '		;is second character a space?
 	jr	nz,xreg10
 	ld	a,'C'		;replace space - this is pc
-xreg10:	call	ttyo		;display second	character
+xreg10:	call	ttyo		;display second character
 	xor	a
 	or	b		;now test sign
-	jp	p,xreg20	;sign not set -	not prime reg
+	jp	p,xreg20	;sign not set - not prime reg
 	ld	a,27h		;display quote
 	call	ttyo
 xreg20:	ld	a,':'
 	call	ttyo
-	ld	hl,regmap	;map of	pointers to reg	contents
+	ld	hl,regmap	;map of pointers to reg contents
 	add	hl,de
 	ld	a,(hl)
 	jp	p,xreg30	;p - not prime reg
-	add	a,8		;prime contents	8 bytes	past non-prime
-xreg30:	and	7fh		;ignore	sign
+	add	a,8		;prime contents 8 bytes past non-prime
+xreg30:	and	7fh		;ignore sign
 	ld	e,a
 	ld	hl,regcon	;start of register contents storage
 	add	hl,de
@@ -5774,13 +5774,13 @@ xreg30:	and	7fh		;ignore	sign
 ;*
 ;*
 ;*	zasm15 - start of the disassembly loop
-;*	zasmpc - address of the	instruction being disassembled
+;*	zasmpc - address of the instruction being disassembled
 ;*	zasmfb - disassembly flag byte
-;*	zmflag - flag indicating directive processing (defb and	defw)
+;*	zmflag - flag indicating directive processing (defb and defw)
 ;*
-;*		    bit	6 - xreg calling
-;*		    bit	5 - asmblr calling
-;*		    bit	0 - write to disk flag
+;*		    bit 6 - xreg calling
+;*		    bit 5 - asmblr calling
+;*		    bit 0 - write to disk flag
 ;*
 ;******************************************************************************
 
@@ -5868,10 +5868,10 @@ zasm18:	call	outadr		;display instruction address
 	ld	b,a		;b  - length
 	ld	c,a		;c  - ditto
 zasm20:	ld	a,(hl)
-	call	othxsp		;display object	code
+	call	othxsp		;display object code
 	inc	hl
 	djnz	zasm20
-	ld	a,c		;number	of object bytes
+	ld	a,c		;number of object bytes
 	dec	a
 	xor	3
 	ld	b,a		;calculate space padding
@@ -5883,9 +5883,9 @@ zasm25:	call	space
 	djnz	zasm25
 	ld	(zasmnx),hl	;store address of next instruction
 	and	a		;clear carry
-	sbc	hl,bc		;point to first	byte in	instruction
+	sbc	hl,bc		;point to first byte in instruction
 zasm30:	ex	de,hl		;de - current instruction pointer
-	ld	hl,(zasmio)	;buffer	address	storage
+	ld	hl,(zasmio)	;buffer address storage
 	ld	a,(maxlin)
 	ld	b,a		;line length based on max symbol size
 zasm35:	ld	(hl),' '	;space out buffer
@@ -5893,7 +5893,7 @@ zasm35:	ld	(hl),' '	;space out buffer
 	djnz	zasm35
 	ld	a,b
 	ld	(opnflg),a
-	ld	(hl),cr		;append	crlf
+	ld	(hl),cr		;append crlf
 	inc	hl
 	ld	(hl),lf
 	call	fadr		;find address match
@@ -5923,19 +5923,19 @@ zasm42:	ld	a,(de)		;first byte of op code
 zasm45:	cpir			;check for FD, DD, ED or CB
 	jr	z,zasm55	;z - found
 zasm50:	cp	40h
-	jr	c,zasm90	;opcode	range 00 - 3F
+	jr	c,zasm90	;opcode range 00 - 3F
 	ld	b,0E0h		;
 	cp	0C0h		;
-	jr	nc,zasm90	;opcode	range C0 - CC
+	jr	nc,zasm90	;opcode range C0 - CC
 	cp	80h
-	jr	nc,zasm85	;opcode	range 80 - BF
+	jr	nc,zasm85	;opcode range 80 - BF
 	ld	b,0F8h		;
 	cp	76h		;test for halt instruction
-	jr	nz,zasm85	;opcode	range 40 - 7F
-	ld	a,0FFh		;set halt instruction key value	to F7h
+	jr	nz,zasm85	;opcode range 40 - 7F
+	ld	a,0FFh		;set halt instruction key value to F7h
 	jr	zasm90
 zasm55:	inc	de
-	ld	a,(de)		;byte two of multi-byte	instruction
+	ld	a,(de)		;byte two of multi-byte instruction
 	dec	c		;test for ED instruction
 	jr	nz,zasm65	;nz - not an ED
     if	Z180
@@ -5943,21 +5943,21 @@ zasm55:	inc	de
 	jr	zasm90		;Go build instruction key.
     else
 	cp	80h
-	jr	nc,zasm60	;opcode	range ED 40 - ED 7F
+	jr	nc,zasm60	;opcode range ED 40 - ED 7F
 	cp	40h
 	jr	nc,zasm90	;legal
 	ld	a,09Fh
-	jr	zasm90		;map to	question marks
+	jr	zasm90		;map to question marks
 
 zasm60:	ld	b,0E0h		;set bias
 	cp	0C0h		;test for illegal ED
 	jr	c,zasm90	;legal
-	ld	a,0BFh		;map to	question marks
-	jr	zasm90		;opcode	range ED A0 - ED BB
+	ld	a,0BFh		;map to question marks
+	jr	zasm90		;opcode range ED A0 - ED BB
     endif
 
 zasm65:	inc	c
-	jr	z,zasm80	;z - CB	instruction
+	jr	z,zasm80	;z - CB instruction
 	cp	0CBh		;FD or DD - check for CB in byte two
 	jr	nz,zasm70
 	inc	de		;fetch last byte of FDCB or DDCB
@@ -5982,21 +5982,21 @@ zasm75:	ld	a,9Fh
 	jr	zasm90
 zasm80:	cp	40h		;test type of CB instruction
 	ld	b,0E8h
-	jr	c,zasm85	;opcode	range CB 00 - CB 3F (shift)
+	jr	c,zasm85	;opcode range CB 00 - CB 3F (shift)
 	rlca
 	rlca
 	and	03		;hi order bits become index
 	ld	b,0F0h
-	jr	zasm90		;opcode	range CB 40 - CB FF
+	jr	zasm90		;opcode range CB 40 - CB FF
 zasm85:	rrca
 	rrca
-	rrca			;bits 3-5 of CB	shift yield key
+	rrca			;bits 3-5 of CB shift yield key
 	and	07h
-zasm90:	add	a,b		;add in	bias from B reg
+zasm90:	add	a,b		;add in bias from B reg
 	ld	c,a		;C - instruction key value
 	xor	a
 	ld	b,a
-	ld	hl,zopcpt	;opcode	name pointer table
+	ld	hl,zopcpt	;opcode name pointer table
 	add	hl,bc		;index into table
 	ld	l,(hl)		;fetch opname index
 	ld	h,a
@@ -6004,8 +6004,8 @@ zasm90:	add	a,b		;add in	bias from B reg
 	add	hl,hl		;index times four
 	ld	de,zopcnm	;op code name table
 	add	hl,de
-	ex	de,hl		;DE - pointer to opcode	name
-	ld	hl,(zasmio)	;buffer	pointer	storage
+	ex	de,hl		;DE - pointer to opcode name
+	ld	hl,(zasmio)	;buffer pointer storage
 	ld	a,c
 	ld	(zasmkv),a	;opcode key value
 	ld	a,(maxlen)
@@ -6018,13 +6018,13 @@ zasm90:	add	a,b		;add in	bias from B reg
 	cp	'S'		;step needs compressed format
 zasm92:	add	hl,bc
 	ld	c,4
-	ex	de,hl		;DE - buffer   HL - opcode name	pointer
+	ex	de,hl		;DE - buffer   HL - opcode name pointer
 	ldir
-	inc	bc		;one space after opcode	for compressed format
+	inc	bc		;one space after opcode for compressed format
 	jr	z,zasm95
 	ld	c,4		;four spaces for true disassembly
 zasm95:	ex	de,hl		;hl - buffer pointer
-	add	hl,bc		;start of operand field	in buffer
+	add	hl,bc		;start of operand field in buffer
 	ld	a,(zasmkv)	;save the instruction key value
 	cp	09fh
 	jr	nz,zasm99
@@ -6041,7 +6041,7 @@ zasm97:	ld	a,(de)
 	ld	d,c
 	inc	de
 	jr	zasm97
-zasm99:	ld	de,zopnd1	;table of first	operands
+zasm99:	ld	de,zopnd1	;table of first operands
 	add	a,e
 	ld	e,a		;instant offset
 	ld	a,d
@@ -6053,14 +6053,14 @@ zasm99:	ld	de,zopnd1	;table of first	operands
 	page
 ;******************************************************************************
 ;*
-;*                          - operand processing -
+;*			    - operand processing -
 ;*
-;*	enter:	B - zero (process first	operand)
-;*		C - instruction	key value
+;*	enter:	B - zero (process first operand)
+;*		C - instruction key value
 ;*
 ;*   instruction key value is used to fetch operand key value:
 ;*
-;*	operand	key value is in	the range 0 - 1fh
+;*	operand key value is in the range 0 - 1fh
 ;*	operand key value interpreted as follows:
 ;*
 ;*      0 - 17h  use as index to fetch literal from operand
@@ -6079,11 +6079,11 @@ zasm99:	ld	de,zopnd1	;table of first	operands
 ;*
 ;*     opn100	   18h	 relative jump
 ;*     opn200	   19h	 register specified in instruction
-;*     opn300	   1ah	 convert 16 bit	operand	to hex
+;*     opn300	   1ah	 convert 16 bit operand to hex
 ;*     opn400	   1ch	 convert 8 bit operand to hex
 ;*     opn600	   1dh	 hl/ix/iy instruction
 ;*     opn700	   1eh	 mask rst operand from bit 3-5 of rst instruction
-;*     opn800	   1fh	 bit number is specified in bits 3-5 of	opcode
+;*     opn800	   1fh	 bit number is specified in bits 3-5 of opcode
 ;*
 ;*    exit: to zasm15 to continue block disassembly
 ;*
@@ -6104,18 +6104,18 @@ opn012:	ld	hl,zopnm	;base of operand name/jump table
 opn014:	ld	a,1Fh
 	and	b
 	cp	zopnml		;test if processing required
-	jr	c,opn015	;c - operand is	a fixed	literal
+	jr	c,opn015	;c - operand is a fixed literal
 	ld	a,(hl)		;fetch processing routine address
 	inc	hl
 	ld	h,(hl)		;
 	ld	l,a		;hl - operand processing routine
 	jp	(hl)		;geronimoooooooo
 opn015:	ldi			;first byte of operand literal
-	inc	bc		;compensate for	ldi
+	inc	bc		;compensate for ldi
 	ex	de,hl		;hl - buffer
 	ld	a,(de)
-	cp	' '		;test for space	as byte	two of literal
-	jr	z,opn020	;ignore	spaces appearing in byte two
+	cp	' '		;test for space as byte two of literal
+	jr	z,opn020	;ignore spaces appearing in byte two
 	ld	(hl),a
 	inc	hl		;bump buffer pointer
 opn020:	ld	a,b		;operand key value
@@ -6135,11 +6135,11 @@ opn030:	ld	a,(opnflg)	;get flag byte
 	inc	d
 opn035:	ld	a,(de)		;get operand2 key value
 	inc	a
-	jr	z,opn040	;z - no	second operand
+	jr	z,opn040	;z - no second operand
 	ld	(hl),','	;separate operands with comma in buffer
 	inc	hl
 	jr	opn
-opn040:	ld	hl,(zasmio)	;rewind	buffer pointer
+opn040:	ld	hl,(zasmio)	;rewind buffer pointer
 	ld	a,(maxlin)
 	ld	c,a
 opn041:
@@ -6195,7 +6195,7 @@ opn044:
 	jp	z,zasm15
 	ld	c,82h		;assume defw
 	cp	'D'
-	jr	z,opn045	;defw -	082h
+	jr	z,opn045	;defw - 082h
 	dec	c		;assume ascii defb
 	cp	'A'
 	jr	z,opn045	;ascii defb - 081h
@@ -6281,9 +6281,9 @@ opn065:	call	write		;check if write to disk flag in effect
 	ld	hl,(zasmwt)	;check disassembly count
 	xor	a
 	or	h		;less than 256?
-	jr	z,opn080	;less -	this is	tally
-	ld	bc,(zasmnx)	;fetch next disassembly	address
-	sbc	hl,bc		;versus	requested end address
+	jr	z,opn080	;less - this is tally
+	ld	bc,(zasmnx)	;fetch next disassembly address
+	sbc	hl,bc		;versus requested end address
 	jr	c,opn095	;c - end
 	add	hl,bc		;restore next disassembly address
 	jr	opn085		;more
@@ -6295,7 +6295,7 @@ opn080:	dec	hl
 	ld	a,(zasmf)
 	and	a
 	call	z,ttyi		;query user - more?
-	cp	cr		;return	means end
+	cp	cr		;return means end
 
 	; v4.1 jrs 21 Feb 2015
 	; ...	Changed so that CR is continue, anything else means end.
@@ -6311,7 +6311,7 @@ opn085:
 	cp	cr
 
 	; Changing this one breaks things.
-	jr	z,opn095	;nz - terminate	disassembly
+	jr	z,opn095	;nz - terminate disassembly
 
 opn090:
 	ld	(zasmwt),hl	;restore count
@@ -6375,7 +6375,7 @@ bldf:	call	lfcb		;initialize fcb
 	ld	de,fcb
 	ld	c,19		;file exists - delete it
 	call	bdos
-bldf00:	ld	de,fcb		;create	new file
+bldf00:	ld	de,fcb		;create new file
 	ld	c,22
 	call	bdos		;if no file create one
 	xor	a
@@ -6383,18 +6383,18 @@ bldf00:	ld	de,fcb		;create	new file
 	page
 opn100:	ld	hl,(zasmpc)
 	inc	hl
-	ld	a,(hl)		;fetch relative	displacement
+	ld	a,(hl)		;fetch relative displacement
 	ld	c,a
 	inc	c
 	add	a,a		;test sign for displacement direction
 	ld	b,0
 	jr	nc,opn105
 	dec	b		;produce zero for forward - ff for back
-opn105:	add	hl,bc		;adjust	pc
-	ex	de,hl		;de - instruction ptr	hl - buffer
+opn105:	add	hl,bc		;adjust pc
+	ex	de,hl		;de - instruction ptr hl - buffer
 	call	fadr
 	call	z,xsym
-	jp	z,opn040	;symbol	found
+	jp	z,opn040	;symbol found
 ;;	ld	(hl),'$'	;- eg 3.3.4a
 ;;	inc	hl		;-
 ;;	ld	a,c		;-
@@ -6414,7 +6414,7 @@ opn200:	call	zmqf		;check for interactive disassembly
 	jp	opn020
 opn205:	call	zndx		;check for ix or iy instruction
 	ex	de,hl		;buffer back to de
-	jr	nz,opn210	;nz - not ix or	iy
+	jr	nz,opn210	;nz - not ix or iy
 	inc	hl
 	inc	hl		;must be  ld (ix+ind),nn
 opn210:	inc	hl		;
@@ -6433,9 +6433,9 @@ opn215:	ex	de,hl
 	ld	a,(de)
 	cp	10		;decimal number?
 	jr	nc,opn220	;no - convert to hex
-	call	zhex20		;86 the	leading	zero and trailing h
+	call	zhex20		;86 the leading zero and trailing h
 	jp	opn020
-opn220:	call	zhex		;do hex	to asii	conversion
+opn220:	call	zhex		;do hex to asii conversion
 	ld	(hl),'H'	;following 8 bit hex byte
 	inc	hl
 	jp	opn020
@@ -6443,18 +6443,18 @@ opn220:	call	zhex		;do hex	to asii	conversion
 opn300:	call	zmqf
 	jr	c,opn315	;c - this is defw
 	call	zndx
-	ex	de,hl		;de - buffer   hl - instruction	pointer
-	jr	nz,opn310	;nz - not ix or	iy
+	ex	de,hl		;de - buffer   hl - instruction pointer
+	jr	nz,opn310	;nz - not ix or iy
 	inc	hl
 opn310:	inc	hl
-opn315:	ld	a,(hl)		;fetch lo order	16 bit operand
+opn315:	ld	a,(hl)		;fetch lo order 16 bit operand
 	inc	hl
 	ld	h,(hl)		;hi order
 	ld	l,a
 	ex	de,hl		;de - 16 bit operand   hl - buffer
 	call	fadr
 	call	z,xsym
-	jp	z,opn020	;symbol	found
+	jp	z,opn020	;symbol found
 opn316:				;+ eg 3.3.4b
 	ld	a,d		;convert hi order to hex
 	ld	c,a		;save spare copy
@@ -6474,7 +6474,7 @@ opn320:	ld	(hl),'h'
 
 opn400:
 	call	zndx
-	jr	nz,opn410	;nz - not ix or	iy instruction
+	jr	nz,opn410	;nz - not ix or iy instruction
 	inc	de
 	ld	a,(de)
 	cp	0CBh		;check for indexed bit instruction
@@ -6489,13 +6489,13 @@ opn410:	ld	a,01		;check low bit of operand key value
 	rra
 	rra
 opn500:	and	007		;register specified in bits 0-2
-	xor	006		;from the movie	of the same name
-	jp	nz,opn010	;nz - not hl or	ix or iy
+	xor	006		;from the movie of the same name
+	jp	nz,opn010	;nz - not hl or ix or iy
 	ld	a,(zasmpc)
-	xor	e		;test if pc was	incremented
+	xor	e		;test if pc was incremented
 	ld	(hl),'('	;set leading paren
 	inc	hl
-	ld	b,80h		;set sign bit -	closed paren required
+	ld	b,80h		;set sign bit - closed paren required
 	ex	de,hl		;de - buffer
 	jp	z,opn012
 
@@ -6503,7 +6503,7 @@ opn500:	and	007		;register specified in bits 0-2
 
 opn600:
 	call	zndx		;determine if ix or iy
-	jr	z,opn605	;z - must be ix	or iy
+	jr	z,opn605	;z - must be ix or iy
 	ld	a,80h
 	and	b
 	jp	opn010
@@ -6531,12 +6531,12 @@ opn606:				;+
 	jp	z,opn030	;z - not indexed instruction
 	inc	de
 	ld	a,(de)		;fetch second byte of instruction
-	cp	0E9h		;test for jp (ix) or jp	(iy)
-	jp	z,opn020	;output	closed paren
+	cp	0E9h		;test for jp (ix) or jp (iy)
+	jp	z,opn020	;output closed paren
 	inc	de
 	ld	a,(de)		;fetch displacement byte
 	cp	80h		;test sign
-opn610:	ld	(hl),'+'	;assume	forward
+opn610:	ld	(hl),'+'	;assume forward
 	jr	c,opn620	;c - forward
 	neg			;force positive
 	ld	(hl),'-'
@@ -6548,7 +6548,7 @@ opn620:	inc	hl		;bump buffer pointer
 	jp	nc,opn020
 	ld	(hl),'h'
 	inc	hl
-	jp	opn020		;output	closed paren
+	jp	opn020		;output closed paren
 
 
 
@@ -6557,7 +6557,7 @@ opn700:	ld	hl,(zasmpc)
 	ld	a,(hl)		;fetch restart instruction
 	ex	de,hl		;de - buffer   hl instruction pointer
 	and	38h
-	call	zhex		;convert restart number	to ascii
+	call	zhex		;convert restart number to ascii
 	ld	(hl),'H'
 	jp	opn020
 
@@ -6568,10 +6568,10 @@ opn800:	call	zndx
 	inc	de
 	inc	de
 	inc	de		;
-	ld	a,(de)		;byte 4	of ix or iy bit	instruction
+	ld	a,(de)		;byte 4 of ix or iy bit instruction
 	jr	opn820
 opn810:	cp	10h		;weed out interrupt mode instructions
-	ld	a,(de)		;second	byte of	instruction regardless
+	ld	a,(de)		;second byte of instruction regardless
 	jr	nz,opn820	;nz - cb bit instruction
 	xor	046h		;
 	jr	z,opn830	;z - interrupt mode zero
@@ -6579,7 +6579,7 @@ opn810:	cp	10h		;weed out interrupt mode instructions
 opn820:	rra
 	rra
 	rra
-	and	07		;leave only bit	number
+	and	07		;leave only bit number
 opn830:	call	zhex20		;convert to ascii
 	jp	opn030
 
@@ -6745,15 +6745,15 @@ aed30:	pop	bc		;Restore registers.
 ;*
 ;*		     disassembler utility subroutines
 ;*
-;*	zndx:	  determines if	fd dd ed or cb instruction
+;*	zndx:	  determines if fd dd ed or cb instruction
 ;*		  caller uses returned values on an individual basis
 ;*
-;*		   z  -	dd fd
-;*		  nz  -	neither	of the above
-;*		  current instruction pointer bumped if	cb or ed instruction
+;*		   z  - dd fd
+;*		  nz  - neither of the above
+;*		  current instruction pointer bumped if cb or ed instruction
 ;*
 ;*	zhex:	  convert the byte in the accumulator to ascii with leading zero
-;*		  store	in buffer
+;*		  store in buffer
 ;*		  d - reg destroyed
 ;*
 ;*	zhex10:	  no leading zero permitted
@@ -6775,7 +6775,7 @@ zndx:	ld	hl,(zasmpc)	;fetch current instruction pointer
 	ret	nz
 zndx00:	inc	de		;cb or ed - bump instruction pointer
 	cpl
-	and	a		;ensure	nz set
+	and	a		;ensure nz set
 	cpl
 	ret
 
@@ -6783,7 +6783,7 @@ zndx00:	inc	de		;cb or ed - bump instruction pointer
 
 zhex:	ld	d,a
 	cp	0A0h		;test if left nibble > 9
-	jr	c,zhex00	;starts	with decimal digit - skip the leading zero
+	jr	c,zhex00	;starts with decimal digit - skip the leading zero
 	ld	(hl),'0'
 	inc	hl
 	jr	zhex10
@@ -6838,7 +6838,7 @@ zascii:	cp	' '
 zasc10:	and	a		;set nz - conversion not done
 	ret
 zasc20:	ex	de,hl
-	ld	(hl),quote	;defb -	quoted character
+	ld	(hl),quote	;defb - quoted character
 	inc	hl
 	or	80h		;hi bit on - no case conversion for this guy
 	ld	(hl),a
@@ -6855,9 +6855,9 @@ fadr:	push	bc
 	inc	hl
 fadr00:	ld	a,(hl)		;first byte of symbol name
 	dec	a		;check validity
-	jp	m,fadr30	;end of	table
+	jp	m,fadr30	;end of table
 	add	hl,bc
-	ld	a,(hl)		;fetch hi order	address	from table
+	ld	a,(hl)		;fetch hi order address from table
 	cp	d
 	jp	nz,fadr10
 	dec	hl
@@ -6893,9 +6893,9 @@ xsym00:	ld	a,(de)
 	page
 ;******************************************************************************
 ;*
-;*	bcde:  query user for 3	arguments: source address
+;*	bcde:  query user for 3 arguments: source address
 ;*					   destination address
-;*					   byte	count
+;*					   byte count
 ;*
 ;*	       used by move, verify, and yfil routines
 ;*
@@ -6906,13 +6906,13 @@ xsym00:	ld	a,(de)
 ;*
 ;*		       nz - no input entered
 ;*			  - unable to evaluate argument
-;*			  - destination	address	< source
+;*			  - destination address < source
 ;*
 ;******************************************************************************
 
 bcde:	call	iedtbc
-	ret	m		;no input is treated as	error
-	call	iarg		;read in starting block	address
+	ret	m		;no input is treated as error
+	call	iarg		;read in starting block address
 	ret	nz
 	ex	de,hl
 	call	iarg
@@ -7302,7 +7302,7 @@ iarg:	push	bc
 	page
 parg:	call	prsr		;extract next argument
 	ret	nz		;parse error
-	ld	a,(quoflg)	;test for ascii	literal
+	ld	a,(quoflg)	;test for ascii literal
 	and	a
 	jr	z,parg10	;quote character not found
 	xor	a
@@ -7312,24 +7312,24 @@ parg:	call	prsr		;extract next argument
 	sub	quote
 	jr	nz,parg50	;invalid literal string but may be expression
 				;involving a literal
-	ld	l,b		;l - character count of	parse buffer
+	ld	l,b		;l - character count of parse buffer
 	ld	h,a		;clear
 	add	hl,de		;
 	dec	hl		;hl - pointer to last char in parse buffer
 	ld	a,(hl)		;
-	sub	quote		;ensure	literal	string ends with quote
+	sub	quote		;ensure literal string ends with quote
 	jr	nz,parg50
 	ld	(hl),a		;clear trailing quote
-	ld	c,b		;c - character count of	parse buffer
+	ld	c,b		;c - character count of parse buffer
 	ld	b,a		;clear
-	dec	c		;subtract the quote characters from the	count
+	dec	c		;subtract the quote characters from the count
 	dec	c
 	dec	c		;extra dec set error flag nz for '' string
-	ret	m		;inform	caller of null string
+	ret	m		;inform caller of null string
 	inc	c		;c - actual string length
 	ld	a,c		;spare copy
 	inc	de		;point to second character of parse buffer
-	ld	hl,(argbpt)	;caller	wants evaluated	arg stored here
+	ld	hl,(argbpt)	;caller wants evaluated arg stored here
 	ex	de,hl
 	ldir
 	ex	de,hl
@@ -7351,10 +7351,10 @@ parg10:	call	mreg		;check for register specified
 	jr	nz,parg50	;nz - invalid register name
 	ld	a,c
 	add	a,a
-	jr	c,parg60	;sign bit reset	- 16 bit register pair
+	jr	c,parg60	;sign bit reset - 16 bit register pair
 parg50:	ld	hl,00
 	ld	b,l
-	ld	de,prsbf	;reinit	starting address of parse buffer
+	ld	de,prsbf	;reinit starting address of parse buffer
 	call	xval
 	jr	z,parg70
 	ret
@@ -7400,14 +7400,14 @@ outbyt:	ld	b,a		;save spare copy
 	jp	spaces		;solicit input three spaces right
 
 byte:	call	istr
-	ld	a,(inbfnc)	;number	of chars in input buffer
-	dec	a		;test for input	buffer count of	zero
-	inc	de		;assume	zero - examine next
+	ld	a,(inbfnc)	;number of chars in input buffer
+	dec	a		;test for input buffer count of zero
+	inc	de		;assume zero - examine next
 	ret	m		;no input means examine next
 	dec	de		;incorrect assumption
 	ld	a,(inbf)	;check first char of input buffer
 	cp	'.'
-	ret	z		;period	ends command
+	ret	z		;period ends command
 	cp	'='		;new address?
 	jr	nz,byte10
 	xor	a		;clear equal sign so prsr ignores it
@@ -7428,7 +7428,7 @@ byte10:	cp	'^'		;
 	scf			;set nz - no replacement data entered
 	sbc	a,a
 	ret
-byte15:	call	irsm		;resume	input from console
+byte15:	call	irsm		;resume input from console
 	ret	z		;no errors on input
 	ld	a,(inbfnc)	;check number of chars input
 	and	a
@@ -7441,30 +7441,30 @@ byte30:	call	e???
 	page
 ;******************************************************************************
 ;*
-;*	bdos function 10 replacement to	make ROMming this program easier since
-;*	only two console i/o routines (ttyi and	ttyo) are required. this
-;*	routine	supports backspace, line delete, and tab expansion.
+;*	bdos function 10 replacement to make ROMming this program easier since
+;*	only two console i/o routines (ttyi and ttyo) are required. this
+;*	routine supports backspace, line delete, and tab expansion.
 ;*
 ;*	all input stored in input buffer inbf.
 ;*
 ;*
-;*	iedtbc:	solicit	console	for new	input and initialize b and c registers
-;*		for max	size and input and no special line terminator.
+;*	iedtbc:	solicit console for new input and initialize b and c registers
+;*		for max size and input and no special line terminator.
 ;*
 ;*
-;*	iedt:	solicit	console	for new	input using non-default	byte count for
+;*	iedt:	solicit console for new input using non-default byte count for
 ;*		buffer or non-standard terminator.
 ;*
-;*		called:	 b - max number	of characters to receive
-;*			 c - special terminator	other than carriage return
+;*		called:	 b - max number of characters to receive
+;*			 c - special terminator other than carriage return
 ;*
 ;*
-;*	iedt00:	resume input - used by routines	which call iedt	with a buffer
-;*		count of 1 to check for	special	character as the first char
+;*	iedt00:	resume input - used by routines which call iedt with a buffer
+;*		count of 1 to check for special character as the first char
 ;*		received (such as exam looking for period).
 ;*
-;*		called:	 b - max number	of characters to receive
-;*			 c - special terminator	other than carriage return
+;*		called:	 b - max number of characters to receive
+;*			 c - special terminator other than carriage return
 ;*
 ;******************************************************************************
 
@@ -7480,14 +7480,14 @@ iedt00:	ld	(hl),a
 	inc	hl
 	dec	d
 	jr	nz,iedt00
-	ld	(argbc),a	;init number of	arguments tally
+	ld	(argbc),a	;init number of arguments tally
 	ld	hl,argbf
 	ld	(argbpt),hl	;init pointer to start of buffer
-iedt03:	ld	hl,inbf		;start of input	buffer
+iedt03:	ld	hl,inbf		;start of input buffer
 	ld	(quoflg),a
-iedt05:	call	inchar		;read char from	console
+iedt05:	call	inchar		;read char from console
 	ld	(trmntr),a	;assume line terminator until proven otherwise
-	cp	cr		;end of	line?
+	cp	cr		;end of line?
 	jp	z,iedt90	;z - end (jr changed to jp:  eg 3.3.8a)
 	ld	e,a
 	cp	quote
@@ -7518,7 +7518,7 @@ iedt25:	call	space		;space out until char position mod 8 = zero
 	jr	nz,iedt25
 	ld	(hl),0		;set end of line null
 	jr	iedt70
-iedt35:	ld	e,1		;assume	one backspace required
+iedt35:	ld	e,1		;assume one backspace required
 	cp	bs
 	jr	z,iedt40	;z - correct assumption
 	cp	del
@@ -7536,10 +7536,10 @@ iedt35:	ld	e,1		;assume	one backspace required
 
 iedt40:	xor	a		;test if already at beginning of buffer
 	or	d
-	jr	z,iedt05	;z - at	beginning so leave cursor as is
+	jr	z,iedt05	;z - at beginning so leave cursor as is
 iedt50:	call	bksp		;transmit bs - space - bs string
 	dec	d		;sub one from input buffer count
-	dec	hl		;rewind	buffer pointer on notch
+	dec	hl		;rewind buffer pointer on notch
 	ld	a,(hl)		;check for control characters
 	ld	(hl),0
 	cp	quote		;check for backspacing over a quote
@@ -7553,10 +7553,10 @@ iedt55:	cp	' '
 	call	c,bksp		;c - control char requires extra bs for caret
 iedt58:	dec	e		;dec backspace count
 	jr	nz,iedt50	;more backspacing
-	ld	a,(strngf)	;string	function flag on?
+	ld	a,(strngf)	;string function flag on?
 	and	a
-	jr	z,iedt05	;off - get next	input char
-	xor	a		;did we	backspace to start of buffer?
+	jr	z,iedt05	;off - get next input char
+	xor	a		;did we backspace to start of buffer?
 	or	d		;test via character count
 	jp	nz,iedt05	;not rewound all the way
 	ld	(inbfnc),a	;set a zero byte count so caller knows
@@ -7565,14 +7565,14 @@ iedt58:	dec	e		;dec backspace count
 iedt60:	ld	(hl),a		;store char in inbf
 	inc	hl		;bump inbf pointer
 	ld	(hl),0		;end of line
-	inc	d		;bump number of	chars in buffer
+	inc	d		;bump number of chars in buffer
 iedt70:	ld	a,d		;current size
-	sub	b		;versus	max size requested by caller
+	sub	b		;versus max size requested by caller
 	jp	c,iedt05	;more room in buffer
 iedt90:	ld	hl,inbfnc	;store number of characters received ala
 				;bdos function 10
 	ld	(hl),d
-	inc	hl		;point to first	char in	buffer
+	inc	hl		;point to first char in buffer
 	dec	d		;set m flag if length is zero
 	ret			;sayonara
 
@@ -7646,7 +7646,7 @@ printb:	ld	a,(hl)
 	jr	nz,printb
 	ret
 
-nrel:					;end of	relocatable code
+nrel:					;end of relocatable code
 	page
 
 zopnm:
@@ -7694,7 +7694,7 @@ zoprjt:
 
 zasmio:	defw	zasmbf
 
-zopjtl	equ	($-zoprjt)/2		;length	of operand jump	table
+zopjtl	equ	($-zoprjt)/2		;length of operand jump table
 
 jtcmd:
 	defw	ifcb			; i
@@ -7735,7 +7735,7 @@ cmd:
 ;;	defb	'#?>WKXQDLOSHFCB'
 	defb	'?>WKXQDLOSHFCB'
 	defb	'PVMYGREZJNUAI'
-ncmd	equ	$-cmd		;number	of commands
+ncmd	equ	$-cmd		;number of commands
 
 ;*****************************
 ;*	Message Strings      *
@@ -7835,21 +7835,21 @@ z803s:	defb	0cdh			; call **
 	defb	0dch,0d4h,0cch,0c4h	; call c,**  ; call nc,** ; call z,** ; call nz,**
 	defb	0ech,0e4h,0fch,0f4h	; call pe,** ; call po,** ; call m,** ; call p,**
 
-z803sl	equ	$-z803s			;number	of call	instructions
+z803sl	equ	$-z803s			;number of call instructions
 
 z803c:	defb	0c3h			; jp **
 	defb	0dah,0d2h,0cah,0c2h	; jp c,**  ; jp nc,** ; jp z,** ; jp nz,**
 	defb	0eah,0e2h,0fah,0f2h	; jp pe,** ; jp po,** ; jp m,** ; jp p,**
 
-z803l	equ	$-z803			;number	of 3 byte instructions
-z803cl	equ	$-z803s			;number	of 3 byte pc mod instructions
+z803l	equ	$-z803			;number of 3 byte instructions
+z803cl	equ	$-z803s			;number of 3 byte pc mod instructions
 
 z80ed:	defb	043h,04bh,053h		; ld (**),bc ; ld bc,(**) ; ld (**),de
 	defb	05bh,073h,07bh		; ld de,(**) ; ld (**),sp ; ld sp,(**)
 
 z80edl	equ	$-z80ed
 
-z80rl	equ	$-z80r			;number	relocatable z80	instructions
+z80rl	equ	$-z80r			;number relocatable z80 instructions
 
     if	Z180
 
@@ -8312,7 +8312,7 @@ zopnd1:
 	page
 ;***********************************************************************
 ;*
-;*			table of second	operands
+;*			table of second operands
 ;*
 ;***********************************************************************
 
@@ -8435,13 +8435,13 @@ zopcnm:
 
 	defb	'XOR BIT RES SET ' ; 40 41 42 43
 cnmorg	equ	($ - zopcnm) / 4
-	defb	'ORG '		   ; 44
+	defb	'ORG '             ; 44
 	defb	    'DEFBDEFWDDB ' ;    45 46 47
-	defb	'EQU '		   ; 48
+	defb	'EQU '             ; 48
     if	Z180
 	defb	    'IN0 OUT0TST ' ;    49 4a 4b
 	defb	'TSIOSLP MLT OTIM' ; 4c 4d 4e 4f
-	defb	'OTDMOIMRODMR'	   ; 50 51 52
+	defb	'OTDMOIMRODMR'     ; 50 51 52
     endif
 cnmcnt	equ	($ - zopcnm) / 4
 
@@ -8473,8 +8473,8 @@ regptr:
 
 siotbl:	defb	0f5h,0f7h
 
-symflg:	defb	0ffh		;symbol	table flag   00	- table	present
-				;		     ff	- no table
+symflg:	defb	0ffh		;symbol table flag   00 - table present
+				;		     ff - no table
 
 ;;; =============================================================================
 
@@ -8510,7 +8510,7 @@ loadn:	defw	00		;end of load address
 
 asmbpc:				;next pc location for assembly
 zasmpc:	defw	100h		;next pc location for disassemble
-				;default at load time: start of	tpa
+				;default at load time: start of tpa
 zasmfl:	defw	00		;first disassembled address on jdbg screen
 
 
@@ -8520,7 +8520,7 @@ rlbias:
 lines:
 exampt:
 endw:
-zasmnx:	defb	0		;address of next instruction to	disassemble
+zasmnx:	defb	0		;address of next instruction to disassemble
 oprx01:	defb	0
 bias:
 biaslo:
@@ -8533,22 +8533,22 @@ opnflg:	defb	0		;00 - operand 1   ff - operand 2   zasm
 				;and input character storage for interactive
 				;disassembly
 quoflg:	defb	0
-wflag:	defb	0ffh		;trace subroutine flag:	nz - trace subs
-				;			 z - no	trace
+wflag:	defb	0ffh		;trace subroutine flag: nz - trace subs
+				;			 z - no trace
 
 nstep:
 nstepl:	defb	0
 nsteph:	defb	0
 
-sbps:	defb	0		;number	of step	breakpoints
-bps:	defb	0		;number	of normal breakpoints
+sbps:	defb	0		;number of step breakpoints
+bps:	defb	0		;number of normal breakpoints
 
 zmflag:	defb	0
 zasmf:	defb	0
-execbf:				;execute buffer	for relocated code
+execbf:				;execute buffer for relocated code
 jlines:
 parenf:
-nument:	defb	0		;number	of digits entered
+nument:	defb	0		;number of digits entered
 delim:	defb	0		;argument delimiter character
 	defb	0
 base10:	defb	0
@@ -8662,27 +8662,27 @@ argbf:	defs	argbsz
 fcb	equ     argbf+argbsz-36 ;cp/m file control block
 fcbnam	equ	fcb+1		;start of file name in fcb
 fcbtyp	equ	fcbnam+8	;start of file type in fcb
-fcbext	equ	fcbtyp+3	;current extent	number
+fcbext	equ	fcbtyp+3	;current extent number
 nfcb	equ	$		;last byte of fcb plus one
 
 gpbsiz	equ	164		;size of general purpose buffer
 
 symbuf:
-objbuf:				;object	code buffer
+objbuf:				;object code buffer
 	rept	gpbsiz
 	defb	0
 	endm
 inbfsz	equ	gpbsiz/2
-inbfmx	equ	objbuf+4	;input buffer -	max byte count storage
-inbfnc	equ	inbfmx+1	;	      -	number chars read in
-inbf	equ	inbfnc+1	;	      -	starting address
-inbfl	equ	inbfsz-1	;	      -	last relative position
-ninbf	equ	inbf+inbfl	;	      -	address	of last	char
+inbfmx	equ	objbuf+4	;input buffer - max byte count storage
+inbfnc	equ	inbfmx+1	;	      - number chars read in
+inbf	equ	inbfnc+1	;	      - starting address
+inbfl	equ	inbfsz-1	;	      - last relative position
+ninbf	equ	inbf+inbfl	;	      - address of last char
 
 prsbfz	equ	gpbsiz/2
-prsbf	equ	inbf+inbfsz	;parse buffer -	starting address
-lprsbf	equ	prsbf+prsbfz-1	;	      -	last char of parse buf
-nprsbf	equ	lprsbf+1	;	      -	end address plus one
+prsbf	equ	inbf+inbfsz	;parse buffer - starting address
+lprsbf	equ	prsbf+prsbfz-1	;	      - last char of parse buf
+nprsbf	equ	lprsbf+1	;	      - end address plus one
 
 nzasm	equ	$		;end of disassembly buffer
 zasmbf	equ	nzasm-128	;start of disassembly buffer
