@@ -1,6 +1,8 @@
 	title	*   *** Z8E - Z80 Debug Monitor ***    *
 	subttl	(C) Copyright 1984, 1985   by Richard A. Surwilo  
-
+	.Z80			; Tell M80 to assemble Zilog mnemonics
+	.xall			; generate code.
+	.SFCOND
 ;------------------------------------------------------------------------------
 ;
 ;  Copyright (C) 1984, 1985   by Richard A. Surwilo.  All rights reserved. 
@@ -3722,12 +3724,15 @@ asm030:	ld	hl,00
 asm040:	ld	a,(delim)	;check delimiter
 	cp	','		;check for invalid terminator
 	jp	z,asm??o
-    if Z180
-	ld	c,83		;Number of HD64180 opcode names
-    else
-;	ld	c,73		;number	of Z80 opcodes in table as index
-	ld	c,74		;number	of Z80 opcodes in table as index
-    endif
+;; if Z180
+;; 	ld	c,83		;Number of HD64180 opcode names
+;; else
+;; 	ld	c,67		;number	of Z80 opcodes in table as index
+;; endif
+;;; Let assembler compute number of entries in table.  Do not need condition test above
+
+	ld	c,cnmcnt	;number	of opcodes in table as index
+	;; decrementing C by one lets us start at beginning of last entry
 asm050:	dec	c
 	jp	m,asm??o	;opcode	not found
 	ld	b,0
@@ -3860,7 +3865,10 @@ ibld55:	ld	(hl),a		;store object byte
 	call	nz,rslv		;more work to do
 	jp	nz,asm??v	;error - invalid operand size
 	ld	a,(ikey)
-	sub	67		;org directive?
+;;	sub     67              ;org directive?
+;;; Tisk! Don't hard code values when you should let assembler compute it for you
+;;; I updated the zopcnm table, so value is no longer 67.
+	sub	cnmorg		;'ORG '  directive offset
 	jr	nz,ibld60
 	ld	d,(hl)
 	dec	hl
@@ -6584,7 +6592,7 @@ aed30:	pop	bc		;Restore registers.
 ;*		  nz  -	neither	of the above
 ;*		  current instruction pointer bumped if	cb or ed instruction
 ;*
-;*	zhex:	  convert to byte in the accumulator to ascii with leading zero
+;*	zhex:	  convert the byte in the accumulator to ascii with leading zero
 ;*		  store	in buffer
 ;*		  d - reg destroyed
 ;*
@@ -7794,7 +7802,7 @@ zopcpt:
 	defb	002H,03FH,023H,005H	;AND	XOR	OR	CP
 
 	defb	030H,035H,02EH,033H	;RLC	RRC	RL	RR
-	defb	03BH,03CH,022H,03DH	;SLA	SRA	...	SRL
+	defb	03BH,03CH,022H,03DH	;SLA	SRA	SLL	SRL
 	defb	022H,040H,041H,042H	;...	BIT	RES	SET
 
 	defb	022H,022H,022H,012H	;...	...	...	HALT
@@ -8000,8 +8008,8 @@ zopcpt:
 	defb	014h,026h,039h,022h	;in	out	sbc	...
 	defb	022h,022h,002h,037h	;...	...	...	rrd
 	defb	014h,026h,001h,022h	;in	out	adc	...
-	defb	044h,045h,046h,032h	;defb*	defw*	ddb*	rld
-	defb	043h,047h,039h,01ch	;org*	equ*	sbc	ld	ed 70
+	defb	045h,046h,047h,032h	;defb*	defw*	ddb*	rld
+	defb	044h,048h,039h,01ch	;org*	equ*	sbc	ld	ed 70
 	defb	022h,022h,022h,022h	;...	...	...	...
 	defb	014h,026h,001h,01ch	;in	out	adc	ld
 	defb	022h,022h,022h,022h	;...	...	...	...	ed 7f
@@ -8014,7 +8022,7 @@ zopcpt:
 	defb	020h,009h,019h,025h	;ldir	cpir	inir	otir
 	defb	022h,022h,022h,022h	;...	...	...	...
 	defb	01eh,007h,017h,024h	;lddr	cpdr	indr	otdr
-	defb	022h,022h,022h,044h	;...	....	....	defb*
+	defb	022h,022h,022h,045h	;...	....	....	defb*
 
 
 	defb	02bh,029h,01ah,01ah	;ret	pop	jp	jp	c0 - c3
@@ -8022,25 +8030,25 @@ zopcpt:
 	defb	02bh,02bh,01ah,022h	;ret	ret	jp	...	c8 - cb
 	defb	003h,003h,001h,038h	;call	call	adc	rst	cc - cf
 	defb	02bh,029h,01ah,026h	;ret	pop	jp	out	d0 - d3
-	defb	003h,02ah,03eh,038h	;call	push	sub	rst	d4 - d7
+	defb	003h,02ah,03fh,038h	;call	push	sub	rst	d4 - d7
 	defb	02bh,011h,01ah,014h	;ret	exx	jp	in	d8 - db
 	defb	003h,022h,039h,038h	;call	...	sbc	rst	dc - df
 	defb	02bh,029h,01ah,010h	;ret	pop	jp	ex	e0 - e3
 	defb	003h,02ah,002h,038h	;call	push	and	rst	e4 - e7
 	defb	02bh,01ah,01ah,010h	;ret	jp	jp	ex	e8 - eb
-	defb	003h,022h,03fh,038h	;call	...	xor	rst	ec - ef
+	defb	003h,022h,040h,038h	;call	...	xor	rst	ec - ef
 	defb	02bh,029h,01ah,00dh	;ret	pop	jp	di	f0 - f3
 	defb	003h,02ah,023h,038h	;call	push	or	rst	f4 - f7
 	defb	02bh,01ch,01ah,00fh	;ret	ld	jp	ei	f8 - fb
 	defb	003h,022h,005h,038h	;call	...	cp	rst	fc - ff
 
-	defb	000h,001h,03eh,039h	;add	adc	sub	sbc
-	defb	002h,03fh,023h,005h	;and	xor	or	cp
+	defb	000h,001h,03fh,039h	;add	adc	sub	sbc
+	defb	002h,040h,023h,005h	;and	xor	or	cp
 
 
 	defb	030h,035h,02eh,033h	;rlc	rrc	rl	rr
-	defb	03bh,03ch,048h,03dh	;sla	sra	sll	srl
-	defb	022h,040h,041h,042h	;...	bit	res	set
+	defb	03bh,03dh,03ch,03eh	;sla	sra	sll	srl
+	defb	022h,041h,042h,043h	;...	bit	res	set
 
 
 	defb	022h,022h,022h,012h	;...	...	...	halt
@@ -8235,30 +8243,37 @@ zopnd2:
 ;***********************************************************************
 
 zopcnm:
-	defb	'ADD ADC AND CALL'
-	defb	'CCF CP  CPD CPDR'
-	defb	'CPI CPIRCPL DAA '
-	defb	'DEC DI  DJNZEI  '
-	defb	'EX  EXX HALTIM  '
-	defb	'IN  INC IND INDR'
-	defb	'INI INIRJP  JR  '
-	defb	'LD  LDD LDDRLDI '
-	defb	'LDIRNEG NOP OR  '
-	defb	'OTDROTIROUT OUTD'
-	defb	'OUTIPOP PUSHRET '
-	defb	'RETIRETNRL  RLA '
-	defb	'RLC RLCARLD RR  '
-	defb	'RRA RRC RRCARRD '
-	defb	'RST SBC SCF SLA '
-	defb	'SRA SRL SUB XOR '
-	defb	'BIT RES SET ORG '
-	defb	'DEFBDEFWDDB EQU '
-	defb	'SLL '
+	defb	'ADD ADC AND CALL' ; 00 01 02 03
+	defb	'CCF CP  CPD CPDR' ; 04 05 06 07
+	defb	'CPI CPIRCPL DAA ' ; 08 09 0a 0b
+	defb	'DEC DI  DJNZEI  ' ; 0c 0d 0e 0f
+
+	defb	'EX  EXX HALTIM  ' ; 10 11 12 13
+	defb	'IN  INC IND INDR' ; 14 15 16 17
+	defb	'INI INIRJP  JR  ' ; 18 19 1a 1b
+	defb	'LD  LDD LDDRLDI ' ; 1c 1d 1e 1f
+	
+	defb	'LDIRNEG NOP OR  ' ; 20 21 22 23
+	defb	'OTDROTIROUT OUTD' ; 24 25 26 27
+	defb	'OUTIPOP PUSHRET ' ; 28 29 2a 2b
+	defb	'RETIRETNRL  RLA ' ; 2c 2d 2e 2f
+	
+	defb	'RLC RLCARLD RR  ' ; 30 31 32 33
+	defb	'RRA RRC RRCARRD ' ; 34 35 36 37
+	defb	'RST SBC SCF SLA ' ; 38 39 3a 3b
+	defb	'SLL SRA SRL SUB ' ; 3c 3d 3e 3f  ; inserted SLL and renumbered zopcpt
+	
+	defb	'XOR BIT RES SET ' ; 40 41 42 43
+cnmorg	equ	($ - zopcnm) / 4
+	defb	'ORG '		   ; 44
+	defb	    'DEFBDEFWDDB ' ;    45 46 47
+	defb	'EQU '		   ; 48
     if	Z180
-	defb	'IN0 OUT0TST TSIO'
-	defb	'SLP MLT OTIMOTDM'
-	defb	'OIMRODMR'
+	defb	    'IN0 OUT0TST ' ;    49 4a 4b
+	defb	'TSIOSLP MLT OTIM' ; 4c 4d 4e 4f
+	defb	'OTDMOIMRODMR'	   ; 50 51 52
     endif
+cnmcnt	equ	($ - zopcnm) / 4
 
 op1000:
 	defb	 0fdh,0ddh,0edh,0cbh
