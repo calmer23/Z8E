@@ -27,11 +27,32 @@
 ;------------------------------------------------------------------------------
 ;
 ;                       Revision history
+;		================================
+;
+; 25 Mar 2025 clm v4.2clm43
+;			Fixed "zfnf:" error when unknown filename has bias 
+;			attached, we were not skipping past bias and were
+;			accidentally parsing ",bias" as next filename.
+;
+; 25 Mar 2025 clm v4.2clm40
+;			Rewrote "clmbin" code to be similar to existing code and
+;			saved 45 bytes.  Looks cleaner now.
+;			Cleaned up coding styles and other spelling errors I
+;			missed on previous modifications.
+;
 ; 21 Mar 2025 clm v4.2clm33
 ;			Modified code for "K" (kdmp) to allow actually dumping
 ;			a maximum of 256 bytes (if your screen size allows it).
 ;			And all the other places that reference "wnwsiz".
 ;			Byte counts are now BASE ZERO (count starting at zero).
+;			The count is only 1 byte (8 bits) and previously went
+;			from 1..255, which is one shy of 256.  0 meant no dump.
+;			So rather than use a whole word for the count, and
+;			adjust the code to use 16-bit addition, I just changed
+;			the count to go from zero to 255, a total of 256 bytes.
+;			I still used a second byte for flag to dump or not,
+;			but that byte was already at "wnwsiz" (DEFW instead
+;			of DEFB).
 ;
 ; 21 Jul 2024 clm v4.2clm2
 ;			Added display of registers as bits when "K" active.
@@ -406,7 +427,7 @@ quote	equ	27h		;	quote (actually, an apostrophe)
 tilde	equ	7Eh		;	tilde
 del	equ	7Fh		;	del
 
-bdos	equ	5
+BDOS	equ	5
 fcb5c	equ	005Ch		;CP/M default FCB
 
 nop	equ	000		;Z80 instructions
@@ -492,7 +513,7 @@ mbannr:		;Move XTERM terminal window near to upper left corner of screen
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm33 - 21_Mar_2025'
+	defb	' v4.2.clm40 - 25_Mar_2025'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -523,12 +544,12 @@ nint:
 	;If CP/M+ then get height from SCB
     if CPM3
 	ld	c,cpmVer
-	call	bdos
+	call	BDOS
 	cp	30h		;Skip if not 3.x (What about MP/M?)
 	jr	c,setHeight
 	ld	de,scbpb	;Address of SCB parameter block
 	ld	c,getSCB
-	call	bdos		;Height comes back in A and L
+	call	BDOS		;Height comes back in A and L
 	or	a
 	jr	z,setHeight	;in case height is not set in SCB
 	inc	a		;Adjust for zero origin count
@@ -607,8 +628,8 @@ nint00:	ld	(maxlin),a
 ; (Last statement no longer true - see patch 3.3.1)
 
 	ld	de,0080h
-	ld	c,26
-	call	bdos
+	ld	c,26		;Set DMA Address
+	call	BDOS
 
 	ld	a,jp		;Initialize where L80 fears to tread
 
@@ -814,7 +835,7 @@ nint95:	inc	hl
 ;*	ZSYM:	Symbol table build from .SYM and .PRN files
 ;*
 ;*	LFCB called to parse the input buffer (inbf) in low memory.
-;*	INBF contains the command line tail which bdos passed to us at
+;*	INBF contains the command line tail which BDOS passed to us at
 ;*	0080h and which we have since moved to inbf (so that prsr thinks
 ;*	it's just keyboard input).
 ;*
@@ -866,7 +887,7 @@ zsym:	call	lfcb		;Initialize fcb
 	ld	e,a
 	ld	d,0FFh		;Lower end of TPA by amount equal to
 				; the value of maxlen negated to insert
-				; jump to bdos
+				; jump to BDOS
 	add	hl,de
 	ld	a,(case)	;Check case of symbol table
 	and	a
@@ -1341,8 +1362,8 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	ld	h,a
 	ld	(mhex+2),hl
 	ld	de,msym..	;display number of symbols loaded message
-	ld	c,9
-	call	bdos
+	ld	c,9		;print string
+	call	BDOS
 	ld	de,mhex		;now look thru ascii number of symbols to
 				;strip leading zeros
 	ld	b,3
@@ -1352,8 +1373,8 @@ zsym10:	ld	(bias),hl	;Bias to add to each symbol address
 	inc	de
 	djnz	.eof10		;if first three chars zero - fall thru and
 				;print the fourth regardless
-.eof20: ld	c,9
-	call	bdos		;print the number as string ending with $
+.eof20: ld	c,9		;print string
+	call	BDOS		;print the number as string ending with $
 	call	crlf
 	ld	hl,(tsym)	;now add in bcd total for this file to bcd
 				;total for all files
@@ -1393,14 +1414,14 @@ load:	ld	hl,(ntpa)	;current end of memory
 	ld	e,a		;de - length of a symbol table block
 	inc	e
 	sbc	hl,de		;compensate for pre-increment of pointer
-load00:	ld	de,(0006)	;de - real entry point to bdos
+load00:	ld	de,(0006)	;de - real entry point to BDOS
 	ld	(0006),hl	;point to our origin in high memory
-	ld	(hl),jp		;init jump to bdos at start of z8e
+	ld	(hl),jp		;init jump to BDOS at start of z8e
 	inc	hl
 	ld	(hl),e
 	inc	hl
 	ld	(hl),d
-	ld	e,00		;de - old start of bdos address in also our
+	ld	e,00		;de - old start of BDOS address in also our
 				;ending address
 	ld	hl,(z8eb)	;load out starting address in high memory
 	ld	bc,z8e-z8eorg	;fetch the number of bytes between z8e's base
@@ -1409,7 +1430,7 @@ load00:	ld	de,(0006)	;de - real entry point to bdos
 	add	hl,bc
 	ld	b,h
 	ld	c,l		;BC - relocated z8e address
-	ex	de,hl		;DE - entry point z8e HL - old start of bdos
+	ex	de,hl		;DE - entry point z8e HL - old start of BDOS
 	dec	hl		;HL - last byte in our memory
 
 	; Adjust the execution environment so that it is possible to exit to
@@ -1424,7 +1445,7 @@ load00:	ld	de,(0006)	;de - real entry point to bdos
 	inc	hl
 	inc	hl		;hl - points to "LD SP,0000" instruction at the
 				;start of the command processor. replace 0000
-				;with the address bdos-1
+				;with the address BDOS-1
 	ld	(hl),e		;set real stack address
 	inc	hl
 	ld	(hl),d
@@ -1444,9 +1465,9 @@ load00:	ld	de,(0006)	;de - real entry point to bdos
 	call	ttyo
 	call	space
 	call	space
-	ld	hl,(0006)		;this points to the new jump to bdos
+	ld	hl,(0006)	;this points to the new jump to BDOS
 	inc	hl
-	ld	e,(hl)		;de - old start of bdos address
+	ld	e,(hl)		;de - old start of BDOS address
 	inc	hl
 	ld	d,(hl)
 	ex	de,hl
@@ -1458,7 +1479,7 @@ load00:	ld	de,(0006)	;de - real entry point to bdos
 	jr	nz,load40	;nz - no table
 	ld	de,msymld	;display start address of symbol table message
 	call	print
-	ld	hl,(0006)		;vector to bdos is start of symbol table
+	ld	hl,(0006)	;vector to BDOS is start of symbol table
 	call	outadr
 	ld	a,'-'
 	call	ttyo
@@ -1478,8 +1499,8 @@ load00:	ld	de,(0006)	;de - real entry point to bdos
 	ld	h,a
 	ld	(mhex+2),hl	;save in string
 	ld	de,tsym..	;total symbols message
-	ld	c,9
-	call	bdos
+	ld	c,9		;print string
+	call	BDOS
 	ld	de,mhex		;address of ascii digits
 	ld	b,3		;check for leading zeros
 load20:	ld	a,(de)
@@ -1488,8 +1509,8 @@ load20:	ld	a,(de)
 	inc	de
 	djnz	load20		;check first three digits then fall thru and
 				;print fourth regardless
-load30:	ld	c,9
-	call	bdos
+load30:	ld	c,9		;print string
+	call	BDOS
 
 load40:	ld	hl,(06)
 	dec	hl		;hl - address of new TPA
@@ -1555,7 +1576,7 @@ read:	push	bc
 	push	de
 	ld	de,fcb
 	ld	c,20		;sequential file read
-	call	bdos
+	call	BDOS
 	and	a		;test for error
 	ld	hl,iobuf	;assume ok - init i/o buffer address
 	pop	de
@@ -1698,6 +1719,13 @@ zstx:	ld	a,(prsbf)
 
 zfnf:	ld	de,mfilnf	;display file not found
 	call	print
+;;++++++++++++++++++++++++++++++ 25 Mar 2025 clm v4.2clm41
+	ld	a,(delim)	;+ check if this filename has bias attached
+	cp	','		;+
+	jp	nz,.eof50	;+ nope
+	call	prsr		;+ yup, so skip to avoid parsing as next filename
+	ld	(delim),a	;+
+;;++++++++++++++++++++++++++++++ 25 Mar 2025 clm v4.2clm41
 	jp	.eof50
 
 
@@ -1853,7 +1881,7 @@ z8e:	and	a		;Any do-nothing instruction with the sign
 
 	defb	31h		;LD SP,nnnn - Load monitor stack pointer
 z8esp:	defw	8000h		;Actual address filled in by nint at load
-				;time when we figure out where bdos is
+				;time when we figure out where BDOS is
 
 z8ecmd:	ld	hl,z8e
 	push	hl
@@ -2163,7 +2191,7 @@ term10:	cp	'A'		; Does user want to use auxiliary terminal?
 ;*	of the code.  The user enters the starting address to animate
 ;*	optionally preceded by a subroutine qualifier.  The subroutine
 ;*	qualifier may be either a "*" which instructs Z8E not to trace
-;*	any subroutines which are located below 0100h (ie. bdos calls),
+;*	any subroutines which are located below 0100h (ie. BDOS calls),
 ;*	or it may be a "/" which means no tracing of any subroutines.
 ;*	Jdbg will also paint the original screen with the register
 ;*	contents as well as the memory window.  The contents of the
@@ -2227,10 +2255,10 @@ jdbg2a:				;+
 	ld	(hl),0FFh	;conditionally assume trace all
 	sub	'/'		;slash means don't trace any
 	jr	z,jdbg03	;
-	add	a,'/'-'*'	;check for star - no trace of bdos subs
+	add	a,'/'-'*'	;check for star - no trace of BDOS subs
 	jr	nz,jdbg05
 	inc	a		;set flag one to indicate no trace of subs
-				;at address < 0100h (bdos calls)
+				;at address < 0100h (BDOS calls)
 jdbg03:	ld	(hl),a		;set wflag
 	xor	a		;if slash or space replace with null in inbf
 				;so parser will ignore
@@ -2259,26 +2287,28 @@ jdbg10:	ld	(timer),a
 	ld	a,(wnwsiz+1)
 	and	a		;test if window being displayed
 	jr	z,jdbg28	;nope
+
 	ld	de,window	;save user specified memory block til next bp
 	ld	hl,(wnwtab)	;start of memory window address
 	ld	b,0
-	ld	c,10		;	ld	c,3
+	ld	c,11		;row to start displaying kdmp bytes
+
 jdbg20: ld	a,(fwndow)	;position cursor starting at column
-	sub	6
+	sub	6		;move left for display of dump address
 	call	curs
 	call	outadr		;display address of memory window
+
 jdbg25:	ld	a,(fwndow)
 	call	curs		;column position on screen of memory window
 				;is (rel pos * 3) + (fwndow)
 	ld	a,(hl)		;display this byte
-
 	ld	(de),a		;save this byte in window between bps
 	call	outhex
 
 ;;; need to test A against B using BASE ZERO values (do not increment B yet)
 ;;; a value of zero (0) is equal to a count of one (1).
 ;;;		inc	b	;move and display user specified number
-;;;				;of bytes (wnwsiz).  Move down 4 lines.
+;;;				;of bytes (wnwsiz).  Moved down 4 lines.
 	ld	a,(wnwsiz)
 	sub	b
 	jr	z,jdbg28
@@ -2512,13 +2542,13 @@ rgdisp:	call	home		;home cursor
 
 
 ;;; display BINARY value of some registers when in full screen 'J' command
-;;; quick-and-dirty code to see if it works OK.  I'll optimize code later.
 
 clmbin:	ld	bc,0000
+	ld	d,b		;zero out upper byte of 'DE'
 
 clmb00:
 	push	bc
-	ld	a,4		;VBT (Binary regs, TOP row)
+	ld	a,3		;VBT (Binary regs, TOP row)
 	add	a,c		;add row offset
 	ld	b,a		;actual row for this register display
 	ld	c,62		;VBS (Binary regs, STARTING column)
@@ -2533,9 +2563,9 @@ clmb00:
 	ret
 
 clmb05:
-	ld	d,b		;zero out upper byte of 'DE'
 	ld	hl,zopnm+2	;begin at 'A '
 	add	hl,bc		;offset to this register
+	add	hl,bc		;each name is two bytes, so double the offset
 	ld	a,(hl)		;output 'x: ' for each register
 	call	ttyo
 	ld	a,':'
@@ -2561,104 +2591,31 @@ clmblp:	rlca		; Shift high bit of A into carry bit
 
 	ret		; B is back to zero, nice!
 
-;; clmbin:	push	af		; what the heck, save them all
-;; 	push	hl
-;; 	push	de
-;; 	push	bc
-;; 	push	ix
-;; 	push	iy
-;; 	ld	b,0
-;; 	ld	c,b
-;; 	ld	ix,zopnm+2
-;; 	ld	iy,clmbr
-;; 	ld	a,'3'-1		; esc [0x;63H    row 3
-;; 	ld	(iy),a		; reset row address to beginning
-;; clmbnx:
-;; 	inc	(iy)		; advance row number
-;;
-;; 	ld	a,(ix)
-;; 	inc	ix
-;; 	inc	ix
-;; 	ld	(clmbn),a	; insert register name
-;;
-;; 	ld	hl,clmbd
-;; 	add	hl,bc
-;; 	ld	a,(hl)		; offset from afreg to register value
-;;
-;; 	ld	hl,afreg
-;; 	add	a,l
-;; 	ld	l,a
-;; 	jr	nc,clmbnc
-;; 	inc	h		; add in the carry from L to H
-;; clmbnc:
-;; 	ld	a,(hl)		; register value to convert
-;;
-;; 	ld	hl,clmba	; stuff ones and zeroes here
-;; 	push	bc		; Preserve BC on stack
-;; 	ld	b,8		; Loop for all 8 bits
-;; clmblp:
-;; 	rlca		; Shift high bit of A into carry bit
-;; 	ld	c,a	; Preserve A in C
-;; 	ld	a,'0'	; "ld" opcodes do not change carry flag
-;; 	adc	a,0	; if no carry, then A = '0'.  If carry, then A = '1'
-;; 	ld	(hl),a	; store in buffer(hl) ('0' or '1')
-;; 	inc	hl
-;; 	ld	a,c	; Restore A
-;; 	djnz	clmblp	; Continue looping until B = 0
-;;
-;; 	ld	de,clmbh
-;; 	call	print
-;; 	pop	bc		; Restore BC
-;; 	inc	c		; next register
-;; 	ld	a,clmbc
-;; 	sub	c
-;; 	jr	nz,clmbnx	; more to do
-;;
-;; 	pop	iy
-;; 	pop	ix
-;; 	pop	bc
-;; 	pop	de
-;; 	pop	hl
-;; 	pop	af
-;; 	ret
-
+;;; cursor positioning while displaying memory dump.
+;;; row value computed based on number of bytes displayed per line
+;;; and added to initial base row.
 
 curs:	push	bc		;This routine has been simplified and shortened
 	push	de		;by 19 bytes because it is no longer used for
 	push	hl		;register display positioning.  jrs 20/4/87
 	ld	d,a
 	ld	e,c		;save base row address
-;;			cp	3		;test if reg or memory window (3 is reg)
-;;			ld	a,7
-;;			jr	z,curs00	;z - regs are eight per line (first line)
-
 	ld	a,(nlmask)
-curs00:	and	b		;item number mod lnmask is the relative pos of
+	and	b		;item number mod lnmask is the relative pos of
 	ld	c,a		;reg contents or memory data byte
 	add	a,a
 	add	a,c
 	ld	c,a		;c - rel pos times three
-;;			ld	a,d		;if base column address is < 50 then this is
-;;						;reg display
-;;			sub	3
-;;			ld	h,a
-;;			ld	a,c
-;;			jr	nz,curs20	;nz - not reg display - must be memory
-;;			add	a,a		;so multiply times three again
-;;			add	a,c		;times 9 in all for register display
-curs20:	add	a,d		;add in base
+	add	a,d		;add in base
 	ld	c,a		;c - absolute col number
-;;			xor	a		;test if this is reg or memory window display
-;;			or	h
-;;			jr	z,curs30	;z - this is register display
 	ld	a,(fwndow)
 	cp	68		;14-char symbols in effect?
-	jp	z,curs40
-curs30:	srl	b
-curs40:	ld	a,0FCh
+	jr	z,curs40	;   4 bytes per line
+	srl	b		;divide item count by 2 if 6-char symbols: 8 bytes/line
+curs40:	ld	a,11111100b	;0FCh, mask off the lowest two bits (mod 4)
 	and	b		;now compute row number
 	rrca
-	rrca
+	rrca		  	;divide by 4 and add to initial starting value
 	add	a,e		;base row address
 	ld	b,a		;b - absolute row number
 	call	xycp		;convert row and column to xy cursor address
@@ -2684,12 +2641,12 @@ clok10:	dec	de
 clmspin:		;spin some characters in upper-right when 'J' runs
 	ld	de,(clmsp)
 	ld	a,(de)
+	or	a
+	jr	z,clmsp6	;at end of bytes, refresh clmsp address
 	ld	(clmsb),a
 	inc	de
-	ld	a,e
-	and	07h
-	jr	nz,clmsp7
-	ld	de,clmsc
+	jr	clmsp7
+clmsp6:	ld	de,clmsc
 clmsp7:	ld	(clmsp),de
 	ld	de,clmss
 	jp	print
@@ -2853,7 +2810,7 @@ usym10:	ld	a,(maxlen)
 	and	a
 	jr	z,usym10
 	dec	a		;neg means this is jp opcode (0C3h) of jump to
-				;bdos
+				;BDOS
 	jp	p,usym20
 	call	pcrlf		;hit end of table - put crlf in buffer
 	ld	a,eof
@@ -5141,9 +5098,9 @@ cuser:	call	iedtbc
 	sub	6		; else convert to decimal
 	cp	10h		; see if still too big
 	jp	nc,e???
-cusok:	ld	c,32
+cusok:	ld	c,32		; Get/Set User Code
 	ld	e,a
-	jp	bdos		; change user
+	jp	BDOS		; change user
 
 
 ;*******************************************************************
@@ -5352,10 +5309,10 @@ lbin:
 lbin00:	push	hl
 	ex	de,hl
 	ld	c,26		;Set CP/M DMA address
-	call	bdos
+	call	BDOS
 	ld	de,fcb
 	ld	c,20		;CP/M sequential file read
-	call	bdos
+	call	BDOS
 	pop	de		;Recover DMA address
 	ld	hl,0080h
 	add	hl,de		;Compute next DMA address
@@ -5429,7 +5386,7 @@ lbin40:	call	nz,ttyo		;Print tens digit
 z8ej:				;+
 	ld	c,26		;+ "Set DMA" function
 	ld	de,0080h	;+ Restore default DMA for user program
-	call	bdos		;+
+	call	BDOS		;+
 	jp	z8e		;Next command
 
 
@@ -5520,16 +5477,16 @@ lopn:
 ;;	jr	z,lopn00	;z - default means no selection required
 ;;	dec	a		;select drive
 ;;	ld	e,a
-;;	ld	c,14
-;;	call	bdos
+;;	ld	c,14		;Select Disk
+;;	call	BDOS
 lopn00:	ld	de,fcb
 	ld	b,nfcb-fcbext
 	ld	hl,fcbext	;clear remainder of fcb
 lopn10:	ld	(hl),00
 	inc	hl
 	djnz	lopn10
-	ld	c,15
-	call	bdos		;tell bdos to open file
+	ld	c,15		;Open File
+	call	BDOS		;tell BDOS to open file
 	inc	a		;test open return code
 	ret			;nz - open ok
 
@@ -6401,9 +6358,9 @@ opn095:	ld	a,(dwrite)	;writing to disk?
 	ld	de,zasmbf
 	call	write
 
-closef:	ld	de,fcb		;close file
-	ld	c,16
-	jp	bdos
+closef:	ld	de,fcb
+	ld	c,16		;Close File
+	jp	BDOS
 
 
 write:	push	bc
@@ -6421,18 +6378,18 @@ wrt10:	pop	hl
 	ret
 
 
-bwrite:	push	bc		;bdos write routine
+bwrite:	push	bc		;BDOS write routine
 	push	de
 	push	hl
 	ld	c,26		;set dma address
-	call	bdos
+	call	BDOS
 	ld	de,fcb
 	ld	c,21
-	call	bdos		;write buffer
+	call	BDOS		;write buffer
 				;+ eg 3.3.7b
 	ld	c,26		;+ "Set DMA" function
 	ld	de,80h		;+ Restore default DMA for user program
-	call	bdos		;+
+	call	BDOS		;+
 	pop	hl
 	pop	de
 	pop	bc
@@ -6444,11 +6401,11 @@ bldf:	call	lfcb		;initialize fcb
 	call	lopn
 	jr	z,bldf00	;no file - create one
 	ld	de,fcb
-	ld	c,19		;file exists - delete it
-	call	bdos
+	ld	c,19		;Delete File
+	call	BDOS		;file exists - delete it
 bldf00:	ld	de,fcb		;create new file
-	ld	c,22
-	call	bdos		;if no file create one
+	ld	c,22		;Make/Create File
+	call	BDOS		;if no file create one
 	xor	a
 	ret
 
@@ -7523,9 +7480,9 @@ byte30:	call	e???
 	page
 ;******************************************************************************
 ;*
-;*	bdos function 10 replacement to make ROMming this program easier since
-;*	only two console i/o routines (ttyi and ttyo) are required. this
-;*	routine supports backspace, line delete, and tab expansion.
+;*	BDOS function 10 (Read Console String) replacement to make ROMming this
+;*	program easier since only two console i/o routines (ttyi and ttyo) are
+;*	required. This routine supports backspace, line delete, and tab expansion.
 ;*
 ;*	all input stored in input buffer inbf.
 ;*
@@ -7655,7 +7612,7 @@ iedt70:	ld	a,d		;current size
 	sub	b		;versus max size requested by caller
 	jp	c,iedt05	;more room in buffer
 iedt90:	ld	hl,inbfnc	;store number of characters received ala
-				;bdos function 10
+				;BDOS function 10
 	ld	(hl),d
 	inc	hl		;point to first char in buffer
 	dec	d		;set m flag if length is zero
@@ -8543,12 +8500,11 @@ symflg:	defb	0FFh		;symbol table flag   00h - table present
 ;;; ===========================================================================
 
 clmsp:	defw	clmsc
-	org	($ + 15) AND 0FFF0h
-clmsc:	defb	'|\-/+\-/'
+	;; 	org	($ + 15) AND 0FFF0h
+clmsc:	defb	'|\-/+\-/', 00h
+clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
+clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
 
-;; clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-;; clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
-;;
 ;; 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
 ;; clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
 ;; clmbr:	defb	'3'-1		; rows [1]03-09  (-1 because code adds 1 before use)
