@@ -3,7 +3,6 @@
 	.Z80			; Tell M80 to assemble Zilog mnemonics
 	.xall			; generate code.
 	.SFCOND			; suppress listings of false conditionals
-;;;	Time-stamp: "2024-07-22 16:48:35 clmercer"
 
 ;;; if you are not using M80, you should delete the dot (.) lines above.
 ;------------------------------------------------------------------------------
@@ -68,7 +67,7 @@
 ;			in source.
 ;			Added ANSI terminal escape sequences to position and
 ;			resize terminal emulator window to upper left area
-;			of screen at 90 rows, 90 columns (Mac Terminal v2.9.5).
+;			of screen at 77 rows, 90 columns (Mac Terminal v2.9.5).
 ;
 ; 18 Feb 18 hp  v4.2	Fixed the "Symbol Table Not Found" error that happened
 ;			when loading a .SYM symbol file that ended exactly at
@@ -324,7 +323,7 @@ SLR	equ	false		;SLR's lightning-fast Z80ASM assembler
 ; them.
 ;---------------------------------------------------------------------------
 
-    if	zasmb
+    if	ZASMB
 include: macro	#file
 *include #file
 	mend
@@ -358,14 +357,14 @@ page:	macro			;Equivalence M80's "page" and ZASMB's "form"
 ; Where this macro is used in the code, the label also appears as a comment.
 ; That is just to make life easier when editing and has no semantic value.
 
-    if	zasmb
+    if	ZASMB
 export:	macro	#label
 	entry	#label
 #label:
 	mend
     endif
 
-    if	m80 or slr
+    if	M80 or SLR
 export	macro	label
 label::
 	endm
@@ -408,7 +407,7 @@ hazeltine equ	false
 	.xall			; generate code.
 	.Z80			; Tell M80 to assemble Zilog mnemonics
     endif
-    if	zasmb
+    if	ZASMB
 	list	gen
     endif
 
@@ -475,7 +474,7 @@ getSCB	equ	49
 	aseg
       endif
 
-      if	zasmb
+      if	ZASMB
 	abs
       endif
 
@@ -485,7 +484,7 @@ getSCB	equ	49
 
 	export	height
 ;height:
-	defb	90		;Default (patchable) Screen height (in lines).
+	defb	77		;Default (patchable) Screen height (in lines).
 				;(Don't bother patching if running CP/M Plus
 				; because Z8E will get the screen height from
 				; the SCB.)
@@ -502,7 +501,7 @@ getSCB	equ	49
 
 mbannr:		;Move XTERM terminal window near to upper left corner of screen
 ;;;	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
-	defb	esc,'[8;090;090t'  ;ROW;COL; window size to 90 rows by 90 cols
+	defb	esc,'[8;077;090t'  ;ROW;COL; window size to 90 rows by 90 cols
 	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1Fh	;Set window TITLE
@@ -1851,7 +1850,7 @@ znmbuf:
 ;init:		; since we no longer patch code, we don't call 'init' either
 ;;	ret
 ;;		defs	255	; Patch space for extra initialization code.
-				; (Not needed!)
+;;				; (Not needed!)
 	page
 ;******************************************************************************
 ;*
@@ -6990,12 +6989,12 @@ defcode	defl	true		; Load code here
 defdata	defl	false		; Do not load data yet
 terminal defl	console		; Load console routines
 	include	TERMINAL.INC	;	Must be UPPER CASE for M80
-	if	m80		; error here???
+	if	M80		; error here???
 	conincl
 	endif
 terminal defl	auxiliary	; Load auxiliary routines
 	include TERMINAL.INC	;	Must be UPPER CASE for M80
-	if	m80 and auxterm ne none
+	if	M80 and auxterm ne none
 	auxincl
 	endif
 ; Logical routines ...
@@ -8624,12 +8623,12 @@ defdata	defl	true		; Load data here
 defcode	defl	false		; Inhibit code
 terminal defl	console		; Load console data
 	include	TERMINAL.INC	;	Must be UPPER CASE for M80
-	if	m80		; or error here?
+	if	M80		; or error here?
 	conincl
 	endif
 terminal defl	auxiliary	; Load auxiliary data
 	include TERMINAL.INC	;	Must be UPPER CASE for M80
-	if	m80 and auxterm ne none
+	if	M80 and auxterm ne none
 	auxincl
 	endif
 
