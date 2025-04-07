@@ -2514,66 +2514,113 @@ rgdisp:	call	home		;home cursor
 ;;; display BINARY value of some registers when in full screen 'J' command
 ;;; quick-and-dirty code to see if it works OK.  I'll optimize code later.
 
-clmbin:	push	af		; what the heck, save them all
-	push	hl
-	push	de
+clmbin:	ld	bc,0000
+
+clmb00:
 	push	bc
-	push	ix
-	push	iy
-	ld	b,0
-	ld	c,b
-	ld	ix,zopnm+2
-	ld	iy,clmbr
-	ld	a,'3'-1		; esc [0x;63H    row 3
-	ld	(iy),a		; reset row address to beginning
-clmbnx:
-	inc	(iy)		; advance row number
+	ld	a,4		;VBT (Binary regs, TOP row)
+	add	a,c		;add row offset
+	ld	b,a		;actual row for this register display
+	ld	c,62		;VBS (Binary regs, STARTING column)
+	call	xycp		;move to row and column
+	pop	bc
 
-	ld	a,(ix)
-	inc	ix
-	inc	ix
-	ld	(clmbn),a	; insert register name
+	call	clmb05
+	inc	c		;counter 0..6 (A,H,L,D,E,B,C)
+	ld	a,clmbc		;number of registers to display
+	cp	c
+	jr	nz,clmb00
+	ret
 
-	ld	hl,clmbd
+clmb05:
+	ld	d,b		;zero out upper byte of 'DE'
+	ld	hl,zopnm+2	;begin at 'A '
+	add	hl,bc		;offset to this register
+	ld	a,(hl)		;output 'x: ' for each register
+	call	ttyo
+	ld	a,':'
+	call	ttyo
+	ld	a,' '
+	call	ttyo
+
+	ld	hl,clmbd	;offsets into register contents array
 	add	hl,bc
-	ld	a,(hl)		; offset from afreg to register value
+	ld	e,(hl)		;this register's offset to value
+	ld	hl,regcon
+	add	hl,de
+	ld	a,(hl)		;finally, the register's contents
+	ld	b,8		;do all eight bits
 
-	ld	hl,afreg
-	add	a,l
-	ld	l,a
-	jr	nc,clmbnc
-	inc	h		; add in the carry from L to H
-clmbnc:
-	ld	a,(hl)		; register value to convert
-
-	ld	hl,clmba	; stuff ones and zeroes here
-	push	bc		; Preserve BC on stack
-	ld	b,8		; Loop for all 8 bits
-clmblp:
-	rlca		; Shift high bit of A into carry bit
-	ld	c,a	; Preserve A in C
+clmblp:	rlca		; Shift high bit of A into carry bit
+	ld	e,a	; Preserve A in E
 	ld	a,'0'	; "ld" opcodes do not change carry flag
 	adc	a,0	; if no carry, then A = '0'.  If carry, then A = '1'
-	ld	(hl),a	; store in buffer(hl) ('0' or '1')
-	inc	hl
-	ld	a,c	; Restore A
+	call	ttyo
+	ld	a,e	; Restore A
 	djnz	clmblp	; Continue looping until B = 0
 
-	ld	de,clmbh
-	call	print
-	pop	bc		; Restore BC
-	inc	c		; next register
-	ld	a,clmbc
-	sub	c
-	jr	nz,clmbnx	; more to do
+	ret		; B is back to zero, nice!
 
-	pop	iy
-	pop	ix
-	pop	bc
-	pop	de
-	pop	hl
-	pop	af
-	ret
+;; clmbin:	push	af		; what the heck, save them all
+;; 	push	hl
+;; 	push	de
+;; 	push	bc
+;; 	push	ix
+;; 	push	iy
+;; 	ld	b,0
+;; 	ld	c,b
+;; 	ld	ix,zopnm+2
+;; 	ld	iy,clmbr
+;; 	ld	a,'3'-1		; esc [0x;63H    row 3
+;; 	ld	(iy),a		; reset row address to beginning
+;; clmbnx:
+;; 	inc	(iy)		; advance row number
+;;
+;; 	ld	a,(ix)
+;; 	inc	ix
+;; 	inc	ix
+;; 	ld	(clmbn),a	; insert register name
+;;
+;; 	ld	hl,clmbd
+;; 	add	hl,bc
+;; 	ld	a,(hl)		; offset from afreg to register value
+;;
+;; 	ld	hl,afreg
+;; 	add	a,l
+;; 	ld	l,a
+;; 	jr	nc,clmbnc
+;; 	inc	h		; add in the carry from L to H
+;; clmbnc:
+;; 	ld	a,(hl)		; register value to convert
+;;
+;; 	ld	hl,clmba	; stuff ones and zeroes here
+;; 	push	bc		; Preserve BC on stack
+;; 	ld	b,8		; Loop for all 8 bits
+;; clmblp:
+;; 	rlca		; Shift high bit of A into carry bit
+;; 	ld	c,a	; Preserve A in C
+;; 	ld	a,'0'	; "ld" opcodes do not change carry flag
+;; 	adc	a,0	; if no carry, then A = '0'.  If carry, then A = '1'
+;; 	ld	(hl),a	; store in buffer(hl) ('0' or '1')
+;; 	inc	hl
+;; 	ld	a,c	; Restore A
+;; 	djnz	clmblp	; Continue looping until B = 0
+;;
+;; 	ld	de,clmbh
+;; 	call	print
+;; 	pop	bc		; Restore BC
+;; 	inc	c		; next register
+;; 	ld	a,clmbc
+;; 	sub	c
+;; 	jr	nz,clmbnx	; more to do
+;;
+;; 	pop	iy
+;; 	pop	ix
+;; 	pop	bc
+;; 	pop	de
+;; 	pop	hl
+;; 	pop	af
+;; 	ret
 
 
 curs:	push	bc		;This routine has been simplified and shortened
@@ -5709,9 +5756,9 @@ xreg00:	call	xreg05		;display reg name and contents
 	cp	8
 	call	z,crlf
 	ld	a,c
-	cp	0Ch
+	cp	12		;have we processed all registers?
 	ld	b,0
-	jr	nz,xreg00
+	jr	nz,xreg00	;nope, go back for more
 	ld	a,(lcmd)
 	cp	'J'		;animated command in effect?
 	ret	z		;z - no disassembly required
@@ -5742,7 +5789,7 @@ xreg10:	call	ttyo		;display second character
 	xor	a
 	or	b		;now test sign
 	jp	p,xreg20	;sign not set - not prime reg
-	ld	a,27h		;display quote
+	ld	a,27h		;display apostrophe (single quote)
 	call	ttyo
 xreg20:	ld	a,':'
 	call	ttyo
@@ -8499,17 +8546,17 @@ clmsp:	defw	clmsc
 	org	($ + 15) AND 0FFF0h
 clmsc:	defb	'|\-/+\-/'
 
-clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
+;; clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
+;; clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
+;;
+;; 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
+;; clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
+;; clmbr:	defb	'3'-1		; rows [1]03-09  (-1 because code adds 1 before use)
+;; 	defb	';63H'		; column [1]63
+;; clmbn:	defb	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
+;; clmba:	defb	'76543210',00h	; ASCII bits and terminator
 
-	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
-clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
-clmbr:	defb	'3'-1		; rows [1]03-09  (-1 because code adds 1 before use)
-	defb	';63H'		; column [1]63
-clmbn:	defb	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
-clmba:	defb	'76543210',00h	; ASCII bits and terminator
-
-clmbd:	defb	afreg-afreg+1
+clmbd:	defb	afreg-afreg+1	;displacements to register values for binary display
 	defb	hlreg-afreg+1, hlreg-afreg+0
 	defb	dereg-afreg+1, dereg-afreg+0
 	defb	bcreg-afreg+1, bcreg-afreg+0
