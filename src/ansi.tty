@@ -76,7 +76,7 @@
 	export	mttyq
 ;mttyq:
 	ld	c,11			; Console input status
-	call	bdos
+	call	BDOS
 	and	a			; Is a character available?
 	ret	z			; Return zero if nothing there
 					; Othersise fall through to input
@@ -105,7 +105,7 @@
 	ld	e,0FFh			; CP/M 2 doesn't assign special meaning
     endif				; to E=FE or FD.
 
-	call	bdos			; Fetch character
+	call	BDOS			; Fetch character
 	and	7FH			; Mask off high bit
 	jr	z,mttyi			; Loop if no character or a NUL
 	ret
@@ -119,7 +119,7 @@
 	export	mttyo
 ;mttyo:
 	ld	c,6		; Character for transmission is already in E
-	call	bdos
+	call	BDOS
 	ret
 
 ;;===========================================================================
@@ -251,7 +251,7 @@ mcls0:
     if	CPM3
 
 	ld	c,7			; Auxiliary input status
-	call	bdos
+	call	BDOS
 	or	a			; Is a character available?
 	ret	z			; No:  return a zero
 					; Yes: fall through to input routine
@@ -281,7 +281,7 @@ mcls0:
 	jr	z,mttyi			; No, use console
 
 	ld	c,3			; Auxiliary input (blocking)
-	call	bdos
+	call	BDOS
 
 	and	7Fh			; Mask off the high bit
 	jr	z,attyi			; Ignore a NUL character
@@ -297,7 +297,7 @@ mcls0:
 					; Character for transmission is
 					; already in E
 	ld	c,4			; AUX/PUN output
-	call	bdos
+	call	BDOS
 	ret
 
 ;;===========================================================================

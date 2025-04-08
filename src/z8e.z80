@@ -408,6 +408,16 @@ auxiliary equ	2		; auxiliary terminals
 ; command character (i.e. as part of a video control sequence).
 
 hazeltine equ	false
+;hazeltine equ	true
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;;; The following should be set to "true" if you have a virtual console that	
+;;; is x-term and you wish to send escape sequences at initialization to
+;;; configure the screen to a specific size, location, or window title.
+;;; See "mbannr:" below.
+
+;virtterm equ	false
+virtterm equ	true
 
     if	SLR or M80		; Control macro listing ... show lines which
 	.xall			; generate code.
@@ -432,17 +442,17 @@ quote	equ	27h		;	quote (actually, an apostrophe)
 tilde	equ	7Eh		;	tilde
 del	equ	7Fh		;	del
 
-BDOS	equ	5
+BDOS	equ	0005h
 fcb5c	equ	005Ch		;CP/M default FCB
 
-nop	equ	000		;Z80 instructions
+nop	equ	00h		;Z80 instructions
 jp	equ	0C3h
 rst38	equ	0FFh
 
 iobuf	equ	0080h		;Disk read buffer for symbol loading
 
-cpmVer	equ	12
-getSCB	equ	49
+cpmVer	equ	12		;BDOS call
+getSCB	equ	49		;BDOS call
 	page
 ;******************************************************************************
 ;*
@@ -505,13 +515,17 @@ getSCB	equ	49
 				;to screen.  Patch to 0FFh if your terminal
 				;needs high-order bit set on occasions.
 
-mbannr:		;Move XTERM terminal window near to upper left corner of screen
-;;;	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
+mbannr:			;Main Banner displayed at program start-up
+
+    if virtterm		;Move XTERM terminal window near to upper left corner of screen
+;;<--	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
 	defb	esc,'[8;075;090t'  ;ROW;COL; window size to 75 rows by 90 cols
-	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
+	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to upper-left corner (ROW;COL)
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1Fh	;Set window TITLE
 ;;;		yes, that really is a right bracket; and terminated by CNTL-G
+    endif
+
 	defb	cr,lf,tab,tab
     if Z180
 	defb	'18E'
