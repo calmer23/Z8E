@@ -28,6 +28,11 @@
 ;                       Revision history
 ;		================================
 ;
+; 07 Apr 2025 clm v4.3
+;			Removed 'clmspin' code and data (commented out). Does
+;			not add any functionality to program.
+;
+;
 ; 25 Mar 2025 clm v4.2clm43
 ;			Fixed "zfnf:" error when unknown filename has bias 
 ;			attached, we were not skipping past bias and were
@@ -284,6 +289,7 @@
 ;	gbi = Gary Inman		Los Angeles, California
 ;	gah = George Havach		California
 ;	hp  = Hector Peraza
+;	clm = Cal Mercer		Minneapolis, Minnesoda
 ;
 ;------------------------------------------------------------------------------
 
@@ -484,7 +490,7 @@ getSCB	equ	49
 
 	export	height
 ;height:
-	defb	77		;Default (patchable) Screen height (in lines).
+	defb	75		;Default (patchable) Screen height (in lines).
 				;(Don't bother patching if running CP/M Plus
 				; because Z8E will get the screen height from
 				; the SCB.)
@@ -501,7 +507,7 @@ getSCB	equ	49
 
 mbannr:		;Move XTERM terminal window near to upper left corner of screen
 ;;;	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
-	defb	esc,'[8;077;090t'  ;ROW;COL; window size to 90 rows by 90 cols
+	defb	esc,'[8;075;090t'  ;ROW;COL; window size to 75 rows by 90 cols
 	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to ROW;COL
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1Fh	;Set window TITLE
@@ -512,7 +518,7 @@ mbannr:		;Move XTERM terminal window near to upper left corner of screen
     else
 	defb	'Z8E'
     endif
-	defb	' v4.2.clm40 - 25_Mar_2025'
+	defb	' v4.3'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -2633,22 +2639,22 @@ clok10:	dec	de
 	ld	a,e
 	or	d
 	jr	nz,clok10
-	call	clmspin
+;;	call	clmspin		;spinning characters, like a blinking light
 	jr	clok
 
-
-clmspin:		;spin some characters in upper-right when 'J' runs
-	ld	de,(clmsp)
-	ld	a,(de)
-	or	a
-	jr	z,clmsp6	;at end of bytes, refresh clmsp address
-	ld	(clmsb),a
-	inc	de
-	jr	clmsp7
-clmsp6:	ld	de,clmsc
-clmsp7:	ld	(clmsp),de
-	ld	de,clmss
-	jp	print
+;;	Removed from code 2025-04-07.  Pretty, but does not really add functionality.
+;; clmspin:		;spin some characters in upper-right when 'J' runs
+;; 	ld	de,(clmsp)
+;; 	ld	a,(de)
+;; 	or	a
+;; 	jr	z,clmsp6	;at end of bytes, refresh clmsp address
+;; 	ld	(clmsb),a
+;; 	inc	de
+;; 	jr	clmsp7
+;; clmsp6:	ld	de,clmsc
+;; clmsp7:	ld	(clmsp),de
+;; 	ld	de,clmss
+;; 	jp	print
 
 	page
 ;******************************************************************************
@@ -8498,18 +8504,13 @@ symflg:	defb	0FFh		;symbol table flag   00h - table present
 
 ;;; ===========================================================================
 
-clmsp:	defw	clmsc
-	;; 	org	($ + 15) AND 0FFF0h
-clmsc:	defb	'|\-/+\-/', 00h
-clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
+;;	Data for 'clmspin'.  Code removed 2025-04-07
+;; clmsp:	defw	clmsc
+;; 	;; 	org	($ + 15) AND 0FFF0h
+;; clmsc:	defb	'|\-/+\-/', 00h
+;; clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
+;; clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
 
-;; 	; terminal cursor addressing is ONE BASED (1,1).  code uses zero based (0,0).
-;; clmbh:	defb	esc,'[0'	; position cursor starts at [zero based](3,62)
-;; clmbr:	defb	'3'-1		; rows [1]03-09  (-1 because code adds 1 before use)
-;; 	defb	';63H'		; column [1]63
-;; clmbn:	defb	'x: '		; names: A,H,L,D,E,B,C (zopnm+2)
-;; clmba:	defb	'76543210',00h	; ASCII bits and terminator
 
 clmbd:	defb	afreg-afreg+1	;displacements to register values for binary display
 	defb	hlreg-afreg+1, hlreg-afreg+0
