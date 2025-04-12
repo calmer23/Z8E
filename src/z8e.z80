@@ -4,7 +4,8 @@
 	.xall			; generate code.
 	.SFCOND			; suppress listings of false conditionals
 
-;;; if you are not using M80, you should delete the dot (.) lines above.
+;;; -->>  if you are not using M80, you should delete the dot (.) lines above.
+
 ;------------------------------------------------------------------------------
 ;
 ;  Copyright (C) 1984, 1985   by Richard A. Surwilo.  All rights reserved.
@@ -28,19 +29,28 @@
 ;                       Revision history
 ;		================================
 ;
+; 12 Apr 2025 clm v4.3.2
+;			Fixed "K nnnn<cr>" (no count) to use 256# default as
+;			documented.
+;
+; 10 Apr 2025 clm v4.3.1
+;			Command "+" now toggles display of BINARY registers
+;			in "J" screen. Does not include registers:
+;			   PC, SP, IX, IY   Usually 16-bit addresses and
+;			there is no benefit to seeing binary display.
+;
 ; 07 Apr 2025 clm v4.3
 ;			Removed 'clmspin' code and data (commented out). Does
 ;			not add any functionality to program.
 ;
-;
 ; 25 Mar 2025 clm v4.2clm43
-;			Fixed "zfnf:" error when unknown filename has bias 
+;			Fixed "zfnf:" error when unknown filename has bias
 ;			attached, we were not skipping past bias and were
 ;			accidentally parsing ",bias" as next filename.
 ;
 ; 25 Mar 2025 clm v4.2clm40
-;			Rewrote "clmbin" code to be similar to existing code and
-;			saved 45 bytes.  Looks cleaner now.
+;			Rewrote "clmbin" code to be similar to existing code
+;			and saved 45 bytes.  Looks cleaner now.
 ;			Cleaned up coding styles and other spelling errors I
 ;			missed on previous modifications.
 ;
@@ -289,7 +299,7 @@
 ;	gbi = Gary Inman		Los Angeles, California
 ;	gah = George Havach		California
 ;	hp  = Hector Peraza
-;	clm = Cal Mercer		Minneapolis, Minnesoda
+;	clm = Cal Mercer		Minneapolis, Minnesota
 ;
 ;------------------------------------------------------------------------------
 
@@ -411,7 +421,7 @@ hazeltine equ	false
 ;hazeltine equ	true
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;;; The following should be set to "true" if you have a virtual console that	
+;;; The following should be set to "true" if you have a virtual console that
 ;;; is x-term and you wish to send escape sequences at initialization to
 ;;; configure the screen to a specific size, location, or window title.
 ;;; See "mbannr:" below.
@@ -500,26 +510,27 @@ getSCB	equ	49		;BDOS call
 
 	export	height
 ;height:
-	defb	75		;Default (patchable) Screen height (in lines).
-				;(Don't bother patching if running CP/M Plus
-				; because Z8E will get the screen height from
-				; the SCB.)
+	defb	76	;Default (patchable) Screen height (in lines).
+			;Obviously, virtual screens must be <=255 lines.
+			;If running CP/M Plus, this value may be overwritten
+			; because Z8E will get the screen height from
+			; the SCB, if available.
 
 	export	rstVec
 ;rstVec:
-	defb	38h		;Default (but patchable) breakpoint vector
+	defb	38h	;Default (but patchable) breakpoint vector
 
-	export	coMask
+	export	coMask	;Console Output Mask
 ;coMask:
-	defb	7Fh		;Mask applied to characters before output
-				;to screen.  Patch to 0FFh if your terminal
-				;needs high-order bit set on occasions.
+	defb	7Fh	;Mask applied to characters before output
+			;to screen.  Patch to 0FFh if your terminal
+			;needs high-order bit set on occasions.
 
 mbannr:			;Main Banner displayed at program start-up
 
     if virtterm		;Move XTERM terminal window near to upper left corner of screen
 ;;<--	defb	esc,'[3;050;000t'  ;COL;ROW; use 3-digit numbers, easy patching
-	defb	esc,'[8;075;090t'  ;ROW;COL; window size to 75 rows by 90 cols
+	defb	esc,'[8;076;090t'  ;ROW;COL; window size to 76 rows by 90 cols
 	defb	esc,'[1;1H'	   ;ROW;COL; Move cursor to upper-left corner (ROW;COL)
 	defb	esc,'[0m',esc,'[02J' ;reset text attributes and clear screen
 	defb	esc,']2;Z8E Debugger', 'G' AND 1Fh	;Set window TITLE
@@ -532,7 +543,7 @@ mbannr:			;Main Banner displayed at program start-up
     else
 	defb	'Z8E'
     endif
-	defb	' v4.3'
+	defb	' v4.3.2'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -619,21 +630,22 @@ setHeight:
 
 ; Do config based on max length of symbol names
 
-	ld	a,(maxlen)	;Check max symbol length
-	inc	a		;Create mask
+	ld	a,(maxlen)	;Check max symbol length (14 or 6)
+	inc	a		;Create mask (0Fh or 07h)
 	cp	15
-	ld	b,a		;B - maxlen mask - 15
+	ld	b,a		;B - maxlen mask = 15
 	ld	a,62		;A - maxlin disassembly line length (62)
 	ld	c,68		;C - column to display first byte of memory
 				;    window for J command
-	ld	d,3		;D - bytes per line of memory window display
+	ld	d,3		;D - mask for 4 bytes per line of memory display
 	jp	z,nint00	;Z - max symbol length is 14
 
 				;If not 14 - use default values
-	ld	b,7		;B - maxlen mask -  7
+	ld	b,7		;B - maxlen mask =  7
 	ld	a,30		;A - maxlin disassembly line length (30)
 	ld	c,56		;C - column to display first byte of memory
-	ld	d,7		;    window for J command
+				;    window for J command
+	ld	d,7		;D - mask for 8 bytes per line of memory display
 nint00:	ld	(maxlin),a
 	ld	a,b
 	ld	(maxlen),a
@@ -2303,6 +2315,7 @@ jdbg10:	ld	(timer),a
 	call	rgdisp		;display current user regs
 	call	zwnw		;display disassembled window
 	call	clmbin		;display BINARY values of registers
+
 	ld	a,(wnwsiz+1)
 	and	a		;test if window being displayed
 	jr	z,jdbg28	;nope
@@ -2310,7 +2323,9 @@ jdbg10:	ld	(timer),a
 	ld	de,window	;save user specified memory block til next bp
 	ld	hl,(wnwtab)	;start of memory window address
 	ld	b,0
-	ld	c,11		;row to start displaying kdmp bytes
+	ld	a,(binrow)	;if displaying binary, move down 8 rows
+	add	a,3		;starting row is either 3 or 11
+	ld	c,a		;row to start displaying kdmp bytes
 
 jdbg20: ld	a,(fwndow)	;position cursor starting at column
 	sub	6		;move left for display of dump address
@@ -2331,7 +2346,7 @@ jdbg25:	ld	a,(fwndow)
 	ld	a,(wnwsiz)
 	sub	b
 	jr	z,jdbg28
-	inc	b		;;; moved from 4 lines above, to here
+	inc	b
 	inc	hl
 	inc	de
 	ld	a,(nlmask)	;check for new line time
@@ -2340,8 +2355,8 @@ jdbg25:	ld	a,(fwndow)
 	jr	jdbg20		;...display address first
 
 jdbg28:	ld	a,3		;point to very first instruction
-;;; -----------------------------------------------------
 	jp	jdbg75
+;;; -----------------------------------------------------
 				;breakpoint handler jumps here for full
 				;screen single step
 jdbg30:	ld	c,3
@@ -2405,6 +2420,7 @@ jdbg45:	inc	hl
 	ld	a,regsiz/2	;number of reg pairs to display
 	sub	b
 	jr	nz,jdbg35
+;;; -----------------------------------------------------
 	call	space
 	ld	b,1
 	ld	c,36
@@ -2413,13 +2429,18 @@ jdbg45:	inc	hl
 	ld	b,0
 	call	pswDsp		;now display flag reg mnemonics
 
+;;; -----------------------------------------------------
 	ld	a,(wnwsiz+1)	;check window size
 	and	a
 	jr	z,jdbg60	;z - no memory window in effect
+
 	ld	hl,(wnwtab)	;hl - address of start of window
 	ld	b,0-1		;start B pre-decremented
-	ld	c,3
+	ld	a,(binrow)
+	add	a,3		;offset from top of screen
+	ld	c,a		;starting row is either 3 or 11
 	ld	de,window	;old contents of window stored here
+
 jdbg50:	inc	b		;bump memory window byte count
 	ld	a,(de)		;compare old vs new
 	cp	(hl)
@@ -2430,13 +2451,17 @@ jdbg50:	inc	b		;bump memory window byte count
 	ld	(de),a		;we only need to move byte if it changed
 	call	outhex
 jdbg55:
-	ld	a,(wnwsiz)	;max size
 	inc	hl
 	inc	de
-	sub	b
+	ld	a,(wnwsiz)	;max size
+	sub	0+0-0+0		;if BINARY register shown, reduce count
+binadj	equ	$-1
+	cp	b
 	jr	nz,jdbg50	;loop until entire window examined
-jdbg60:
-	call	clmbin		;display BINARY values of registers
+
+;;; -----------------------------------------------------
+jdbg60:	call	clmbin		;display BINARY values of registers
+;;; -----------------------------------------------------
 
 	ld	a,18+0-0	;init count of disassembled instructions
 ht04	equ	$-1		;[Patch to screen height - 6]
@@ -2468,6 +2493,7 @@ jdbg65:	ld	hl,(pcreg)
 	ld	a,3		;disassembled instructions start on line 4
 	jr	jdbg75
 
+;;; -----------------------------------------------------
 jdbg70:	ld	a,(jlines)
 	neg
 	add	a,21+0-0	;a - screen row on which to position cursor
@@ -2511,6 +2537,7 @@ jdbg90:	ld	de,regsav	;move current reg contents to save area
 	ldir
 	jp	step40
 
+;;; -----------------------------------------------------
 				;user requested abort from console
 jdbg95: ld	b,22+0-0	;position cursor on line 23 for prompt
 ht06	equ	$-1		;[Patch to screen height - 2]
@@ -2521,6 +2548,8 @@ ht06	equ	$-1		;[Patch to screen height - 2]
 	ld	(jstepf),a	;indicate we have full screen of data
 	jp	z8e		;to z8e command processor
 
+;;; -----------------------------------------------------
+;;; -----------------------------------------------------
 
 zwnw:				;display disassembly window
 	ld	a,18+0-0	;number of instructions to disassemble
@@ -2553,6 +2582,7 @@ zwnw20:	call	printb
 	call	xycp
 	ret
 
+;;; -----------------------------------------------------
 				;display regs at top of screen:
 rgdisp:	call	home		;home cursor
 	call	xreg		;display regs
@@ -2560,9 +2590,25 @@ rgdisp:	call	home		;home cursor
 	jp	crlf
 
 
+;;; -----------------------------------------------------
 ;;; display BINARY value of some registers when in full screen 'J' command
 
-clmbin:	ld	bc,0000
+bintog:	ld	a,8-8+0-0	;=0 do not display binary, =8 display binary
+binrow	equ	$-1		;number of rows used for binary display
+	xor	08h		;toggle to opposite value; 8 rows for BINARY
+	ld	(binrow),a	;binrow is both size of binary rows and flag
+	ld	a,0-0+0-0
+wnwhi	equ	$-1
+	jr	z,binoff
+	ld	a,0-0+0-0
+wnwlo	equ	$-1
+binoff:	ld	(wnwsiz),a
+	ret
+
+clmbin:	ld	a,(binrow)	;is the toggle on or off
+	or	a
+	ret	z		;off, do not display
+	ld	bc,0000
 	ld	d,b		;zero out upper byte of 'DE'
 
 clmb00:
@@ -2610,6 +2656,7 @@ clmblp:	rlca		; Shift high bit of A into carry bit
 
 	ret		; B is back to zero, nice!
 
+;;; -----------------------------------------------------
 ;;; cursor positioning while displaying memory dump.
 ;;; row value computed based on number of bytes displayed per line
 ;;; and added to initial base row.
@@ -2617,24 +2664,26 @@ clmblp:	rlca		; Shift high bit of A into carry bit
 curs:	push	bc		;This routine has been simplified and shortened
 	push	de		;by 19 bytes because it is no longer used for
 	push	hl		;register display positioning.  jrs 20/4/87
-	ld	d,a
+	ld	d,a		;save base column address
 	ld	e,c		;save base row address
-	ld	a,(nlmask)
-	and	b		;item number mod lnmask is the relative pos of
+
+	ld	a,(nlmask)	; 3 (0000.0011) or 7 (0000.0111)
+	and	b		;item number mod nlmask is the relative pos of
 	ld	c,a		;reg contents or memory data byte
 	add	a,a
 	add	a,c
 	ld	c,a		;c - rel pos times three
 	add	a,d		;add in base
 	ld	c,a		;c - absolute col number
-	ld	a,(fwndow)
-	cp	68		;14-char symbols in effect?
+
+	ld	a,(nlmask)	;makes more sense to test nlmask than fwndow
+	cp	3
 	jr	z,curs40	;   4 bytes per line
-	srl	b		;divide item count by 2 if 6-char symbols: 8 bytes/line
+	srl	b		;divide item count by 2 if 8 bytes/line
 curs40:	ld	a,11111100b	;0FCh, mask off the lowest two bits (mod 4)
 	and	b		;now compute row number
 	rrca
-	rrca		  	;divide by 4 and add to initial starting value
+	rrca			;divide by 4 and add to initial starting value
 	add	a,e		;base row address
 	ld	b,a		;b - absolute row number
 	call	xycp		;convert row and column to xy cursor address
@@ -2643,9 +2692,9 @@ curs40:	ld	a,11111100b	;0FCh, mask off the lowest two bits (mod 4)
 	pop	bc
 	ret
 
+;;; -----------------------------------------------------
 
-clok:
-	ld	d,50		;idle loop - decrement to 0 and reload
+clok:	ld	d,50		;idle loop - decrement to 0 and reload
 	ld	e,00
 	dec	b		;user specified the loop counter
 	ret	m
@@ -2653,22 +2702,7 @@ clok10:	dec	de
 	ld	a,e
 	or	d
 	jr	nz,clok10
-;;	call	clmspin		;spinning characters, like a blinking light
 	jr	clok
-
-;;	Removed from code 2025-04-07.  Pretty, but does not really add functionality.
-;; clmspin:		;spin some characters in upper-right when 'J' runs
-;; 	ld	de,(clmsp)
-;; 	ld	a,(de)
-;; 	or	a
-;; 	jr	z,clmsp6	;at end of bytes, refresh clmsp address
-;; 	ld	(clmsb),a
-;; 	inc	de
-;; 	jr	clmsp7
-;; clmsp6:	ld	de,clmsc
-;; clmsp7:	ld	(clmsp),de
-;; 	ld	de,clmss
-;; 	jp	print
 
 	page
 ;******************************************************************************
@@ -3462,7 +3496,7 @@ obrk20:	call	crlf
 ;*
 ;*	address entered:  start of memory to display
 ;*
-;*	size:		  number of bytes to display (MAX = 256)
+;*	count:		number of bytes to display (MAX = 256)
 ;*
 ;*	wnwsiz    count of bytes (base zero) 00->255, total of 256 bytes
 ;*	wnwsiz+1  flag, ==0 no display, <>0 display memory
@@ -3470,9 +3504,18 @@ obrk20:	call	crlf
 ;*	All this horrid code below is because the DOCS said the maximum
 ;*	number of memory bytes to display is 256, which is more than 1 byte.
 ;*	Rather than use a word (two byte value) to store the count, I am
-;*	using two bytes with the second byte being a FLAG to indicate bytes
-;*	to display rather than using a value of zero to indicate no display.
-;*	All the places that use wnwsiz also need to be changed to match.
+;*	using two bytes with the second byte being a FLAG indicating bytes
+;*	to display rather than a zero count value to indicate no display.
+;*	All the places that use wnwsiz needed to be changed to match.
+;*
+;*	Also, code in version 4.2 was checking if count was too big by
+;*	multiplying the display rows (ht07b: screen size - 6) by 4 or 8 and
+;*	comparing that number against count.  This worked fine for 24 line
+;*	screens, but with large virtual screens > 65 lines, or more, it
+;*	would cause the computed value to overflow 8 bits. Fixed by
+;*	computing rows needed against screen size (unless your virtual
+;*	screen is REALLY BIG, like > 256 lines).
+;*
 ;*	Ugh!  ..clm..
 ;***************************************************************************
 
@@ -3480,54 +3523,113 @@ kdmp:	call	iedtbc		;let user input address of memory to display
 	ret	m		;no input ends command
 	call	iarg		;evaluate user arg
 	jp	nz,e???
-	ex	de,hl		;de - save memory address
+	ld	(wnwtab),hl	;save memory address
+	or	a		;was address terminated by CR? (delimiter = 00)
+	jr	z,kdmp03	;yes.  use default count of 256# (0100h)
+;kdmp01:
+	xor	a		;assume we are displaying NOTHING, flag = 0
+	ld	(wnwsiz+1),a	;if iarg fails, kdmp output is disabled
 	call	iarg		;now get count
-	ld	a,00
-	ld	(wnwsiz+1),a	;assume we are displaying NOTHING, flag = 0
-	jr	nz,kdmp20	;error during input - display no bytes
+	jp	nz,e???		;error during input - display no bytes
+	xor	a		;count value in HL
 	or	h
-	jr	z,kdmp02	;H==0; if L==0, no display; L<>0 is count
+	jr	z,kdmp04	;H==0; if L==0, no display; L<>0 is count
 ;;; H<>0, check if H>1, error (>256 value)
 	dec	a
 	jp	nz,e???		;H>1, so value > 256 is error
 ;;; H==1, so check L==0 (256 entered), L>0 then error (>256 entered)
 	or	l
 	jp	nz,e???		;H==1, L>0 is error (>256 entered)
+kdmp03:
 	dec	a		;H==1, L==0
 	ld	(wnwsiz),a	;count of 255 is display of 256 bytes
 	ld	(wnwsiz+1),a	;set flag to display memory
-	ld	l,a		;count in L
-	jr	kdmp05		; test maximm allowed by screen rows
+	jr	kdmp05		; test maximum allowed by screen rows
 
-kdmp02:	;; H==0; if L==0, no display; L<>0 is count
+kdmp04:	;; H==0; if L==0, no display; L<>0 is count
 	or	l
-	jr	z,kdmp20	;user entered zero, no display
+	ret	z		;user entered zero, no display
 	ld	(wnwsiz+1),a	;flag non-zero, we have bytes to display
 	dec	a		;count=count-1 [00..254] total of 255 entries
-	ld	(wnwsiz),a	;save count
-	ld	l,a		;count to L
-	
-;;; ...test maximum allowed by displayable rows and adjust count
+	ld	(wnwsiz),a	;save count as BASE ZERO number (1st is 0)
 
-kdmp05:	ld	a,(maxlen)	;max symbol length
-	ld	b,2		;assume big names
-	cp	15
-	ld	a,18+0-0	;number of disassembled lines displayed
+;;; Test maximum allowed by available rows and adjust count
+;;; ===========================================================================
+;;; User has entered a count of bytes to display.  1-255, 0=256.  Null = 256.
+;;; Need to figure out how many we can actually display on the screen.
+;;; The number of rows available is at ht07b.
+;;; KDMP output is either 4 or 8 bytes per row, depending on nlmask.
+;;; Value is 9 bits:  CARRY..A(bits 7-0).
+
+kdmp05:	inc	a		;change back to BASE ONE for a minute
+;;;				;  ignore CARRY overflow. if 256, A is 00h
+	ld	l,a		;L=count. First row is bytes: 1.2.3.4 or 1..8
+	ld	a,(nlmask)	;mask value 03h (4 bytes/row) or 07h (8 B/L)
+	ld	c,a		;save mask for testing later
+	and	l		;is last row partial (NZ) or full (Z)?
+	ld	b,a		;number of bytes in last row, if not full
+
+	ld	a,(wnwsiz)	;now convert bytes to rows (4 or 8 per row)
+	add	a,1		;change to BASE ONE, set CARRY if 0FFh (255.)
+	rra			;count/2 (CARRY moves into bit 7)
+	srl	a		;count/4
+	bit	2,c		;nlmask == 0000.0[0]11 (Z) or 0000.0[1]11 (NZ)
+	jr	z,kdmp07	;if 4 B/L, then we stop shifting
+	srl	a		;count/8 == total FULL rows (8 B/L)
+kdmp07:	dec	b		;if last row was full, then B was zero
+	inc	b
+	jr	z,kdmp08	;and we skip
+	inc	a		;else add one final row to hold partial row
+kdmp08:
+	ld	h,a		;number of rows required to hold kdmp output
+
+;;; Check if enough available rows to display requested bytes of memory.
+
+	ld	a,0-0+1-1
 ht07b	equ	$-1		;[Patch to screen height - 6]
-	jr	z,kdmp09
-	ld	b,3		;double number of lines one extra time
-kdmp09:	sub	10-3		;clm moved kdmp display down 7 lines (row 10)
-kdmp10:	add	a,a		;times two, times four, [times eight]
-	djnz	kdmp10		;number of lines*4 (or *8) is bytes per line
+	cp	h		;if (ht07b >= krows) [NC], then keep krows
+	jr	nc,kdmp11
+	ld	h,a		;reset needed rows to screen size limit
+	ld	b,0		;clear byte count for last row; now a full row
+kdmp11:
+	ld	l,a
+	ld	a,h
+	call	kdmp90
+	ld	(wnwhi),a	;byte count when BINARY display is off
+	ld	a,l
 
-	jr	nc,kdmp11	;screen lines permit < 256 bytes
-	xor	a		;screen could do >=256, so default to 255
-kdmp11:	dec	a		;compare A-L using BASE ZERO (0 is count of 1)
-	cp	l		;if number of bytes specified by user is too
-	jr	c,kdmp20	;large to display on screen then use default
-	ld	a,l		;use value specified by user
+	sub	8		;ht07b - 8 (BINARY ON uses 8 rows)
+	cp	h		;if ((ht07b-8) >= krows) [NC], then keep krows
+	jr	nc,kdmp12
+	ld	h,a		;reduce needed rows when BINARY ON
+	ld	b,0		;clear last row byte count if A changed
+	sub	8
+	jp	m,e???		;screen does not have AT LEAST 10 ROWS?!?!
+kdmp12:
+	ld	a,h
+	call	kdmp90
+	ld	(wnwlo),a	;byte count when BINARY display is on
+
+	ld	hl,binrow
+	bit	3,(hl)		;is BINARY display on or off right now?
+	jr	nz,kdmp20	;on
+	ld	a,(wnwhi)	;off
 kdmp20:	ld	(wnwsiz),a	;(wnwsiz+1) non-zero already, set above
-kdmp21:	ld	(wnwtab),de
+	ret
+
+kdmp90:	add	a,a		;rows * 2
+	add	a,a		;rows * 4
+	bit	2,c		;4 B/L or 8 B/L
+	jr	z,kdmp95	;4 it is, skip last multiply
+	add	a,a		;rows * 8
+kdmp95:
+	dec	b
+	inc	b		;if zero, leave last row alone
+	jr	z,kdmp97
+	sub	c		;remove last row count (a-3) or (a-7)
+	dec	a		;we really needed (a-4) or (a-8), subtract 1
+	add	a,b		;add back in true number of bytes in last row
+kdmp97:	dec	a		;remember, the count is ZERO BASED
 	ret
 
 	page
@@ -3901,8 +4003,8 @@ asm040:	ld	a,(delim)	;check delimiter
 ;; endif
 ;;;		Let assembler compute number of entries in table.
 ;;;		Do not need conditional test above.
-
 	ld	c,cnmcnt	;number of opcodes in table as index
+
 	;; decrementing C by 1 lets us start at beginning of last entry
 asm050:	dec	c
 	jp	m,asm??o	;opcode not found
@@ -4042,8 +4144,8 @@ ibld55:	ld	(hl),a		;store object byte
 ;;	sub     67		;org directive?
 ;;; Tisk!  Don't hard code values when the assembler will compute it for you.
 ;;; I updated the zopcnm table, so value is no longer 67.
-
 	sub	cnmorg		;'ORG '  directive offset
+
 	jr	nz,ibld60
 	ld	d,(hl)
 	dec	hl
@@ -7781,6 +7883,7 @@ jtcmd:
 	defw	writ			; w
 	defw	cuser			; >
 	defw	qeval			; ?
+	defw	bintog			; +
 ;;	defw	gadr			; #
     if auxterm ne none
 	defw	term			; t
@@ -7790,7 +7893,7 @@ cmd:
 	defb	'T'
     endif
 ;;	defb	'#?>WKXQDLOSHFCB'
-	defb	'?>WKXQDLOSHFCB'
+	defb	'+?>WKXQDLOSHFCB'
 	defb	'PVMYGREZJNUAI'
 ncmd	equ	$-cmd		;number of commands
 
@@ -8517,14 +8620,6 @@ symflg:	defb	0FFh		;symbol table flag   00h - table present
 				;		     FFh - no table
 
 ;;; ===========================================================================
-
-;;	Data for 'clmspin'.  Code removed 2025-04-07
-;; clmsp:	defw	clmsc
-;; 	;; 	org	($ + 15) AND 0FFF0h
-;; clmsc:	defb	'|\-/+\-/', 00h
-;; clmss:	defb	esc,'[?25l',esc,'7',esc,'[1;79H'	; [0](0,78) code row,col
-;; clmsb:	defb	'#',esc,'8',esc,'[?25h', 00h		; spin cursor at '#' location
-
 
 clmbd:	defb	afreg-afreg+1	;displacements to register values for binary display
 	defb	hlreg-afreg+1, hlreg-afreg+0
