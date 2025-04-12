@@ -82,12 +82,13 @@ III. INVOKING Z8E .......................................... 4
     Z    Disassemble ....................................... 49
     ?    Evaluate Expression ............................... 52
     >    Change User Number ................................ 53
-APPENDIX A - FILE FORMAT FOR SYMBOL TABLES ................. 54
-APPENDIX B - ZILOG MNEMONICS ............................... 57
-APPENDIX C - Hitachi HD64180 Instructions .................. 64
-APPENDIX D - SYSTEM MEMORY MAP ............................. 65
-APPENDIX E - COMMAND SUMMARY ............................... 66
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+    +    Toggle Binary Registers ........................... 54
+APPENDIX A - FILE FORMAT FOR SYMBOL TABLES ................. 55
+APPENDIX B - ZILOG MNEMONICS ............................... 58
+APPENDIX C - Hitachi HD64180 Instructions .................. 65
+APPENDIX D - SYSTEM MEMORY MAP ............................. 66
+APPENDIX E - COMMAND SUMMARY ............................... 67
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 I. INTRODUCTION
@@ -154,7 +155,7 @@ features:
 
 
                                   - 1 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 II. INSTALLATION
@@ -221,7 +222,7 @@ edit it if necessary.
 
 
                                   - 2 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 3. Choose or create the terminal handlers
@@ -288,7 +289,7 @@ IMPORTANT: Coding caveat
 
 
                                   - 3 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 III. INVOKING Z8E AT THE CP/M COMMAND LEVEL
@@ -355,7 +356,7 @@ for user symbol table entries. The argument would appear immediately  after
 
 
                                   - 4 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                optional bias would probably not be used.)
@@ -422,7 +423,7 @@ produced by the following programs:
 
 
                                   - 5 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 
@@ -489,7 +490,7 @@ console relating to the activity in progress as shown below:
 
 
                                   - 6 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 After all user files, both symbol files and the .COM file to be debugged, 
@@ -556,7 +557,7 @@ For a discussion of the format of symbol files, see APPENDIX A.
 
 
                                   - 7 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 IV. INITIALIZATION
@@ -623,7 +624,7 @@ Note:
 
 
                                   - 8 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
      the  remainder of the file name field in the FCB would be  filled 
@@ -690,7 +691,7 @@ Note:
 
 
                                   - 9 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 V. BREAKPOINTS
@@ -757,7 +758,7 @@ section 2.
 
 
                                   - 10 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 VI. COMMAND INPUT
@@ -824,7 +825,7 @@ individual commands):
 
 
                                   - 11 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 
@@ -891,7 +892,7 @@ individual commands):
 
 
                                   - 12 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                   interested debugging the body of the subroutine;  he 
@@ -958,7 +959,7 @@ individual commands):
 
 
                                   - 13 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 
@@ -1025,7 +1026,7 @@ The following pages describe all the commands understood by Z8E.
 
 
                                   - 14 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 A    Assemble
@@ -1092,7 +1093,7 @@ followed  by  a  carriage return. No object code is produced  and  no  user
 
 
                                   - 15 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 memory  areas  are  modified but the symbol and its  associated  value  are 
@@ -1159,7 +1160,7 @@ and will be one of the following:
 
 
                                   - 16 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                ERROR FLAG               MEANING
@@ -1226,7 +1227,7 @@ console.
 
 
                                   - 17 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 B    Set Breakpoint
@@ -1293,7 +1294,7 @@ breakpoint.
 
 
                                   - 18 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 C    Clear Breakpoint
@@ -1360,7 +1361,7 @@ ALL.
 
 
                                   - 19 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 D    Dump
@@ -1427,7 +1428,7 @@ can walk through memory, table by table.
 
 
                                   - 20 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 E    Examine Memory
@@ -1494,7 +1495,7 @@ entered available for reinspection:
 
 
                                   - 21 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 
@@ -1561,7 +1562,7 @@ this argument becomes the new current memory address as shown below:
 
 
                                   - 22 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 F    Find
@@ -1628,7 +1629,7 @@ The following are examples of the FIND command:
 
 
                                   - 23 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
      The  two  bytes  which represent the address of  symbol  are  not 
@@ -1695,7 +1696,7 @@ The following are examples of the FIND command:
 
 
                                   - 24 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 G    Go
@@ -1762,7 +1763,7 @@ HINT:
 
 
                                   - 25 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 H    Display Symbol Table
@@ -1829,7 +1830,7 @@ prints a question mark.
 
 
                                   - 26 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 I    Initialize FCB and Command Tail
@@ -1845,7 +1846,7 @@ fields in the default FCB (005Ch and 006Ch).
 
 The command tail in the default DMA buffer at 0080h will be filled in  with 
 a  standard format command buffer comprising a length byte followed by  the 
-string formed by translating all the ARGs to upper case. A zero is appended 
+string formed by translating all the ARGs to uppercase. A zero is  appended 
 after the last ARG (but is not counted in the command tail's length).
 
 The  first two ARGs are treated as (possibly ambiguous) file names and  are 
@@ -1896,7 +1897,7 @@ word 'square'.
 
 
                                   - 27 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 J    Animated Full Screen Debugger
@@ -1963,7 +1964,7 @@ keyboard  is pressed, which ends the command. If a numeric key is  pressed,
 
 
                                   - 28 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 then  Z8E responds by changing the timeout parameter on the fly.  The  user 
@@ -2030,28 +2031,29 @@ to refresh the screen. No other argument is permitted.
 
 
                                   - 29 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 K    Set Memory Window Parameters for use with the J command
 ________________________________________________________________
 
 
-The K command sets the starting address and block size of the memory window 
+The K command sets the starting address and byte count of the memory window 
 display during the J command. The format of the command is:
 
      *K   ARG1  [ARG2]  <cr>
 
           ARG1  =  the starting address of the memory block.
 
-          ARG2  =  is an optional size parameter (in  hexadecimal 
+          ARG2  =  optional   count  parameter  (in   hexadecimal 
                    unless  you add the trailing '#'). If  omitted 
-                   the block size defaults to the maximum.
+                   the byte count defaults to the maximum 100  or 
+                   256#.
 
 The starting address of the memory block can be anywhere in memory; it does 
 not have to be within the confines of the user program.
 
-The  maximum  size  of ARG2 is FF (255#). The number  of  displayed  memory 
+The  maximum amount of ARG2 is 100 (256#). The number of  displayed  memory 
 entries  is  dependant on your screen size and the length of  symbol  names 
 (Z8E computes the maximum number of bytes it can display).
 
@@ -2095,9 +2097,8 @@ entries  is  dependant on your screen size and the length of  symbol  names
 
 
 
-
                                   - 30 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 L    Load File
@@ -2164,7 +2165,7 @@ treat the file name "." as a syntax error.
 
 
                                   - 31 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 The  user may occasionally need to overlay a section of code in a  program, 
@@ -2231,7 +2232,7 @@ the data needed to accomplish the overlay.
 
 
                                   - 32 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 M    Move Memory
@@ -2298,7 +2299,7 @@ the overwriting of the destination data block:
 
 
                                   - 33 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 N    Output to I/O Ports Without Pre-read
@@ -2365,7 +2366,7 @@ I/O registers.
 
 
                                   - 34 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 When  writing  to  a Z180/HD64180 port, Z8E first clears  the  B  register, 
@@ -2432,7 +2433,7 @@ is accessing an I/O port.
 
 
                                   - 35 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 O    Output Current Breakpoints to Console
@@ -2499,7 +2500,7 @@ breakpoint address with which they are associated.
 
 
                                   - 36 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 P    Examine/Modify PSW (Flag Register)
@@ -2566,7 +2567,7 @@ If an invalid flag bit mnemonic is entered, Z8E prints a question mark.
 
 
                                   - 37 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 Q    Query I/O Ports
@@ -2633,7 +2634,7 @@ options, once a byte has been read from the I/O port, are as follows:
 
 
                                   - 38 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
      CONTINUOUS INPUT (MONITOR MODE)
@@ -2700,7 +2701,7 @@ or Q commands are accessing an I/O port.
 
 
                                   - 39 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 R    Examine/Modify Register Contents
@@ -2767,7 +2768,7 @@ is waiting for a register mnemonic.
 
 
                                   - 40 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 S    Single Step
@@ -2834,7 +2835,7 @@ the  "S<cr>"  command form if you want to have the option of  aborting  the
 
 
                                   - 41 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 command  before  you press <cr> by typing ^X to cancel the  command  or  by 
@@ -2901,7 +2902,7 @@ each iteration of a DJNZ instruction.
 
 
                                   - 42 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 T    Select Debug Terminal
@@ -2968,7 +2969,7 @@ result in a "locked up" computer which must be re-booted.
 
 
                                   - 43 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 U    Write Symbol Table to Disk
@@ -3035,7 +3036,7 @@ If a file with the name ARG1 already exists on disk, it will be deleted.
 
 
                                   - 44 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 V    Verify Two Memory Blocks
@@ -3102,7 +3103,7 @@ keyboard.
 
 
                                   - 45 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 W    Write Memory to a File
@@ -3169,7 +3170,7 @@ memory address as the writing to disk takes place.
 
 
                                   - 46 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 X    Display Machine State
@@ -3236,7 +3237,7 @@ To inspect the I or R registers, use the R command.
 
 
                                   - 47 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 Y    Fill Memory
@@ -3303,7 +3304,7 @@ even if that byte is not 77h.
 
 
                                   - 48 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 Z    Disassemble
@@ -3370,7 +3371,7 @@ interactively when ARG2 is equal to 1. The format of the command is:
 
 
                                   - 49 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 Z8E outputs to the console using the following format:
@@ -3437,7 +3438,7 @@ format:
 
 
                                   - 50 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
      CHARACTER    OUTPUT FORMAT    EXAMPLE
@@ -3504,7 +3505,7 @@ into a valid Z80 instruction, it will display the data as DEFBs.
 
 
                                   - 51 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 ?    Evaluate Expression
@@ -3571,7 +3572,7 @@ commands.
 
 
                                   - 52 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 >    Change User Number
@@ -3638,7 +3639,74 @@ from user areas other than the one from which Z8E was invoked.
 
 
                                   - 53 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
+
+
++    Toggle Binary Registers 
+_________________________________________________________________
+
+
+     *+
+
+          No  arguments are allowed, as the command  executes  without 
+          needing a carriage return.
+
+This command toggles the display of registers A, H, L, D, E, B, C in binary 
+form in the upper right of the "J" full-screen display. If the "K"  command 
+is  used to display a block of memory contents, the memory block  is  moved 
+down  8  rows,  potentially reducing the number of  bytes  displayed.  When 
+toggled OFF, the memory block is expanded back to full size.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  - 54 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                 APPENDIX A - FILE FORMAT FOR SYMBOL TABLES
@@ -3704,8 +3772,8 @@ The unique characteristics of each are:
 
 
 
-                                  - 54 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 55 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
           The character appearing after the hex value is  interpreted 
@@ -3771,8 +3839,8 @@ The unique characteristics of each are:
           to  the  one produced by Link-80. Z8E  treats  all  symbols 
 
 
-                                  - 55 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 56 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
           loaded from a SLRNK .SYM file as absolute symbols. However, 
@@ -3838,8 +3906,8 @@ NOTE:
 
 
 
-                                  - 56 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 57 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                        APPENDIX B - ZILOG MNEMONICS
@@ -3905,8 +3973,8 @@ NOTE:
 
 
 
-                                  - 57 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 58 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 01CF  CB 6E       BIT  5,(HL)        |  0243  ED A9       CPD
@@ -3972,8 +4040,8 @@ NOTE:
 
 
 
-                                  - 58 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 59 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 0288  34          INC  (HL)          |  02DB  DD 77 36    LD  (IX+INDEX),A
@@ -4039,8 +4107,8 @@ NOTE:
 
 
 
-                                  - 59 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 60 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 0357  4E          LD  C,(HL)         |  03A6  DD 2A 123F  LD  IX,(NNNN)
@@ -4106,8 +4174,8 @@ NOTE:
 
 
 
-                                  - 60 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 61 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 0403  ED AB       OUTD               |  0477  CB A6       RES  4,(HL)
@@ -4173,8 +4241,8 @@ NOTE:
 
 
 
-                                  - 61 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 62 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 04E4  CB 16       RL  (HL)           |  054C  C7          RST  0
@@ -4240,8 +4308,8 @@ NOTE:
 
 
 
-                                  - 62 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 63 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
 05B5  CB DE       SET  3,(HL)        |  062D  CB 26       SLA  (HL)
@@ -4307,8 +4375,8 @@ NOTE:
 
 
 
-                                  - 63 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 64 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                  APPENDIX C - Hitachi HD64180 Instructions
@@ -4374,8 +4442,8 @@ assemble Z180 source files generated from a Z8E disassembly.
 
 
 
-                                  - 64 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 65 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                       APPENDIX D - SYSTEM MEMORY MAP
@@ -4441,8 +4509,8 @@ the comparison is fair.
 
 
 
-                                  - 65 -
-                 Z8E REFERENCE MANUAL v4.2 - March 2025
+                                  - 66 -
+                Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
                        APPENDIX E - COMMAND SUMMARY
@@ -4460,24 +4528,25 @@ CMD             Description                        Arguments
  H      Display Symbol Table         [FirstSymbol]
  I      Initialize command line      [string1..stringN]
  J      Full Screen/Animated Debug   [/] [*] [Addr]      [Timeout]
- K      Set Memory Window            StartAddr           [Size]
- L      Load File                    FileName            [,Load Address]
- M      Move Memory                  SourceStart    SourceEnd    DestStart
- N      Output to Port NO Pre-Read   [(] PortAddr [)]
- O      Output Current Breakpoints
- P      Exam/Modify PSW (Flag Reg)
- Q      Query I/O Port               [(] PortAddr [)]
- R      Examine/Modify Registers     RegSpecifier
- S      Single-Step                  [/]  [Count]
- T      Select debug terminal        A or C
- U      Write Symbol Table To Disk   FileName
- V      Verify Memory                SourceStart    SourceEnd   DestStart
- W      Write to Disk                FileName       [StartAddr] [EndAddr]
- X      Examine Machine State
- Y      Fill Memory                  FromAddr       ToAddr      Data
- Z      Disassemble                  StartAddr      End/Count   FileName
- ?      Evaluate expression          Expression
- >      Change user number           UserNumber
+ K      Set Memory Window            StartAddr           [Count] 
+ L      Load File                    FileName            [,Load Address] 
+ M      Move Memory                  SourceStart    SourceEnd    DestStart 
+ N      Output to Port NO Pre-Read   [(] PortAddr [)] 
+ O      Output Current Breakpoints 
+ P      Exam/Modify PSW (Flag Reg) 
+ Q      Query I/O Port               [(] PortAddr [)] 
+ R      Examine/Modify Registers     RegSpecifier 
+ S      Single-Step                  [/]  [Count] 
+ T      Select debug terminal        A or C 
+ U      Write Symbol Table To Disk   FileName 
+ V      Verify Memory                SourceStart    SourceEnd   DestStart 
+ W      Write to Disk                FileName       [StartAddr] [EndAddr] 
+ X      Examine Machine State 
+ Y      Fill Memory                  FromAddr       ToAddr      Data 
+ Z      Disassemble                  StartAddr      End/Count   FileName 
+ ?      Evaluate expression          Expression 
+ >      Change user number           UserNumber 
+ +      Toggle Binary Registers 
 
 []      Denotes Optional Argument
 [/]     Do Not Trace Subroutine
@@ -4507,6 +4576,5 @@ CMD             Description                        Arguments
 
 
 
-
-                                  - 66 -
+                                  - 67 -
 
