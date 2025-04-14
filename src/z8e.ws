@@ -92,6 +92,10 @@
 
 
 
+
+
+
+
                                     Z8Å
 
                Z80/HD6418° ASSEMBÌÙ LANGUAGÅ DEBUGGINÇ TOOL
@@ -112,6 +116,7 @@
                          Wyckoff, New Jersey 07481
 
 
+
                    Z180/HD6418° portionó Copyright 1988
 
                                Damon Gibson
@@ -120,20 +125,29 @@
                               (317) 842-7128
 
 
+
        Thió documenô anä thå softwarå iô describeó ió maintaineä by
 
-                                Joî Saxton
+                                Joî Saxtoî   (RIĞ 2015)
                                Lakå Barrine
                               Queenslanä 4884
                                  Australia
                             tesseract@triton.vg
+
+
+
+                   Modificationó anä updateó applieä by
+
+                                Caì Mercer
+                        202µ ­ calmer2399@gmail.com
+
 .paŠ.he                      TABLE OF CONTENTS
 .fi z8e.toc
 .paŠ.he                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 .pn 1
 .fo                                   ­ £ -
 .RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc   I. INTRODUCTION .......................................... #
+.tc      I.  INTRODUCTION .........................................  #
 I® INTRODUCTION
 
 Z8Å ió á professionaì qualitù interactivå debugginç tooì designeä tï assisô 
@@ -184,7 +198,8 @@ features:
 .lm
 .rm 75
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc  II. INSTALLATION .......................................... #
+.tc
+.tc     II.  INSTALLATION .........................................  #
 II® INSTALLATION
 
 Thió sectioî describeó ho÷ tï configurå anä builä Z8Å foò youò hardwarå anä 
@@ -200,7 +215,7 @@ releaseä buô sourcå patcheó arå easù tï savå anä reapply.
 
 .cp 2
 The tasks needed to build Z8E from the source are as follows:
-.tc         Choose the assembler ............................... #
+.tc            Choose the assembler ...............................  #
 
 1. Edit Z8E.Z80 to choose the assembler.
 
@@ -223,7 +238,7 @@ Alì threå assembleró yield.COÍ fileó whicè arå biô-foò-biô identical.
 
 .cp 2
 2® Instructioî seô anä numbeò oæ terminals
-.tã         Instructioî seô anä numbeò oæ terminaló ...........® #
+.tã            Instructioî seô anä numbeò oæ terminaló ...........®  #
 
 Z8Å caî debuç programó foò thå Z8° oò thå Z18° (Hitaché HD64180© anä iô caî 
 takå  advantagå oæ á seconä terminal¬ iæ onå ió attached® Thaô  makeó  fouò 
@@ -250,7 +265,7 @@ Fouò small includå fileó arå includeä iî thió distribution:
 Copù onå oæ theså fileó tï havå thå namå "CONFIG.INC"® Looë aô thå filå anä 
 ediô iô iæ necessary.
 .cp 6Š3® Chooså oò creatå thå terminaì handlers
-.tc         Choose or create the terminal handlers ............. #
+.tc            Choose or create the terminal handlers .............  #
 
 Á  few.TTÙ  fileó arå supplied® Eacè oæ theså fileó defineó thå  codå  anä 
 datá specifiã tï á particulaò terminal® Tï supporô á differenô terminal:
@@ -264,7 +279,7 @@ datá specifiã tï á particulaò terminal® Tï supporô á differenô terminal:
 .rm 75
 .lm 1
 .pm
-.tc         Assemble the program ............................... #
+.tc            Assemble the program ...............................  #
 4® Assemblå thå program
 
 .rm 75
@@ -284,7 +299,7 @@ datá specifiã tï á particulaò terminal® Tï supporô á differenô terminal:
 
 .lm
 .cp 4
-.tc         Coding caveat ...................................... #
+.tc            Coding caveat ......................................  #
 IMPORTANTº Codinç caveat
 
 .lm 6
@@ -322,7 +337,8 @@ IMPORTANTº Codinç caveat
 
 .rm 75
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc III. INVOKING Z8E .......................................... #
+.tc
+.tc    III.  INVOKING Z8E AT THE CP/M COMMAND LEVEL ...............  #
 III® INVOKINÇ Z8Å AÔ THÅ CP/Í COMMANÄ LEVEL
 
 Upoî invocatioî aô thå CP/Í commanä level¬ Z8Å loadó aô thå lo÷ enä oæ  thå 
@@ -592,7 +608,8 @@ CP/Í commanä linå level.
 
 Foò á discussioî oæ thå formaô oæ symboì files¬ seå APPENDIØ A.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc  IV. INITIALIZATION ........................................ #
+.tc
+.tc     IV.  INITIALIZATION .......................................  #
 IV® INITIALIZATION
 
 Oncå Z8Å haó beeî loaded¬ anä haó iî turî loadeä alì fileó specifieä oî thå 
@@ -689,7 +706,8 @@ Note:
 .rm 75
 .lm
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc   V. BREAKPOINTS ........................................... #
+.tc
+.tc      V.  BREAKPOINTS .......................................... #
 V® BREAKPOINTS
 
 Breakpointó arå thoså addresseó iî thå prograí undeò tesô aô whicè thå useò 
@@ -749,7 +767,8 @@ patcè Z8Å tï uså á differenô vectoò address® Changå thå valuå oæ RSTVEÃ  tï 
 onå  oæ  thå otheò legaì values® Instructionó foò doinç thió arå  giveî  iî 
 sectioî 2.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc  VI. COMMAND INPUT ......................................... #
+.tc
+.tc     VI.  COMMAND INPUT ........................................ #
 VI® COMMANÄ INPUT
 
 Oncå  filå  anä symboì tablå loadinç haó beeî completed¬  Z8Å  promptó  thå 
@@ -1021,7 +1040,7 @@ thaô 'return§ performó it¬ anù otheò keù terminateó thå command.
 
 Thå followinç pageó describå alì thå commandó understooä bù Z8E.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     A    Assemble .......................................... #
+.tc            A   Assemble ....................................... #
 Á    Assemble
 ________________________________________________________________ß 
 
@@ -1236,7 +1255,7 @@ statementó  arå evaluateä tï á 1¶-biô value® Z8Å wilì displaù thå valuå  oæ 
 thió  1¶-biô  numbeò  aó fouò heø digitó iî thå objecô codå  fielä  oî  thå 
 console.Š.pa
 .RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     B    Set Breakpoint .................................... #
+.ôc            B   Set Breakpoint ................................. #
 Â    Seô Breakpoinô
 _________________________________________________________________
 
@@ -1285,7 +1304,7 @@ breakpointó specifieä uğ tï thå invaliä onå wilì bå set®
 Z8Å  displayó á questioî marë wheî aî attempô ió madå tï seô á  seventeentè 
 breakpoint.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     C    Clear Breakpoint .................................. #
+®tc            C   Clear Breakpoint ............................... #
 Ã    Cleaò Breakpoint
 _________________________________________________________________
 
@@ -1313,7 +1332,7 @@ existenô breakpoint.
 Tï  cleaò ALÌ breakpointó enterº  "C*<cr>",wherå thå  asterisë  indicateó 
 ALL.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     D    Dump .............................................. #
+.tc            D   Dump ........................................... #
 Ä    Dump
 _________________________________________________________________
 
@@ -1367,7 +1386,7 @@ foò  examplå iî scanninç thå disë parameteò headeró iî youò BIOS® Thaô  is¬ 
 bù specifyinç thå baså addresó aó ARG± anä thå tablå sizå aó ARG² thå  useò 
 caî walë througè memory¬ tablå bù table.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     E    Examine Memory .................................... #
+.tc            E   Examine Memory ................................. #
 Å    Examinå Memory
 _________________________________________________________________
 
@@ -1480,7 +1499,7 @@ thió argumenô becomeó thå ne÷ currenô memorù addresó aó showî belowº
      9F3´  6³  c
 .lm
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     Æ    Find .............................................® #
+.tc            Æ   Find ..........................................® #
 Æ    Finä
 _________________________________________________________________
 
@@ -1561,7 +1580,7 @@ Thå followinç arå exampleó oæ thå FINÄ command:
 ..lm
 ..pm
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     G    Go ................................................ #
+®tc            G   Go ............................................. #
 Ç    Go
 ________________________________________________________________ß
 
@@ -1617,7 +1636,7 @@ HINT:
 .rm 75
 .lm
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     H    Display Symbol Table .............................. #
+.tc            H   Display Symbol Table ........................... #
 È    Displaù Symboì Table
 ________________________________________________________________ß
 
@@ -1642,7 +1661,7 @@ terminates® Iæ thå useò enteró anù otheò character¬ theî thå nexô blocë  oæ 
 Iæ  á symboì namå entereä aó ARG± cannoô bå founä iî thå symboì table¬  Z8Å 
 printó á questioî mark.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     I    Initialize FCB and Command Tail ................... #
+.tc            I   Initialize FCB and Command Tail ................ #
 É    Initializå FCÂ anä Commanä Tail
 ________________________________________________________________ß
 
@@ -1705,8 +1724,8 @@ woulä be:
 anä  yoõ caî emulatå thió forí bù puttinç thå spacå iî yourselæ beforå  thå 
 worä 'square'.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     J    Animated Full Screen Debugger ..................... #
-Ê    Animateä Fulì Screeî Debuggeò
+.tc            J   Animated Full Screen Debugging ................. #
+Ê    Animateä Fulì Screeî Debugging
 _______________________________________________________________ß
 
 
@@ -1840,7 +1859,7 @@ tï refresè thå screen® Nï otheò argumenô ió permitted.
 .lm6
      *Ê   #<cr>
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     K    Set Memory Window Parameters ...................... #
+.tc            K   Set Memory Window Parameters ................... #
 Ë    Seô Memorù Windo÷ Parameteró foò uså witè thå Ê command
 _______________________________________________________________ß
 
@@ -1871,7 +1890,7 @@ Thå  maximuí amounô oæ ARG² ió 10° (256#)® Thå numbeò oæ  displayeä  memorù 
 entrieó  ió  dependanô oî youò screeî sizå anä thå lengtè oæ  symboì  nameó 
 (Z8Å computeó thå maximuí numbeò oæ byteó iô caî display).
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     L    Load File ......................................... #
+.tc            L   Load File ...................................... #
 Ì    Loaä File
 _________________________________________________________________
 
@@ -1948,7 +1967,7 @@ Thå useò caî circumvenô thió limitatioî bù loadinç thå filå froí disë  intï 
 aî unuseä sectioî oæ memorù anä theî usinç Z8E'ó movå commanä tï movå  onlù 
 thå datá needeä tï accomplisè thå overlay.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     M    Move Memory ....................................... #
+.tc            M   Move Memory .................................... #
 Í    Movå Memory
 ________________________________________________________________ß
 
@@ -1997,7 +2016,7 @@ thå overwritinç oæ thå destinatioî datá block:
 .lm 6
      *Í   100° 100Æ 1008<cr>
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     N    Output to I/O Ports Without Pre-read .............. #
+.tã            N   Output to I/O Ports Without Pre-read ........... #
 Î    Outpuô tï I/Ï Portó Withouô Pre-read
 ________________________________________________________________ß
 
@@ -2086,7 +2105,7 @@ instruction®
 Thió methoä ensureó thaô addresó bitó A¸ tï A1µ arå aô ° wheî thå Î commanä 
 ió accessinç aî I/Ï port® 
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     O    Output Current Breakpoints to Console ............. #
+.tc            O   Output Current Breakpoints to Console .......... #
 Ï    Outpuô Currenô Breakpointó tï Console
 _________________________________________________________________
 
@@ -2112,8 +2131,8 @@ correspondinç tï thå addresó ió found¬ onlù thå heø addresó ió displayed®
 Iæ  anù pasó countó arå currentlù iî effecô, theù arå displayeä nexô tï  thå 
 breakpoinô addresó witè whicè theù arå associated.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     P    Examine/Modify PSW (Flags Register) ............... #
-Ğ    Examine/Modifù PS× (Flaç Register)
+.tc            P   Examine/Modify Flag Register ................... #
+Ğ    Examine/Modifù Flaç Register
 ________________________________________________________________ß
 
 
@@ -2167,7 +2186,7 @@ terminates.
 
 Iæ aî invaliä flaç biô mnemoniã ió entereä, Z8Å printó á questioî mark.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     Q    Query I/O Ports ................................... #
+.tc            Q   Query I/O Ports ................................ #
 Ñ    Querù I/Ï Ports
 ________________________________________________________________ß
 
@@ -2308,7 +2327,7 @@ taininç thå datá tï bå writteî, anä theî executeó aî OUTI instruction®
 Thió methoä ensureó thaô addresó bitó A¸ thrõ A1µ arå helä aô ° wheî thå  Î 
 oò Ñ commandó arå accessinç aî I/Ï port® 
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     R    Examine/Modify Register Contents .................. #
+.tc            R   Examine/Modify Register Contents ............... #
 Ò    Examine/Modifù Registeò Contents
 ________________________________________________________________ß
 
@@ -2350,7 +2369,7 @@ registeò, onlù thå lo÷ ordeò bytå oæ thå valuå ió used.
 Thå commanä terminateó wheî á carriagå returî oò spacå ió entereä wheî  Z8Å 
 ió waitinç foò á registeò mnemonic.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     Ó    Singlå Step ......................................® #
+.tc            Ó   Singlå Step ...................................® #
 Ó    Singlå Step
 ________________________________________________________________ß
 
@@ -2434,7 +2453,7 @@ Thå Ó commanä doeó noô relocatå instructionó beforå executioî aó doeó thå Ç 
 commanä  (seå Ç command)® Hence¬ iô ió noô possiblå tï singlå steğ  througè 
 eacè iteratioî oæ á DJNÚ instruction.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     T    Select Debug Terminal ............................. #
+.tc            T   Select Debug Terminal .......................... #
 Ô    Select Debug Terminal
 __________________________________________________________________
 
@@ -2484,7 +2503,7 @@ resulô iî á "lockeä up¢ computeò whicè musô bå rå-booted.
 
     ------------------------------------------------------------------
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     U    Write Symbol Table to Disk ........................ #
+.tc            U   Write Symbol Table to Disk ..................... #
 Õ    Writå Symboì Tablå tï Disk
 ________________________________________________________________ß
 
@@ -2519,7 +2538,7 @@ indicatå a.PRÎ file®
 
 Iæ á filå witè thå namå ARG± alreadù existó oî disë, iô wilì bå deleted® 
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     V    Verify Two Memory Blocks .......................... #
+.tc            V   Verify Two Memory Blocks ....................... #
 Ö    Verifù Twï Memorù Blocks
 ________________________________________________________________ß
 
@@ -2546,7 +2565,7 @@ continueó untiì thå endinç addresó ió reached.
 Thå  useò  maù halô thå commanä aô anù timå bù depressinç anù  keù  oî  thå 
 keyboard.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     W    Write Memory to a File ............................ #
+.tc            W   Write Memory to a File ......................... #
 ×    Writå Memorù tï á File
 ________________________________________________________________ß
 
@@ -2579,7 +2598,7 @@ filå bù thió namå existó theî Z8Å wilì automaticallù creatå it.
 Z8Å wilì echï thå startinç memorù addresó anä continuallù updatå thå endinç 
 memorù addresó aó thå writinç tï disë takeó place.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     X    Display Machine State.............................. #
+.tc            X   Display Machine State........................... #
 Ø    Displaù Machinå State
 ________________________________________________________________ß
 
@@ -2605,7 +2624,7 @@ executeä upoî thå receipô oæ thå nexô Ç (GO© oò Ó (SINGLÅ STEP© command.
 
 Tï inspecô thå É oò Ò registeró, uså thå R command.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     Y    Fill Memory ....................................... #
+.tc            Y   Fill Memory .................................... #
 Ù    Filì Memory
 ________________________________________________________________ß
 
@@ -2653,7 +2672,7 @@ bytå  doeó  noô  represenô thå lasô bytå iî thå ARG³ block®  Iî  thå  abovå 
 example¬  thå  commanä woulä enä wheî á bytå ió writteî tï  addresó  127Ch¬ 
 eveî iæ thaô bytå ió noô 77h® 
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     Z    Disassemble ....................................... #
+.tc            Z   Disassemble .................................... #
 Ú    Disassemble
 _________________________________________________________________
 
@@ -2865,7 +2884,7 @@ format:
 If¬  durinç disassembly¬ Z8Å encounteró datá whicè cannoô  bå  disassembleä 
 intï á valiä Z8° instruction¬ iô wilì displaù thå datá aó DEFBs.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tã     ?    Evaluate Expression ..............................® #
+.tc            ?   Evaluate Expression ...........................® #
 ¿    Evaluate Expression
 ________________________________________________________________ß
 
@@ -2889,7 +2908,7 @@ displayó thå worä aô thå addresó containeä iî HL.
 Thå ruleó foò expressioî formatioî arå describeä beforå thå listinç oæ  Z8Å 
 commands.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     >    Change User Number ................................ #
+.tc            >   Change User Number ............................. #
 ¾    Change User Number
 ________________________________________________________________ß
 
@@ -2906,7 +2925,7 @@ Usefuì  iî  preparatioî  foò  á L(oad©  command¬  thå  ">¢  commanä  allowó 
 switchinç useò numberó afteò Z8Å ió activå sï thaô yoõ maù theî loaä  fileó 
 froí useò areaó otheò thaî thå onå froí whicè Z8Å waó invoked.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc     +    Toggle Binary Registers ........................... #
+.tc            +   Toggle Binary Registers ........................ #
 +    Togglå Binarù Registeró 
 ________________________________________________________________ß
 
@@ -2927,7 +2946,8 @@ ió  useä tï displaù á blocë oæ memorù contents¬ thå memorù blocë  ió  moveä 
 dowî  ¸  rows¬  potentiallù reducinç thå numbeò oæ  byteó  displayed®  Wheî 
 toggleä OFF¬ thå memorù blocë ió expandeä bacë tï fulì size.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc APPENDIØ A ­ FILÅ FORMAÔ FOÒ SYMBOÌ TABLEÓ ................. #
+.tc
+.tc      APPENDIØ A ­ FILÅ FORMAÔ FOÒ SYMBOÌ TABLEÓ ............... #
                 APPENDIØ A ­ FILÅ FORMAÔ FOÒ SYMBOÌ TABLEÓ
 
 
@@ -3112,7 +3132,8 @@ NOTE:
      iî anù oæ thå filå typeó mentioneä above® Headingó whicè precedå 
      eacè pagå arå automaticallù ignoreä bù Z8E.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc APPENDIX B - ZILOG MNEMONICS ............................... #
+.tc
+.tc      APPENDIX B - ZILOG MNEMONICS ............................. #
                        APPENDIØ Â ­ ZILOÇ MNEMONICS
 
              00049   NN     EQU   49H        ;8 BIT OPERAND
@@ -3520,7 +3541,8 @@ NOTE:
                                      |  0692  AD          XOR  L
                                      |  0693  EE 49       XOR  NN
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc APPENDIX C - Hitachi HD64180 Instructions .................. #
+.tc
+.tc      APPENDIX C - Hitachi HD64180 Instructions ................ #
                  APPENDIX C - Hitachi HD64180 Instructions
 
 
@@ -3568,7 +3590,8 @@ assemblå Z18° sourcå fileó generateä froí á Z8Å disassembly.
                 emdí                 endí                 endm
 .aw on
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc APPENDIØ Ä ­ SYSTEÍ MEMORÙ MAP ............................. #
+.tc
+.tc      APPENDIØ Ä ­ SYSTEÍ MEMORÙ MAP ........................... #
                       APPENDIØ D ­ SYSTEÍ MEMORÙ MAP
 
 
@@ -3632,48 +3655,49 @@ foò aî extrá 0.2µ kByteó yoõ caî dï alì oæ thå abovå oî á Z180/HD64180.
 Nonå oæ thå numberó quoteä abovå includeó anù spacå occupieä bù symboló  sï 
 thå comparisoî ió fair.
 .paŠ.RR--!----!----!----!----!----!----!----!----!----!----!------------------R
-.tc APPENDIX E - COMMAND SUMMARY ............................... #
+.tc
+.tc      APPENDIX E - COMMAND SUMMARY ............................. #
                        APPENDIØ E ­ COMMANÄ SUMMARÙ
 
 
-CMÄ             Descriptioî                        Argumentó
+  CMÄ           Descriptioî                        Argumentó
 
- Á      Inlinå Assemblù              StartAddò
- Â      Seô Breakpoinô               Addr1[,Pasó Countİ  [Addr2..AddrNİ
- Ã      Cleaò Breakpoinô             Addr±               [Addr2..AddrNİ
- Ä      Dumğ Memorù                  [StartAddrİ         [End/Countİ
- Å      Examinå Memorù               StartAddò
- Æ      Finä                         StartAddò           MatchDatá
- Ç      Gï                           ExecutionAddò
- È      Displaù Symboì Tablå         [FirstSymbolİ
- É      Initializå commanä linå      [string1..stringNİ
- Ê      Fulì Screen/Animateä Debuç   [/İ [*İ [Addrİ      [Timeoutİ
- Ë      Seô Memorù Windo÷            StartAddò           [Countİ 
- Ì      Loaä Filå                    FileNamå            [,Loaä Addressİ 
- Í      Movå Memorù                  SourceStarô    SourceEnä    DestStarô 
- Î      Outpuô tï Porô NÏ Pre-Reaä   [(İ PortAddò [)İ 
- Ï      Outpuô Currenô Breakpointó 
- Ğ      Exam/Modifù PS× (Flaç Reg© 
- Ñ      Querù I/Ï Porô               [(İ PortAddò [)İ 
- Ò      Examine/Modifù Registeró     RegSpecifieò 
- Ó      Single-Steğ                  [/İ  [Countİ 
- Ô      Selecô debuç terminaì        Á oò C 
- Õ      Writå Symboì Tablå Tï Disë   FileNamå 
- Ö      Verifù Memorù                SourceStarô    SourceEnä   DestStarô 
- ×      Writå tï Disë                FileNamå       [StartAddrİ [EndAddrİ 
- Ø      Examinå Machinå Statå 
- Ù      Filì Memorù                  FromAddò       ToAddò      Datá 
- Ú      Disassemblå                  StartAddò      End/Counô   FileNamå 
- ¿      Evaluatå expressioî          Expression 
- ¾      Changå useò numbeò           UserNumber 
- +      Togglå Binarù Registeró 
+   Á    Inlinå Assemblù              StartAddò
+   Â    Seô Breakpoinô               Addr1[,PasóCountİ   [Addr2..AddrNİ
+   Ã    Cleaò Breakpoinô             Addr±               [Addr2..AddrNİ
+   Ä    Dumğ Memorù                  [StartAddrİ         [Enä ü Countİ
+   Å    Examinå Memorù               StartAddò
+   Æ    Finä                         StartAddò           MatchDatá
+   Ç    Gï                           ExecutionAddò
+   È    Displaù Symboì Tablå         [FirstSymbolİ
+   É    Initializå Commanä Linå      [string1..stringNİ
+   Ê    Fulì Screen/Animateä Debuç   [/İ [*İ [Addrİ      [Timeoutİ
+   Ë    Seô Memorù Windo÷            StartAddò           [Countİ
+   Ì    Loaä Filå                    FileNamå            [,LoaäAddrİ
+   Í    Movå Memorù                  SourceStarô   SourceEnä   DestStarô
+   Î    Outpuô tï Porô NÏ Pre-Reaä   [(İ PortAddò [)İ
+   Ï    Outpuô Currenô Breakpointó
+   Ğ    Exam/Modifù PS× (Flaç Reg©
+   Ñ    Querù I/Ï Porô               [(İ PortAddò [)İ
+   Ò    Examine/Modifù Registeró     RegSpecifieò
+   Ó    Single-Steğ                  [/İ  [Countİ
+   Ô    Selecô Debuç Terminaì        Á | C
+   Õ    Writå Symboì Tablå Tï Disë   FileNamå
+   Ö    Verifù Memorù                SourceStarô   SourceEnä   DestStarô
+   ×    Writå tï Disë                FileNamå      [StartAddrİ [EndAddrİ
+   Ø    Examinå Machinå Statå
+   Ù    Filì Memorù                  FromAddò      ToAddò      Datá
+   Ú    Disassemblå                  StartAddò     End/Counô   FileNamå
+   ¿    Evaluatå Expressioî          Expression
+   ¾    Changå Useò Numbeò           UserNumber
+   +    Togglå Binarù Registeró
 
-[İ      Denoteó Optionaì Argumenô
-[/İ     Dï Noô Tracå Subroutinå
-[*İ     Dï Noô Tracå BDOÓ Calì
-[(İ [)İ I/Ï Porô Monitoò Modå
+	[İ      Denoteó Optionaì Argumenô
+	[/İ     Dï Noô Tracå Subroutinå
+	[*İ     Dï Noô Tracå BDOÓ Calì
+	[(İ [)İ I/Ï Porô Monitoò Modå
 
 
 
-                Z8Å  Copyrighô (c© 198´  AERO-SOFÔ
-
+                    Z8Å  Copyrighô (c© 198´  AERO-SOFÔ
+

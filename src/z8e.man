@@ -5,6 +5,10 @@
 
 
 
+
+
+
+
                                     Z8E
 
                Z80/HD64180 ASSEMBLY LANGUAGE DEBUGGING TOOL
@@ -25,6 +29,7 @@
                          Wyckoff, New Jersey 07481
 
 
+
                    Z180/HD64180 portions Copyright 1988
 
                                Damon Gibson
@@ -33,61 +38,80 @@
                               (317) 842-7128
 
 
+
        This document and the software it describes is maintained by
 
-                                Jon Saxton
+                                Jon Saxton   (RIP 2015)
                                Lake Barrine
                               Queensland 4884
                                  Australia
                             tesseract@triton.vg
+
+
+
+                   Modifications and updates applied by
+
+                                Cal Mercer
+                        2025 - calmer2399@gmail.com
+
                      TABLE OF CONTENTS
 
 
-  I. INTRODUCTION .......................................... 1
- II. INSTALLATION .......................................... 2
-        Choose the assembler ............................... 2
-        Instruction set and number of terminals ............ 2
-        Choose or create the terminal handlers ............. 3
-        Assemble the program ............................... 3
-        Coding caveat ...................................... 3
-III. INVOKING Z8E .......................................... 4
- IV. INITIALIZATION ........................................ 8
-  V. BREAKPOINTS ........................................... 10
- VI. COMMAND INPUT ......................................... 11
-    A    Assemble .......................................... 15
-    B    Set Breakpoint .................................... 18
-    C    Clear Breakpoint .................................. 19
-    D    Dump .............................................. 20
-    E    Examine Memory .................................... 21
-    F    Find .............................................. 23
-    G    Go ................................................ 25
-    H    Display Symbol Table .............................. 26
-    I    Initialize FCB and Command Tail ................... 27
-    J    Animated Full Screen Debugger ..................... 28
-    K    Set Memory Window Parameters ...................... 30
-    L    Load File ......................................... 31
-    M    Move Memory ....................................... 33
-    N    Output to I/O Ports Without Pre-read .............. 34
-    O    Output Current Breakpoints to Console ............. 36
-    P    Examine/Modify PSW (Flags Register) ............... 37
-    Q    Query I/O Ports ................................... 38
-    R    Examine/Modify Register Contents .................. 40
-    S    Single Step ....................................... 41
-    T    Select Debug Terminal ............................. 43
-    U    Write Symbol Table to Disk ........................ 44
-    V    Verify Two Memory Blocks .......................... 45
-    W    Write Memory to a File ............................ 46
-    X    Display Machine State.............................. 47
-    Y    Fill Memory ....................................... 48
-    Z    Disassemble ....................................... 49
-    ?    Evaluate Expression ............................... 52
-    >    Change User Number ................................ 53
-    +    Toggle Binary Registers ........................... 54
-APPENDIX A - FILE FORMAT FOR SYMBOL TABLES ................. 55
-APPENDIX B - ZILOG MNEMONICS ............................... 58
-APPENDIX C - Hitachi HD64180 Instructions .................. 65
-APPENDIX D - SYSTEM MEMORY MAP ............................. 66
-APPENDIX E - COMMAND SUMMARY ............................... 67
+     I.  INTRODUCTION .........................................  1
+
+    II.  INSTALLATION .........................................  2
+           Choose the assembler ...............................  2
+           Instruction set and number of terminals ............  2
+           Choose or create the terminal handlers .............  3
+           Assemble the program ...............................  3
+           Coding caveat ......................................  3
+
+   III.  INVOKING Z8E AT THE CP/M COMMAND LEVEL ...............  4
+
+    IV.  INITIALIZATION .......................................  8
+
+     V.  BREAKPOINTS .......................................... 10
+
+    VI.  COMMAND INPUT ........................................ 11
+           A   Assemble ....................................... 15
+           B   Set Breakpoint ................................. 18
+           C   Clear Breakpoint ............................... 19
+           D   Dump ........................................... 20
+           E   Examine Memory ................................. 21
+           F   Find ........................................... 23
+           G   Go ............................................. 25
+           H   Display Symbol Table ........................... 26
+           I   Initialize FCB and Command Tail ................ 27
+           J   Animated Full Screen Debugging ................. 28
+           K   Set Memory Window Parameters ................... 30
+           L   Load File ...................................... 31
+           M   Move Memory .................................... 33
+           N   Output to I/O Ports Without Pre-read ........... 34
+           O   Output Current Breakpoints to Console .......... 36
+           P   Examine/Modify Flag Register ................... 37
+           Q   Query I/O Ports ................................ 38
+           R   Examine/Modify Register Contents ............... 40
+           S   Single Step .................................... 41
+           T   Select Debug Terminal .......................... 43
+           U   Write Symbol Table to Disk ..................... 44
+           V   Verify Two Memory Blocks ....................... 45
+           W   Write Memory to a File ......................... 46
+           X   Display Machine State........................... 47
+           Y   Fill Memory .................................... 48
+           Z   Disassemble .................................... 49
+           ?   Evaluate Expression ............................ 52
+           >   Change User Number ............................. 53
+           +   Toggle Binary Registers ........................ 54
+
+     APPENDIX A - FILE FORMAT FOR SYMBOL TABLES ............... 55
+
+     APPENDIX B - ZILOG MNEMONICS ............................. 58
+
+     APPENDIX C - Hitachi HD64180 Instructions ................ 65
+
+     APPENDIX D - SYSTEM MEMORY MAP ........................... 66
+
+     APPENDIX E - COMMAND SUMMARY ............................. 67
                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
@@ -1359,7 +1383,6 @@ ALL.
 
 
 
-
                                   - 19 -
                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
@@ -1761,7 +1784,6 @@ HINT:
 
 
 
-
                                   - 25 -
                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
@@ -1900,7 +1922,7 @@ word 'square'.
                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
-J    Animated Full Screen Debugger
+J    Animated Full Screen Debugging
 ________________________________________________________________
 
 
@@ -2503,7 +2525,7 @@ breakpoint address with which they are associated.
                 Z8E REFERENCE MANUAL v4.3.2 - April 2025
 
 
-P    Examine/Modify PSW (Flag Register)
+P    Examine/Modify Flag Register
 _________________________________________________________________
 
 
@@ -4516,46 +4538,46 @@ the comparison is fair.
                        APPENDIX E - COMMAND SUMMARY
 
 
-CMD             Description                        Arguments
+  CMD           Description                        Arguments
 
- A      Inline Assembly              StartAddr
- B      Set Breakpoint               Addr1[,Pass Count]  [Addr2..AddrN]
- C      Clear Breakpoint             Addr1               [Addr2..AddrN]
- D      Dump Memory                  [StartAddr]         [End/Count]
- E      Examine Memory               StartAddr
- F      Find                         StartAddr           MatchData
- G      Go                           ExecutionAddr
- H      Display Symbol Table         [FirstSymbol]
- I      Initialize command line      [string1..stringN]
- J      Full Screen/Animated Debug   [/] [*] [Addr]      [Timeout]
- K      Set Memory Window            StartAddr           [Count] 
- L      Load File                    FileName            [,Load Address] 
- M      Move Memory                  SourceStart    SourceEnd    DestStart 
- N      Output to Port NO Pre-Read   [(] PortAddr [)] 
- O      Output Current Breakpoints 
- P      Exam/Modify PSW (Flag Reg) 
- Q      Query I/O Port               [(] PortAddr [)] 
- R      Examine/Modify Registers     RegSpecifier 
- S      Single-Step                  [/]  [Count] 
- T      Select debug terminal        A or C 
- U      Write Symbol Table To Disk   FileName 
- V      Verify Memory                SourceStart    SourceEnd   DestStart 
- W      Write to Disk                FileName       [StartAddr] [EndAddr] 
- X      Examine Machine State 
- Y      Fill Memory                  FromAddr       ToAddr      Data 
- Z      Disassemble                  StartAddr      End/Count   FileName 
- ?      Evaluate expression          Expression 
- >      Change user number           UserNumber 
- +      Toggle Binary Registers 
+   A    Inline Assembly              StartAddr
+   B    Set Breakpoint               Addr1[,PassCount]   [Addr2..AddrN]
+   C    Clear Breakpoint             Addr1               [Addr2..AddrN]
+   D    Dump Memory                  [StartAddr]         [End | Count]
+   E    Examine Memory               StartAddr
+   F    Find                         StartAddr           MatchData
+   G    Go                           ExecutionAddr
+   H    Display Symbol Table         [FirstSymbol]
+   I    Initialize Command Line      [string1..stringN]
+   J    Full Screen/Animated Debug   [/] [*] [Addr]      [Timeout]
+   K    Set Memory Window            StartAddr           [Count]
+   L    Load File                    FileName            [,LoadAddr]
+   M    Move Memory                  SourceStart   SourceEnd   DestStart
+   N    Output to Port NO Pre-Read   [(] PortAddr [)]
+   O    Output Current Breakpoints
+   P    Exam/Modify PSW (Flag Reg)
+   Q    Query I/O Port               [(] PortAddr [)]
+   R    Examine/Modify Registers     RegSpecifier
+   S    Single-Step                  [/]  [Count]
+   T    Select Debug Terminal        A | C
+   U    Write Symbol Table To Disk   FileName
+   V    Verify Memory                SourceStart   SourceEnd   DestStart
+   W    Write to Disk                FileName      [StartAddr] [EndAddr]
+   X    Examine Machine State
+   Y    Fill Memory                  FromAddr      ToAddr      Data
+   Z    Disassemble                  StartAddr     End/Count   FileName
+   ?    Evaluate Expression          Expression
+   >    Change User Number           UserNumber
+   +    Toggle Binary Registers
 
-[]      Denotes Optional Argument
-[/]     Do Not Trace Subroutine
-[*]     Do Not Trace BDOS Call
-[(] [)] I/O Port Monitor Mode
+ []      Denotes Optional Argument
+ [/]     Do Not Trace Subroutine
+ [*]     Do Not Trace BDOS Call
+ [(] [)] I/O Port Monitor Mode
 
 
 
-                Z8E  Copyright (c) 1984  AERO-SOFT
+                    Z8E  Copyright (c) 1984  AERO-SOFT
 
 
 
