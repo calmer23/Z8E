@@ -62,8 +62,8 @@
 
 	.xall
     if terminal eq console
-      if conterm eq ansi		; then we need to load the physical
-					; drivers for the console
+      if conterm eq ansi	; then we need to load the physical
+				; drivers for the console
 
 ;;===========================================================================
 ;; mttyq:
@@ -75,12 +75,11 @@
 ;;===========================================================================
 	export	mttyq
 ;mttyq:
-	ld	c,11			; Console input status
+	ld	c,11		; Console input status
 	call	BDOS
-	and	a			; Is a character available?
-	ret	z			; Return zero if nothing there
-					; Othersise fall through to input
-					; routine
+	and	a		; Is a character available?
+	ret	z		; Return zero if nothing there
+				; Othersise fall through to input routine
 
 ;;===========================================================================
 ;; mttyi:
@@ -92,22 +91,22 @@
 	ld	c,6
 	
     if	CPM3
-	ld	e,0FDh			; CP/M+ interpretation of E register:
-					; FF -> return 0 if nothing available
-					;    -> otherwise the character
-					; FE -> return 0 if nothing available
-					;    -> return FF if there is something
-					;	(in which case a 2nd call is
-					;	needed to fetch the character).
-					; FD -> Block until character is ready
-					;	then return it.
-    else				;
-	ld	e,0FFh			; CP/M 2 doesn't assign special meaning
-    endif				; to E=FE or FD.
+	ld	e,0FDh		; CP/M+ interpretation of E register:
+				; FF -> return 0 if nothing available
+				;    -> otherwise the character
+				; FE -> return 0 if nothing available
+				;    -> return FF if there is something
+				;	(in which case a 2nd call is
+				;	 needed to fetch the character).
+				; FD -> Block until character is ready
+				;	 then return it.
+    else
+	ld	e,0FFh		; CP/M 2 doesn't assign special meaning
+    endif			; to E=FE or FD.
 
-	call	BDOS			; Fetch character
-	and	7FH			; Mask off high bit
-	jr	z,mttyi			; Loop if no character or a NUL
+	call	BDOS		; Fetch character
+	and	7FH		; Mask off high bit
+	jr	z,mttyi		; Loop if no character or a NUL
 	ret
 
 ;;===========================================================================
@@ -210,8 +209,8 @@ mcls0:
 	djnz	mcls0		; Count down and loop until all sent
 	ret
 
-      endif	; conterm = ansi
-    endif	; terminal = console
+      endif	; conterm eq ansi
+    endif	; terminal eq console
       
 ;############################################################################
 ;# THE CODE FROM HERE ONWARDS ONLY EXISTS IF Z8E IS BEING ASSEMBLED TO USE  #
@@ -240,9 +239,9 @@ mcls0:
 
 ; If only the main console is active then use that.
 
-	ld	a,(auxon)		; Is auxiliary terminal active?
+	ld	a,(auxon)	; Is auxiliary terminal active?
 	or	a
-	jr	z,mttyq			; No - check console status instead
+	jr	z,mttyq		; No - check console status instead
 
 ; Auxiliary terminal is in use ...
 
@@ -250,22 +249,23 @@ mcls0:
 
     if	CPM3
 
-	ld	c,7			; Auxiliary input status
+	ld	c,7		; Auxiliary input status
 	call	BDOS
-	or	a			; Is a character available?
-	ret	z			; No:  return a zero
-					; Yes: fall through to input routine
+	or	a		; Is a character available?
+	ret	z		; No:  return a zero
+				; Yes: fall through to input routine
     else
 
 	; Not CP/M+.  Insert code to read a port here.
-	; Example for SB180's serial port 0:
 
-	xor	a			; Force address lines A8-A15 low
-	ld	b,a
-	in	a,(4)			; Read serial port status register
-	and	80h			; Isolate high bit
-	ret	z			; Return zero if nothing there
-					; Fall through to input routine
+	in	a,(4)		; Read serial port status register
+	or	a		; Is a character available?
+	ret	z		; Return zero if nothing there
+	inc	a		; if A was FFh, then AUX OK
+	jr	z,attyi		; Fall through to input routine
+	xor	a
+	ld	(auxon),a	; read failed, turn off AUX CONSOLE
+	ret
     endif
 
 ;;===========================================================================
@@ -276,15 +276,13 @@ mcls0:
 
 	export	attyi
 ;attyi:
-	ld	a,(auxon)		; Is 2nd terminal active?
+	ld	a,(auxon)	; Is 2nd terminal active?
 	or	a
-	jr	z,mttyi			; No, use console
+	jr	z,mttyi		; No, use console
 
-	ld	c,3			; Auxiliary input (blocking)
-	call	BDOS
-
-	and	7Fh			; Mask off the high bit
-	jr	z,attyi			; Ignore a NUL character
+	in	a,(5)		; Read serial port data
+	and	7Fh		; Mask off the high bit
+	jr	z,attyi		; Loop if no character or a NUL
 	ret
 
 ;;===========================================================================
@@ -294,10 +292,12 @@ mcls0:
 ;;===========================================================================
 	export	attyo
 ;attyo:
-					; Character for transmission is
-					; already in E
-	ld	c,4			; AUX/PUN output
-	call	BDOS
+	ld	a,(auxon)	; Is 2nd terminal active?
+	or	a
+	jr	z,mttyo		; No, use console
+
+	ld	a,e		; Character for transmission already in E
+	out	(5),a
 	ret
 
 ;;===========================================================================
@@ -408,7 +408,7 @@ acls0:
 ;mclstr:
 	defb	4,esc,'[2J'	; ANSI screen clearing
 
-      endif ; conterm = ansi
+      endif ; conterm eq ansi
     endif ; terminal eq console
 
 ; Auxiliary ...

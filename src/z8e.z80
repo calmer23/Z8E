@@ -4,6 +4,7 @@
 	.xall			; generate code.
 	.SFCOND			; suppress listings of false conditionals
 
+
 ;;; -->>  if you are not using M80, you should delete the dot (.) lines above.
 
 ;------------------------------------------------------------------------------
@@ -26,8 +27,17 @@
 ;
 ;------------------------------------------------------------------------------
 ;
+vers.100	equ	4
+vers.010	equ	3
+vers.001	equ	3
+;
 ;                       Revision history
 ;		================================
+; 01 May 2025 clm v4.3.3
+;			Modified ANSI.TTY and Z8E.Z80 to support auxiliary console
+;			with Z80PACK1.38 (z80pack1.38/cpmsim/srcsim/iosim.c) and
+;			wrote custom program to do remote I/O (aux-fifo.c) from
+;			Mac Terminal window (declared as xterm-256color).
 ;
 ; 12 Apr 2025 clm v4.3.2
 ;			Fixed "K nnnn<cr>" (no count) to use 256# default as
@@ -397,6 +407,16 @@ console	  equ	1		; Differentiate between console and
 auxiliary equ	2		; auxiliary terminals
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;;; The following should be set to "true" if you have a virtual console that
+;;; is x-term and you wish to send escape sequences at initialization to
+;;; configure the screen to a specific size, location, or window title.
+;;; See "mbannr:" below.
+
+;virtterm equ	false
+virtterm equ	true		; console and AUX console on virtual terminals
+z80pack138 equ	true		; using z80pack v1.38 cpm simulator
+
+;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ; EXTERNALLY DEFINED STUFF
 ;
 ; CONFIG.INC is a small file which contains basic configuration data for Z8E.
@@ -420,14 +440,6 @@ auxiliary equ	2		; auxiliary terminals
 hazeltine equ	false
 ;hazeltine equ	true
 
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;;; The following should be set to "true" if you have a virtual console that
-;;; is x-term and you wish to send escape sequences at initialization to
-;;; configure the screen to a specific size, location, or window title.
-;;; See "mbannr:" below.
-
-;virtterm equ	false
-virtterm equ	true
 
     if	SLR or M80		; Control macro listing ... show lines which
 	.xall			; generate code.
@@ -543,7 +555,8 @@ mbannr:			;Main Banner displayed at program start-up
     else
 	defb	'Z8E'
     endif
-	defb	' v4.3.2'
+;;;	defb	' v4.3.3'
+	defb	' v',vers.100+'0','.',vers.010+'0','.',vers.001+'0'
 	defb	cr,lf
 	defb	tab,'Copyright (c) 1984, 1985  Richard A. Surwilo'
 	defb	cr,lf,lf
@@ -2190,9 +2203,12 @@ term:	ld	bc,0200h	; Get user's request.
 	call	print
 	ld	de,matail
 	call	print
-;;		ld	a,false	;-Transfer control of 18E to main.
-	xor	a		;+
+	xor	a		; Transfer control of 18E to main.
 	ld	(auxon),a
+if z80pack138
+	ld	a,0F0H		; non-zero and 0xF0 says HANG UP THE PHONE
+	out	(4),a		; disable AUX console FIFO
+endif
 	ret			; Done.
 
 
@@ -2203,6 +2219,10 @@ term10:	cp	'A'		; Does user want to use auxiliary terminal?
 	call	print
 	ld	a,true		; Transfer control of 18E to auxiliary.
 	ld	(auxon),a
+if z80pack138
+	xor	a		; zero
+	out	(4),a		; activate AUX console FIFO
+endif
 	ret			; Done.
       endif
 
@@ -7948,10 +7968,10 @@ mireg:	defb	'IR: '
 
 	page
     if	auxterm ne none
-mterm:	defb	'  Main'
+mterm:	defb	cr, lf, '  Main'
 	defb	00
-axterm:	defb	'  Auxiliary'
-matail:	defb	' terminal enabled...'
+axterm:	defb	cr, lf, '  Auxiliary'
+matail:	defb	' terminal enabled...', cr, lf
 	defb	00
     endif
 

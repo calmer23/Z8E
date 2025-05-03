@@ -15,7 +15,11 @@ conterm	equ	ansi
 
 auxterm	equ	ansi
 
+; Use z80pack1.38 FIFO files for auxiliary terminal
+
+z80pack	equ	true
+
 ; If you are running under CP/M Plus then you can set CPM3 to true in which
 ; case the auxiliary input status routine will be a simple BDOS call.
 
-CPM3	equ	true
+CPM3	equ	false
