@@ -1716,18 +1716,41 @@ static BYTE prtd_in(void)
 
 /*
  *	I/O handler for write printer data:
- *	the output is written to file "printer.txt"
+ *	the output is written to file "printer_##########.txt"
+ *	where ########## is the epoch seconds. The printer file is
+ *	automatically created when you start sending data to printer.
+ *	The printer file continues to collect output until an EOF (0x1A)
+ *	is received. More printing later creates a new printer file.
+ *
+ *	If you are printing a file via PIP command, you can do this:
+ *	    PIP LST:=MYFILE.TXT,EOF:    and the output file will close.
+ *
+ *	If you are using ^P at CCP prompt to capture screen dialog, do:
+ *	    PIP LST:=EOF:    when you are done.
+ *
+ *	And if your program writes to the printer, have it send an EOF
+ *	character (0x1A) to close the file.
  */
 static void prtd_out(BYTE data)
 {
 	if (printer == 0) {
-		if ((printer = creat("printer.txt", 0664)) == -1) {
-			LOGE(TAG, "can't create printer.txt");
+		char prtname[39];
+		sprintf(prtname, "printer_%ld.txt", (long int) time(NULL));
+	  
+	  //	if ((printer = creat("printer.txt", 0664)) == -1) {
+		if ((printer = creat(prtname, 0664)) == -1) {
+			LOGE(TAG, "can't create file  printer_##########.txt");
 			cpu_error = IOERROR;
 			cpu_state = STOPPED;
 			printer = 0;
 			return;
 		}
+	}
+
+	if (data == 0x1a) {	/*  PIP LST:=EOF:  will close printer file */
+		close(printer);
+		printer = 0;
+		return;
 	}
 
 	if (data != '\r') {
