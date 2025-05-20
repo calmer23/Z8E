@@ -440,7 +440,8 @@ void init_io(void)
 		LOGE(TAG, "can't open pipe auxin");
 		exit(EXIT_FAILURE);
 	}
-	if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_WRONLY)) == -1) {
+//	if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_WRONLY)) == -1) {
+	if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_RDWR | O_NONBLOCK)) == -1) {
 		LOGE(TAG, "can't open pipe auxout");
 		exit(EXIT_FAILURE);
 	}
