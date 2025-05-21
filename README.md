@@ -14,13 +14,18 @@ Main features:
 
 **Version 4.3.3**
 
-1. Configure auxiliary console for use with z80pack1.38 with 
+1. Configure auxiliary console for use with z80pack1.38 with
    modifications to iosim.c source code.
 
 2. Wrote/stole code for program to function as remote auxiliary
-   console on Mac Terminal. See cpmaux.c for shell aliases to 
+   console on Mac Terminal. See cpmaux.c for shell aliases to
    get terminal window into raw mode (and back to SANE when done).
 
+3. Fixed FIFO hang/block when opening (in iosim.c). You no longer
+   need to run cpmaux first before starting z80pack cpmsim. This is
+   not an issue with Z8E itself, but I run Z8E via cpmsim on my
+   Apple iMac. I only need to run cpmaux when I will be using the
+   auxiliary console.
 
 **Version 4.3.2**
 
