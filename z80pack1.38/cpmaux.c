@@ -67,12 +67,14 @@ main(int argc, char **argv)
   if (stat("/tmp/.z80pack/cpmsim.auxout", &sbuf) != 0)
     mkfifo("/tmp/.z80pack/cpmsim.auxout", 0666);
 
-  if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_RDONLY)) == -1) {
+//  if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_RDONLY)) == -1) {
+  if ((auxout = open("/tmp/.z80pack/cpmsim.auxout", O_RDWR)) == -1) {
     perror("can't open pipe auxout");
     exit(1);
   }
 
-  if ((auxin = open("/tmp/.z80pack/cpmsim.auxin", O_WRONLY)) == -1) {
+//  if ((auxin = open("/tmp/.z80pack/cpmsim.auxin", O_WRONLY)) == -1) {
+  if ((auxin = open("/tmp/.z80pack/cpmsim.auxin", O_RDWR)) == -1) {
     perror("can't open pipe auxin");
     exit(1);
   }
